@@ -8,12 +8,13 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'pyramid',
+    'pyramid_debugtoolbar',
+    'pyramid_persona',
+    'pyramid_tm',
     'SQLAlchemy',
     'transaction',
-    'pyramid_tm',
-    'pyramid_debugtoolbar',
-    'zope.sqlalchemy',
     'waitress',
+    'zope.sqlalchemy',
     ]
 
 setup(name='RandoPony',
