@@ -1,7 +1,7 @@
 RandoPony README
 ================
 
-This is a Python 3, Pyramid, SQLAlchemy of RandoPony,
+This is a Python 3, Pyramid, SQLAlchemy of implementation of RandoPony,
 the BC Randonneurs Cycling Club online event registration system.
 
 The app is presently under development for the 2013 season.
