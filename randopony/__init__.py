@@ -3,17 +3,37 @@ from pyramid.config import Configurator
 from pyramid.security import ALL_PERMISSIONS
 from pyramid.security import Allow
 from sqlalchemy import engine_from_config
+from sqlalchemy.orm.exc import NoResultFound
 from .models import (
     DBSession,
     Base,
-    User,
+    Administrator,
     )
 
 
-USERS = {
-    'djl@douglatornell.ca': User('djl@douglatornell.ca'),
-    'stoker@telus.net': User('stoker@telus.net'),
-}
+class Root(object):
+    """Simplest possible resource tree to map groups to permissions.
+    """
+    __acl__ = [
+        (Allow, 'g:admin', ALL_PERMISSIONS),
+    ]
+
+    def __init__(self, request):
+        self.request = request
+
+
+def groupfinder(userid, request):
+    """Check userid against Administrator data model.
+
+    If userid is a known Persona email address, the user is an admin.
+    """
+    query = DBSession.query(Administrator).\
+                filter(Administrator.persona_email == userid)
+    try:
+        query.one()
+        return ['g:admin']
+    except NoResultFound:
+        return None
 
 
 def main(global_config, **settings):
@@ -48,20 +68,3 @@ def map_routes(config):
     config.add_route('home', '/')
     # admin routes
     config.add_route('admin.home', '/admin')
-
-
-class Root(object):
-    """Simplest possible resource tree to map groups to permissions.
-    """
-    __acl__ = [
-        (Allow, 'g:admin', ALL_PERMISSIONS),
-    ]
-
-    def __init__(self, request):
-        self.request = request
-
-
-def groupfinder(userid, request):
-    user = USERS.get(userid)
-    if user:
-        return ['g:admin']

@@ -29,6 +29,10 @@ class MyModel(Base):
         self.value = value
 
 
-class User(object):
-    def __init__(self, userid, groups=None):
-        self.userid = userid
+class Administrator(Base):
+    __tablename__ = 'admins'
+    id = Column(Integer, primary_key=True)
+    persona_email = Column(Text, unique=True)
+
+    def __init__(self, persona_email):
+        self.persona_email = persona_email

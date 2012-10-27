@@ -16,10 +16,8 @@ def admin_login(request):
     return Response(body, status='403 Forbidden')
 
 
-@view_config(
-    route_name='admin.home',
-    renderer='admin_home.mako',
-    permission='admin')
+@view_config(route_name='admin.home', renderer='admin_home.mako',
+             permission='admin')
 def admin_home(request):
     userid = authenticated_userid(request)
     return {'user': userid}

@@ -1,4 +1,6 @@
 2013dev
 -------
 
--  Start Python 3, Pyramid, SQLAlchemy implementation.
+- Use Mozilla Persona for authentication
+
+- Start Python 3, Pyramid, SQLAlchemy implementation.
