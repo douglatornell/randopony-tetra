@@ -7,6 +7,6 @@
 <body>
   ${next.body()}
 
-  ${next.page_js()}
+  <%block name="page_js"></%block>
 </body>
 </html>

@@ -5,18 +5,18 @@
 ${next.body()}
 
 
-<%def name="page_js()">
-  ${self.jquery_js()}
-  ${self.persona_js()}
-</%def>
+<%block name="page_js">
+  ${jquery_js()}
+  ${persona_js()}
+</%block>
 
-<%def name="jquery_js()">
+<%block name="jquery_js">
   <script type="text/javascript"
           src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
   </script>
-</%def>
+</%block>
 
-<%def name="persona_js()">
+<%block name="persona_js">
   <script src="https://login.persona.org/include.js"></script>
   <script>${request.persona_js}</script>
-</%def>
+</%block>
