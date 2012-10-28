@@ -1,0 +1,9 @@
+/* Styles for RandoPony admin interface pages */
+
+ul.admin-list {
+    padding-left: 30px;
+}
+
+ul.admin-list li {
+    line-height: 30px;
+}

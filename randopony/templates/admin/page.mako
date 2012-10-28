@@ -2,6 +2,12 @@
 
 <%block name="title"><title>RandoPony::Admin</title></%block>
 
+<%block name="page_css">
+    <link
+    href="${request.static_url('randopony:static/css/admin.css')}"
+    rel="stylesheet">
+</%block>
+
 <div class="container">
   <div class="navbar navbar-inverse">
     <div class="navbar-inner">
@@ -17,11 +23,6 @@
 </div>
 
 <%block name="page_js">
-  ${persona_js()}
-</%block>
-
-
-<%block name="persona_js">
   <script src="https://login.persona.org/include.js"></script>
   <script>${request.persona_js}</script>
 </%block>

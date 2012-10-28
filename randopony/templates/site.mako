@@ -10,6 +10,7 @@
   <link
     href="${request.static_url('randopony:static/css/bootstrap-responsive.min.css')}"
     rel="stylesheet">
+  <%block name="page_css"></%block>
   <!-- TODO: Need a favicon and Apple touch icons -->
 </head>
 <body>
