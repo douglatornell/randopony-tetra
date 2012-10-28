@@ -68,3 +68,8 @@ def map_routes(config):
     config.add_route('home', '/')
     # admin routes
     config.add_route('admin.home', '/admin')
+    config.add_route('admin.brevets', '/admin/brevets/')
+    config.add_route('admin.club_events', '/admin/club-events/')
+    config.add_route('admin.populaires', '/admin/populaires/')
+    config.add_route('admin.wranglers', '/admin/wranglers/')
+    config.add_route('admin.wrangler.edit', '/admin/wranglers/{item}/edit')

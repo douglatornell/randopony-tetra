@@ -36,3 +36,6 @@ class Administrator(Base):
 
     def __init__(self, persona_email):
         self.persona_email = persona_email
+
+    def __str__(self):
+        return self.persona_email
