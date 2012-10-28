@@ -12,7 +12,7 @@ from pyramid.view import (
 
 @forbidden_view_config()
 def admin_login(request):
-    body = render('admin/login.mako', {}, request=request)
+    body = render('admin/login.mako', {'logout_btn': False}, request=request)
     return Response(body, status='403 Forbidden')
 
 
@@ -20,4 +20,4 @@ def admin_login(request):
              permission='admin')
 def admin_home(request):
     userid = authenticated_userid(request)
-    return {'user': userid}
+    return {'logout_btn': True, 'user': userid}

@@ -2,7 +2,19 @@
 
 <%block name="title"><title>RandoPony::Admin</title></%block>
 
-${next.body()}
+<div class="container">
+  <div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+      <a href="#" class="brand">RandoPony Admin</a>
+      %if logout_btn:
+      <ul class="nav pull-right">
+        <li><button id="signout" class="btn">Logout</button></li>
+      </ul>
+      %endif
+    </div>
+  </div>
+  ${next.body()}
+</div>
 
 <%block name="page_js">
   ${persona_js()}
