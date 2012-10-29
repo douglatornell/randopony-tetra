@@ -24,6 +24,7 @@
   </script>
   <script src="${request.static_url('deform:static/scripts/deform.js')}">
   </script>
+  <script>deform.load()</script>
   <%block name="page_js"></%block>
 </body>
 </html>
