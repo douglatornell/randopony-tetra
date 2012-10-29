@@ -11,7 +11,9 @@
 <div class="container">
   <div class="navbar navbar-inverse">
     <div class="navbar-inner">
-      <a href="#" class="brand">RandoPony Admin</a>
+      <a href="${request.route_url('admin.home')}" class="brand">
+        RandoPony Admin
+      </a>
       %if logout_btn:
       <ul class="nav pull-right">
         <li><button id="signout" class="btn">Logout</button></li>
