@@ -12,3 +12,7 @@ ul.admin-list {
 ul.admin-list li {
     line-height: 30px;
 }
+
+a.add-btn {
+    margin-left: 15px;
+}
