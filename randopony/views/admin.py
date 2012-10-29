@@ -33,15 +33,18 @@ def items_list(request):
             'model': Administrator,
             'order_by': Administrator.persona_email,
             'action': 'edit',
+            'list_title': 'Pony Wranglers',
         },
     }
-    tmpl_vars = {'logout_btn': True}
     list_name = request.matchdict['list']
     params = lists[list_name]
-    items = DBSession.query(params['model']).\
-        order_by(params['order_by'])
-    tmpl_vars.update({
-        'items': items, 'action': params['action'], 'list': list_name})
+    tmpl_vars = {
+        'logout_btn': True,
+        'items': DBSession.query(params['model']).order_by(params['order_by']),
+        'action': params['action'],
+        'list': list_name,
+        'list_title': params['list_title'],
+    }
     return tmpl_vars
 
 

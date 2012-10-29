@@ -70,3 +70,4 @@ def map_routes(config):
     config.add_route('admin.home', '/admin')
     config.add_route('admin.list', '/admin/{list}/')
     config.add_route('admin.wranglers.edit', '/admin/wranglers/{item}/edit')
+    config.add_route('admin.wranglers.new', '/admin/wranglers/new')
