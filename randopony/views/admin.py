@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """RandoPony admin views.
 """
+from deform import Form
 from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.view import (
@@ -8,8 +9,9 @@ from pyramid.view import (
     view_config,
     )
 from ..models import (
-    DBSession,
     Administrator,
+    AdministratorSchema,
+    DBSession,
     )
 
 
@@ -48,9 +50,21 @@ def items_list(request):
     return tmpl_vars
 
 
-@view_config(route_name='admin.wranglers.edit',
-    renderer='string',
+@view_config(route_name='admin.wranglers',
+    renderer='admin/wrangler.mako',
     permission='admin')
 def wrangler_edit(request):
     admin = request.matchdict['item']
-    return 'wrangler edit stub for {}'.format(admin)
+    if admin == 'new':
+        form = Form(
+            AdministratorSchema(), buttons=('add', 'cancel'))
+        appstruct = {'persona_email': ''}
+    else:
+        form = Form(
+            AdministratorSchema(), buttons=('save', 'cancel'))
+        appstruct = {'persona_email': admin}
+    tmpl_vars = {
+        'logout_btn': True,
+        'form': form.render(appstruct),
+    }
+    return tmpl_vars
