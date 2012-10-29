@@ -14,49 +14,40 @@ from ..models import (
 
 
 @forbidden_view_config()
-def admin_login(request):
+def login(request):
     body = render('admin/login.mako', {'logout_btn': False}, request=request)
     return Response(body, status='403 Forbidden')
 
 
 @view_config(route_name='admin.home', renderer='admin/home.mako',
-             permission='admin')
-def admin_home(request):
+     permission='admin')
+def home(request):
     return {'logout_btn': True}
 
 
-@view_config(route_name='admin.brevets', renderer='string',
-             permission='admin')
-def admin_brevets(request):
-    return 'brevets stub'
-
-
-@view_config(route_name='admin.club_events', renderer='string',
-             permission='admin')
-def admin_club_events(request):
-    return 'club events stub'
-
-
-@view_config(route_name='admin.populaires', renderer='string',
-             permission='admin')
-def admin_populaires(request):
-    return 'populaires stub'
-
-
-@view_config(route_name='admin.wranglers',
-    renderer='admin/wranglers.mako',
+@view_config(route_name='admin.list', renderer='admin/list.mako',
     permission='admin')
-def admin_wranglers(request):
+def items_list(request):
+    lists = {
+        'wranglers': {
+            'model': Administrator,
+            'order_by': Administrator.persona_email,
+            'action': 'edit',
+        },
+    }
     tmpl_vars = {'logout_btn': True}
-    wranglers = DBSession.query(Administrator).\
-        order_by(Administrator.persona_email)
-    tmpl_vars.update({'wranglers': wranglers})
+    list_name = request.matchdict['list']
+    params = lists[list_name]
+    items = DBSession.query(params['model']).\
+        order_by(params['order_by'])
+    tmpl_vars.update({
+        'items': items, 'action': params['action'], 'list': list_name})
     return tmpl_vars
 
 
-@view_config(route_name='admin.wrangler.edit',
+@view_config(route_name='admin.wranglers.edit',
     renderer='string',
     permission='admin')
-def admin_wrangler_edit(request):
+def wrangler_edit(request):
     admin = request.matchdict['item']
     return 'wrangler edit stub for {}'.format(admin)

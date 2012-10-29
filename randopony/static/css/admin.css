@@ -1,5 +1,10 @@
 /* Styles for RandoPony admin interface pages */
 
+.container .admin-list {
+    width: 320px;
+    margin-left: 0;
+}
+
 ul.admin-list {
     padding-left: 30px;
 }
