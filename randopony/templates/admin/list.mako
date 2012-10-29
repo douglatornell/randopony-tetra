@@ -4,7 +4,8 @@
   <h4>${list_title}
   <a class='btn btn-primary add-btn',
      href="${request.route_url('admin.{}'.format(list), item='new')}">
-    <i class="icon-plus icon-white hidden-phone"></i> Add New
+    <i class="icon-plus icon-white"></i>
+    <span class="hidden-phone">Add New</span>
   </a>
   </h4>
 </div>
@@ -18,7 +19,8 @@
           ${item.persona_email}
         </a>
         <button class="btn btn-danger pull-right">
-          <i class="icon-trash icon-white hidden-phone"></i> Delete
+          <i class="icon-trash icon-white"></i>
+          <span class="hidden-phone">Delete</span>
         </button>
     </li>
     %endfor
