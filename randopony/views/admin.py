@@ -55,8 +55,41 @@ def items_list(request):
     return tmpl_vars
 
 
-@view_config(route_name='admin.wranglers',
-    renderer='admin/wrangler.mako',
+@view_config(route_name='admin.delete', renderer='admin/confirm_delete.mako',
+    permission='admin')
+def delete(request):
+    """Delete the specified list item, after confirmation.
+    """
+    list_name = request.matchdict['list']
+    item = request.matchdict['item']
+    # Render confirmation form
+    lists = {
+        'wranglers': {
+            'model': Administrator,
+            'item_type': 'administrator',
+            'criterion': Administrator.persona_email == item,
+        },
+    }
+    params = lists[list_name]
+    tmpl_vars = {
+        'logout_btn': True,
+        'list': list_name,
+        'item': item,
+        'item_type': params['item_type'],
+    }
+    # Handle form submission
+    list_view = request.route_url('admin.list', list=list_name)
+    if 'cancel' in request.POST:
+        return HTTPFound(list_view)
+    if 'delete' in request.POST:
+        with transaction.manager:
+            DBSession.query(params['model']).\
+                filter(params['criterion']).delete()
+        return HTTPFound(list_view)
+    return tmpl_vars
+
+
+@view_config(route_name='admin.wranglers', renderer='admin/wrangler.mako',
     permission='admin')
 def wrangler(request):
     """Wrangler (aka administrator) create/update form handler.
@@ -90,7 +123,7 @@ def wrangler(request):
                 DBSession.add(admin)
             else:
                 admin = DBSession.query(Administrator).\
-                    filter(Administrator.persona_email == userid).one()
+                    filter_by(persona_email=userid).first()
                 admin.persona_email = appstruct['persona_email']
         return HTTPFound(list_view)
     return tmpl_vars

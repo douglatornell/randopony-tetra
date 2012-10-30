@@ -18,10 +18,11 @@
                     'admin.{}'.format(list), item=str(item))}">
           ${item.persona_email}
         </a>
-        <button class="btn btn-danger pull-right">
+        <a class="btn btn-danger pull-right"
+           href="${request.route_url('admin.delete', list=list, item=str(item))}">
           <i class="icon-trash icon-white"></i>
           <span class="hidden-phone">Delete</span>
-        </button>
+        </a>
     </li>
     %endfor
   </ul>

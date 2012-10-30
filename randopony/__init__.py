@@ -70,4 +70,5 @@ def map_routes(config):
     # admin routes
     config.add_route('admin.home', '/admin')
     config.add_route('admin.list', '/admin/{list}/')
+    config.add_route('admin.delete', '/admin/{list}/{item}/delete')
     config.add_route('admin.wranglers', '/admin/wranglers/{item}')
