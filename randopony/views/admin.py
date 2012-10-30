@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 """RandoPony admin views.
 """
-from deform import Form
+from deform import (
+    Form,
+    ValidationFailure,
+    )
+from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.view import (
     forbidden_view_config,
     view_config,
     )
+import transaction
 from ..models import (
     Administrator,
     AdministratorSchema,
@@ -53,18 +58,39 @@ def items_list(request):
 @view_config(route_name='admin.wranglers',
     renderer='admin/wrangler.mako',
     permission='admin')
-def wrangler_edit(request):
-    admin = request.matchdict['item']
-    if admin == 'new':
+def wrangler(request):
+    """Wrangler (aka administrator) create/update form handler.
+    """
+    tmpl_vars = {'logout_btn': True}
+    # Render create/update form
+    userid = request.matchdict['item']
+    if userid == 'new':
         form = Form(
             AdministratorSchema(), buttons=('add', 'cancel'))
-        appstruct = {'persona_email': ''}
+        tmpl_vars['form'] = form.render()
     else:
+        appstruct = {'persona_email': userid}
         form = Form(
             AdministratorSchema(), buttons=('save', 'cancel'))
-        appstruct = {'persona_email': admin}
-    tmpl_vars = {
-        'logout_btn': True,
-        'form': form.render(appstruct),
-    }
+        tmpl_vars['form'] = form.render(appstruct)
+    # Handle form submission
+    list_view = request.route_url('admin.list', list='wranglers')
+    if 'cancel' in request.POST:
+        return HTTPFound(list_view)
+    if 'add' in request.POST or 'save' in request.POST:
+        controls = request.POST.items()
+        try:
+            appstruct = form.validate(controls)
+        except ValidationFailure as e:
+            tmpl_vars['form'] = e.render()
+            return tmpl_vars
+        with transaction.manager:
+            if 'add' in request.POST:
+                admin = Administrator(appstruct['persona_email'])
+                DBSession.add(admin)
+            else:
+                admin = DBSession.query(Administrator).\
+                    filter(Administrator.persona_email == userid).one()
+                admin.persona_email = appstruct['persona_email']
+        return HTTPFound(list_view)
     return tmpl_vars

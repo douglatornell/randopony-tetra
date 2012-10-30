@@ -13,7 +13,7 @@
 <div class="container admin-list">
   <ul class="unstyled">
     %for item in items:
-    <li>
+    <li class="admin-list">
         <a href="${request.route_url(
                     'admin.{}'.format(list), item=str(item))}">
           ${item.persona_email}

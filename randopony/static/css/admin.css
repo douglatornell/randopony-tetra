@@ -9,8 +9,8 @@ ul.admin-list {
     padding-left: 30px;
 }
 
-ul.admin-list li {
-    line-height: 30px;
+ul.admin-list li, li.admin-list {
+    line-height: 35px;
 }
 
 a.add-btn {
