@@ -5,16 +5,16 @@ import unittest
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
-from ..models import DBSession
+from ..models import (
+    Base,
+    DBSession,
+    )
 
 
 class TestAuthConfig(unittest.TestCase):
     """Unit tests for auth configuration.
     """
     def setUp(self):
-        from ..models import (
-            Base,
-            )
         self.config = testing.setUp()
         engine = create_engine('sqlite://')
         DBSession.configure(bind=engine)
