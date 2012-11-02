@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """RandoPony data model.
 """
+from datetime import timedelta
 import colander
 from sqlalchemy import (
     Column,
+    DateTime,
     Integer,
     Text,
     )
@@ -33,7 +35,7 @@ class MyModel(Base):
 class Administrator(Base):
     """App administrator (aka Pony Wrangler).
 
-    Authentication is via Mozilla Persona, so all we store is the admin'
+    Authentication is via Mozilla Persona, so all we store is the admin's
     Persona email address.
     """
     __tablename__ = 'admins'
@@ -46,9 +48,68 @@ class Administrator(Base):
     def __str__(self):
         return self.persona_email
 
+    def __repr__(self):
+        return '<Administrator({})>'.format(self)
+
 
 class AdministratorSchema(colander.MappingSchema):
     """Form schema for admin interface for Administrator model.
     """
     persona_email = colander.SchemaNode(
         colander.String(), validator=colander.Email())
+
+
+class Brevet(Base):
+    """Brevet event."""
+    REGIONS = {
+        'LM': 'Lower Mainland',
+        'PR': 'Peace Region',
+        'SI': 'Southern Interior',
+        'VI': 'Vancouver Island',
+    }
+    DISTANCES = {
+        200: '200 km',
+        300: '300 km',
+        400: '400 km',
+        600: '600 km',
+        1000: '1000 km',
+    }
+
+    __tablename__ = 'brevets'
+
+    id = Column(Integer, primary_key=True)
+    region = Column(Text)
+    distance = Column(Integer)
+    date_time = Column(DateTime)
+    alt_date_time = Column(DateTime)
+    route_name = Column(Text)
+    start_locn = Column(Text)
+    start_map_url = Column(Text)
+    organizer_email = Column(Text)
+    registration_end = Column(DateTime)
+    info_question = Column(Text)
+    google_doc_id = Column(Text)
+
+    def __init__(self, region, distance, date_time, route_name, start_locn,
+        organizer_email, info_question=None, alt_date_time=None,
+        registration_end=None):
+        self.region = region
+        self.distance = distance
+        self.date_time = date_time
+        self.alt_date_time = alt_date_time
+        self.route_name = route_name
+        self.start_locn = start_locn
+        self.organizer_email = organizer_email
+        self.info_question = info_question
+        if registration_end is None:
+            self.registration_end = (
+                self.date_time - timedelta(days=1)).\
+                replace(hour=12, minute=0, second=0)
+        else:
+            self.registration_end = registration_end
+
+    def __str__(self):
+        return '{0.region}{0.distance} {0.date_time:%d%b%Y}'.format(self)
+
+    def __repr__(self):
+        return '<Brevet({})>'.format(self)
