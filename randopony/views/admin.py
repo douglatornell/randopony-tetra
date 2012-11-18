@@ -14,10 +14,12 @@ from pyramid.view import (
     view_config,
     view_defaults,
     )
+from sqlalchemy import desc
 import transaction
 from ..models import (
     Administrator,
     AdministratorSchema,
+    Brevet,
     DBSession,
     )
 
@@ -39,6 +41,13 @@ class AdminViews(object):
             'list_title': 'Pony Wranglers',
             'order_by': Administrator.persona_email,
             'action': 'edit',
+        },
+        'brevets': {
+            'model': Brevet,
+            'item_type': 'brevet',
+            'list_title': 'Brevets',
+            'order_by': desc(Brevet.date_time),
+            'action': 'view',
         },
     }
 
@@ -89,6 +98,13 @@ class AdminViews(object):
                 DBSession.query(params['model']).\
                     filter(criterion[list_name]).delete()
             return HTTPFound(list_view)
+        return tmpl_vars
+
+    @view_config(route_name='admin.brevets', renderer='admin/brevet.mako')
+    def brevet(self):
+        """Brevet create/update/view form handler.
+        """
+        tmpl_vars = {'logout_btn': True}
         return tmpl_vars
 
     @view_config(route_name='admin.wranglers', renderer='admin/wrangler.mako')
