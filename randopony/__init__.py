@@ -59,6 +59,7 @@ def auth_config(config, settings):
     config.include('pyramid_persona')
     authn_policy = AuthTktAuthenticationPolicy(
         settings['persona.secret'],
+        hashalg='sha512',
         callback=groupfinder)
     config.set_authentication_policy(authn_policy)
 
