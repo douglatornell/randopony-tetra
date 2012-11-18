@@ -99,12 +99,18 @@ class AdminViews(object):
         userid = self.request.matchdict['item']
         if userid == 'new':
             form = Form(
-                AdministratorSchema(), buttons=('add', 'cancel'))
+                AdministratorSchema(),
+                renderer=mako_renderer,
+                buttons=('add', 'cancel'),
+                )
             tmpl_vars['form'] = form.render()
         else:
             appstruct = {'persona_email': userid}
             form = Form(
-                AdministratorSchema(), buttons=('save', 'cancel'))
+                AdministratorSchema(),
+                renderer=mako_renderer,
+                buttons=('save', 'cancel'),
+                )
             tmpl_vars['form'] = form.render(appstruct)
         # Handle form submission
         list_view = self.request.route_url('admin.list', list='wranglers')
@@ -127,3 +133,7 @@ class AdminViews(object):
                     admin.persona_email = appstruct['persona_email']
             return HTTPFound(list_view)
         return tmpl_vars
+
+
+def mako_renderer(tmpl_name, **kwargs):
+    return render('{}.mako'.format(tmpl_name), kwargs)

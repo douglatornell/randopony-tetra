@@ -3,6 +3,7 @@
 """
 from datetime import timedelta
 import colander
+from deform.widget import TextInputWidget
 from sqlalchemy import (
     Column,
     DateTime,
@@ -56,7 +57,10 @@ class AdministratorSchema(colander.MappingSchema):
     """Form schema for admin interface for Administrator model.
     """
     persona_email = colander.SchemaNode(
-        colander.String(), validator=colander.Email())
+        colander.String(),
+        widget=TextInputWidget(template='emailinput'),
+        validator=colander.Email(),
+        )
 
 
 class Brevet(Base):
