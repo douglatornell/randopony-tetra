@@ -31,7 +31,7 @@ class TestAdminViews(unittest.TestCase):
         DBSession.remove()
         testing.tearDown()
 
-    def test_admin_home_logout_button(self):
+    def test_home_logout_button(self):
         """admin home view has logout button
         """
         request = testing.DummyRequest()
@@ -39,7 +39,7 @@ class TestAdminViews(unittest.TestCase):
         tmpl_vars = admin.home()
         self.assertEqual(tmpl_vars, {'logout_btn': True})
 
-    def test_admin_wranglers_list(self):
+    def test_wranglers_list(self):
         """admin wranglers view has expected template variables
         """
         request = testing.DummyRequest()
@@ -51,7 +51,7 @@ class TestAdminViews(unittest.TestCase):
         self.assertEqual(tmpl_vars['list_title'], 'Pony Wranglers')
         self.assertEqual(tmpl_vars['action'], 'edit')
 
-    def test_admin_wranglers_list_order(self):
+    def test_wranglers_list_order(self):
         """admin wranglers list is alpha ordered by persona email"""
         from ..models import Administrator
         with transaction.manager:
@@ -67,7 +67,7 @@ class TestAdminViews(unittest.TestCase):
         self.assertEqual(
             admins, 'harry@example.com tom@example.com'.split())
 
-    def test_admin_add_wrangler_form(self):
+    def test_add_wrangler_form(self):
         """admin form to add new wrangler has empty input control
         """
         self.config.add_route('admin.list', '/admin/wranglers/')
@@ -79,7 +79,7 @@ class TestAdminViews(unittest.TestCase):
             '<input type="text" name="persona_email" value=""',
             tmpl_vars['form'])
 
-    def test_admin_add_wrangler(self):
+    def test_add_wrangler(self):
         """admin add wrangler POST adds persona email to database
         """
         from ..models import Administrator
@@ -92,7 +92,7 @@ class TestAdminViews(unittest.TestCase):
         wrangler = DBSession.query(Administrator).first()
         self.assertEqual(wrangler.persona_email, 'tom@example.com')
 
-    def test_admin_update_wrangler_form(self):
+    def test_update_wrangler_form(self):
         """admin form to update wrangler has persona email input control value
         """
         self.config.add_route('admin.list', '/admin/wranglers/')
@@ -104,7 +104,7 @@ class TestAdminViews(unittest.TestCase):
             '<input type="text" name="persona_email" value="tom@example.com"',
             tmpl_vars['form'])
 
-    def test_admin_update_wrangler(self):
+    def test_update_wrangler(self):
         """admin update wrangler POST changes persona email in database
         """
         from ..models import Administrator
@@ -120,7 +120,7 @@ class TestAdminViews(unittest.TestCase):
         wrangler = DBSession.query(Administrator).first()
         self.assertEqual(wrangler.persona_email, 'harry@example.com')
 
-    def test_admin_delete_wrangler_confirmation(self):
+    def test_delete_wrangler_confirmation(self):
         """admin delete confirmation view for wrangler has exp template vars
         """
         self.config.add_route('admin.list', '/admin/wranglers/')
@@ -138,7 +138,7 @@ class TestAdminViews(unittest.TestCase):
                 'item_type': 'administrator',
             })
 
-    def test_admin_delete_wrangler(self):
+    def test_delete_wrangler(self):
         """admin delete for wrangler deletes item from database
         """
         from sqlalchemy.orm.exc import NoResultFound

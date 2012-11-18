@@ -15,13 +15,13 @@ class TestAdministrator(unittest.TestCase):
     def _make_one(self, *args, **kwargs):
         return self._get_target_class()(*args, **kwargs)
 
-    def test_administrator_str(self):
+    def test_str(self):
         """Administrator model string rep is persona email address
         """
         admin = self._make_one('tom@example.com')
         self.assertEqual(str(admin), 'tom@example.com')
 
-    def test_administrator_repr(self):
+    def test_repr(self):
         """Administrator model string rep is persona email address
         """
         admin = self._make_one('tom@example.com')
@@ -37,7 +37,7 @@ class TestBrevet(unittest.TestCase):
     def _make_one(self, *args, **kwargs):
         return self._get_target_class()(*args, **kwargs)
 
-    def test_brevet_str(self):
+    def test_str(self):
         """Brevet model string rep is like 'LM200 11Nov2012'."""
         brevet = self._make_one(region='LM', distance=200,
             date_time=datetime(2012, 11, 11, 7, 0, 0), route_name='11th Hour',
@@ -46,7 +46,7 @@ class TestBrevet(unittest.TestCase):
             organizer_email='tracy@example.com')
         self.assertEqual(str(brevet), 'LM200 11Nov2012')
 
-    def test_brevet_repr(self):
+    def test_epr(self):
         """Brevet model string rep is like 'LM200 11Nov2012'."""
         brevet = self._make_one(region='LM', distance=200,
             date_time=datetime(2012, 11, 11, 7, 0, 0), route_name='11th Hour',
@@ -55,7 +55,7 @@ class TestBrevet(unittest.TestCase):
             organizer_email='tracy@example.com')
         self.assertEqual(repr(brevet), '<Brevet(LM200 11Nov2012)>')
 
-    def test_brevet_default_registration_end(self):
+    def test_default_registration_end(self):
         """Brevet end of registration default to noon before event
         """
         brevet = self._make_one(region='LM', distance=200,
