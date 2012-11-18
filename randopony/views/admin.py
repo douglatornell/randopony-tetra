@@ -2,6 +2,7 @@
 """RandoPony admin views.
 """
 from deform import (
+    Button,
     Form,
     ValidationFailure,
     )
@@ -101,7 +102,10 @@ class AdminViews(object):
             form = Form(
                 AdministratorSchema(),
                 renderer=mako_renderer,
-                buttons=('add', 'cancel'),
+                buttons=(
+                    Button(name='add', css_class='btn btn-primary'),
+                    Button(name='cancel', css_class='btn'),
+                    ),
                 )
             tmpl_vars['form'] = form.render()
         else:
@@ -109,7 +113,10 @@ class AdminViews(object):
             form = Form(
                 AdministratorSchema(),
                 renderer=mako_renderer,
-                buttons=('save', 'cancel'),
+                buttons=(
+                    Button(name='save', css_class='btn btn-primary'),
+                    Button(name='cancel', css_class='btn'),
+                    ),
                 )
             tmpl_vars['form'] = form.render(appstruct)
         # Handle form submission

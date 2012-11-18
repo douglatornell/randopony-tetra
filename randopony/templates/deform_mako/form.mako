@@ -56,9 +56,16 @@
             id="${field.formid + button.name}"
             name="${button.name}"
             type="${button.type}"
-            class="btnText submit"
+            class="btnText submit ${button.css_class}"
             value="${button.value}">
-            <span>${button.title}</span>
+            %if button.name == "add":
+                <i class="icon-plus icon-white"></i>
+            % elif button.name == "cancel":
+                <i class="icon-remove"></i>
+            % elif button.name == "save":
+                <i class="icon-ok icon-white"></i>
+            % endif
+            <span class="hidden-phone">${button.title}</span>
         </button>
         % endfor
       </li>
