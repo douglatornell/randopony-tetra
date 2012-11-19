@@ -27,7 +27,7 @@
         <p class="errorMsg" i18n:translate=""
             >Errors have been highlighted below</p>
         </li>
-      % endif
+        % endif
 
         % if field.title:
             <li class="section first" tal:condition="field.title">
@@ -74,33 +74,25 @@
 
 </fieldset>
 
-<script type="text/javascript" tal:condition="field.use_ajax">
-  function deform_ajaxify(response, status, xhr, form, oid, mthd){
-     var options = {
-       target: '#' + oid,
-       replaceTarget: true,
-       success: function(response, status, xhr, form){
-         deform_ajaxify(response, status, xhr, form, oid);
-       }
-     };
-     var extra_options = ${field.ajax_options};
-     var name;
-     if (extra_options) {
-       for (name in extra_options) {
-         options[name] = extra_options[name];
-       };
-     };
-     $('#' + oid).ajaxForm(options);
-     if(mthd){
-       mthd(response, status, xhr, form);
-     }
-  }
+% if field.use_ajax:
+<script>
   deform.addCallback(
-     '${field.formid}',
-     function(oid) {
-       deform_ajaxify(null, null, null, null, oid);
-     }
+    '${form.formid}',
+    function(oid) {
+      var target = '#' + oid;
+      var options = {
+        target: target,
+        replaceTarget: true,
+        success: function() {
+          deform.processCallbacks();
+          deform.focusFirstInput(target);
+        }
+      };
+      var extra_options = ${ajax_options} || {};
+      $('#' + oid).ajaxForm($.extend(options, extra_options));
+    }
   );
 </script>
+% endif
 
 </form>

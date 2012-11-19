@@ -13,6 +13,11 @@ ul.admin-list li, li.admin-list {
     line-height: 35px;
 }
 
-a.add-btn {
+.add-btn {
     margin-left: 15px;
+}
+
+.deformSet {
+    margin: 6px 0;
+    padding: 3px;
 }

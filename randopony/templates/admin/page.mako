@@ -3,9 +3,16 @@
 <%block name="title"><title>RandoPony::Admin</title></%block>
 
 <%block name="page_css">
-    <link
-    href="${request.static_url('randopony:static/css/admin.css')}"
-    rel="stylesheet">
+  <link
+  href="${request.static_url('randopony:static/css/admin.css')}"
+  rel="stylesheet">
+  <%block name="view_css"></%block>
+</%block>
+
+<%block name="page_js">
+  <script src="https://login.persona.org/include.js"></script>
+  <script>${request.persona_js}</script>
+  <%block name="view_js"></%block>
 </%block>
 
 <div class="container">
@@ -23,8 +30,3 @@
   </div>
   ${next.body()}
 </div>
-
-<%block name="page_js">
-  <script src="https://login.persona.org/include.js"></script>
-  <script>${request.persona_js}</script>
-</%block>

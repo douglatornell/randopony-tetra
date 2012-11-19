@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
 """RandoPony data model.
 """
-from datetime import timedelta
+from datetime import (
+    datetime,
+    timedelta,
+    )
+from operator import itemgetter
 import colander
-from deform.widget import TextInputWidget
+from deform.widget import (
+    DateTimeInputWidget,
+    RadioChoiceWidget,
+    SelectWidget,
+    TextInputWidget,
+    )
 from sqlalchemy import (
     Column,
     DateTime,
@@ -58,7 +67,9 @@ class AdministratorSchema(colander.MappingSchema):
     """
     persona_email = colander.SchemaNode(
         colander.String(),
-        widget=TextInputWidget(template='emailinput'),
+        widget=TextInputWidget(
+            template='emailinput',
+            autofocus=True),
         validator=colander.Email(),
         )
 
@@ -117,3 +128,44 @@ class Brevet(Base):
 
     def __repr__(self):
         return '<Brevet({})>'.format(self)
+
+
+class BrevetSchema(colander.MappingSchema):
+    """Form schema for admin interface for Brevet model.
+    """
+    region = colander.SchemaNode(
+        colander.String(),
+        widget=SelectWidget(
+            values=[(k, v) for k, v
+                    in sorted(Brevet.REGIONS.items(), key=itemgetter(0))],
+            autofocus=True),
+        validator=colander.OneOf(Brevet.REGIONS.keys()),
+        )
+    distance = colander.SchemaNode(
+        colander.Integer(),
+        widget=RadioChoiceWidget(
+            values=[(k, v) for k, v
+                    in sorted(Brevet.DISTANCES.items(), key=itemgetter(0))],
+            css_class='radio inline'),
+        validator=colander.OneOf(Brevet.DISTANCES.keys()),
+        )
+    date_time = colander.SchemaNode(
+        colander.DateTime(),
+        widget=DateTimeInputWidget(
+            options={
+                'dateFormat': 'dd-M-yy',
+                'separator': ' ',
+                'timeFormat': 'HH:mm',
+                'hourGrid': 6,
+                'minuteGrid': 15,
+            }),
+        validator=colander.Range(
+            min=datetime.now(),
+            min_err='Brevet date cannot be in the past',
+            max=datetime(datetime.today().year + 1, 12, 31))
+        )
+    # organizer_email = colander.SchemaNode(
+    #     colander.String(),
+    #     widget=TextInputWidget(template='emailinput'),
+    #     validator=colander.Email(),
+    #     )

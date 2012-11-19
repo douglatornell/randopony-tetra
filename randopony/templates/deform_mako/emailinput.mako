@@ -5,7 +5,9 @@
     name="${field.name}"
     value="${cstruct}"
     placeholder="tom@example.com"
+    %if getattr(field.widget, "autofocus", False):
     autofocus
+    % endif
     %if field.widget.size:
     size=${field.widget.size}
     %endif

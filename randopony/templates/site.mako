@@ -12,10 +12,6 @@
   <link rel="stylesheet"
     href="${request.static_url('deform:static/css/form.css')}">
   <%block name="page_css"></%block>
-  <!-- TODO: Need a favicon and Apple touch icons -->
-</head>
-<body>
-  ${next.body()}
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"
           type="text/javascript">
@@ -26,5 +22,10 @@
   </script>
   <script>deform.load()</script>
   <%block name="page_js"></%block>
+  <!-- TODO: Need a favicon and Apple touch icons -->
+</head>
+
+<body>
+  ${next.body()}
 </body>
 </html>

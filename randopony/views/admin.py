@@ -20,6 +20,7 @@ from ..models import (
     Administrator,
     AdministratorSchema,
     Brevet,
+    BrevetSchema,
     DBSession,
     )
 
@@ -105,6 +106,29 @@ class AdminViews(object):
         """Brevet create/update/view form handler.
         """
         tmpl_vars = {'logout_btn': True}
+        # Render create/update form
+        brevet = self.request.matchdict['item']
+        if brevet == 'new':
+            form = Form(
+                BrevetSchema(),
+                renderer=mako_renderer,
+                buttons=(
+                    Button(name='add', css_class='btn btn-primary'),
+                    Button(name='cancel', css_class='btn'),
+                    ),
+                )
+            tmpl_vars['form'] = form.render()
+        # Handle form submission
+        list_view = self.request.route_url('admin.list', list='brevets')
+        if 'cancel' in self.request.POST:
+            return HTTPFound(list_view)
+        if 'add' in self.request.POST or 'save' in self.request.POST:
+            controls = self.request.POST.items()
+            try:
+                appstruct = form.validate(controls)
+            except ValidationFailure as e:
+                tmpl_vars['form'] = e.render()
+                return tmpl_vars
         return tmpl_vars
 
     @view_config(route_name='admin.wranglers', renderer='admin/wrangler.mako')
