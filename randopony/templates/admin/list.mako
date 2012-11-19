@@ -16,7 +16,7 @@
     <li class="admin-list">
         <a href="${request.route_url(
                     'admin.{}'.format(list), item=str(item))}">
-          ${item.persona_email}
+          ${item}
         </a>
         <a class="btn btn-danger pull-right"
            href="${request.route_url('admin.delete', list=list, item=str(item))}">

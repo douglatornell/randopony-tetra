@@ -151,21 +151,35 @@ class BrevetSchema(colander.MappingSchema):
         )
     date_time = colander.SchemaNode(
         colander.DateTime(),
-        widget=DateTimeInputWidget(
-            options={
-                'dateFormat': 'dd-M-yy',
-                'separator': ' ',
-                'timeFormat': 'HH:mm',
-                'hourGrid': 6,
-                'minuteGrid': 15,
-            }),
-        validator=colander.Range(
-            min=datetime.now(),
-            min_err='Brevet date cannot be in the past',
-            max=datetime(datetime.today().year + 1, 12, 31))
+        title='Date and Start Time',
+        widget=DateTimeInputWidget(),
+            # options={
+            #     # 'dateFormat': 'dd-M-yy',
+            #     # 'separator': ' ',
+            #     # 'timeFormat': 'HH:mm',
+            #     'dateFormat': 'yy-mm-dd',
+            #     'separator': 'T',
+            #     'timeFormat': 'HH:mm:ss',
+            #     'hourGrid': 6,
+            #     'minuteGrid': 15,
+            # }),
+        # validator=colander.Range(
+        #     min=datetime.now(),
+        #     min_err='Brevet date cannot be in the past',
+        #     max=datetime(datetime.today().year + 1, 12, 31),
+        #     )
         )
-    # organizer_email = colander.SchemaNode(
-    #     colander.String(),
-    #     widget=TextInputWidget(template='emailinput'),
-    #     validator=colander.Email(),
-    #     )
+    route_name = colander.SchemaNode(
+        colander.String()
+        )
+    start_locn = colander.SchemaNode(
+        colander.String(),
+        title='Start Location',
+        widget=TextInputWidget(placeholder='Venue, Address, City')
+        )
+    organizer_email = colander.SchemaNode(
+        colander.String(),
+        title='Organizer Email(s)',
+        widget=TextInputWidget(template='emailinput'),
+        validator=colander.Email(),
+        )

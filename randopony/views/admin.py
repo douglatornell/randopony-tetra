@@ -129,6 +129,18 @@ class AdminViews(object):
             except ValidationFailure as e:
                 tmpl_vars['form'] = e.render()
                 return tmpl_vars
+            with transaction.manager:
+                if 'add' in self.request.POST:
+                    brevet = Brevet(
+                        region=appstruct['region'],
+                        distance=appstruct['distance'],
+                        date_time=appstruct['date_time'],
+                        route_name=appstruct['route_name'],
+                        start_locn=appstruct['start_locn'],
+                        organizer_email=appstruct['organizer_email'],
+                        )
+                    DBSession.add(brevet)
+            return HTTPFound(list_view)
         return tmpl_vars
 
     @view_config(route_name='admin.wranglers', renderer='admin/wrangler.mako')
