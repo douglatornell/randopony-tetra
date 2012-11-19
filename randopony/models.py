@@ -69,7 +69,9 @@ class AdministratorSchema(colander.MappingSchema):
         colander.String(),
         widget=TextInputWidget(
             template='emailinput',
-            autofocus=True),
+            autofocus=True,
+            placeholder='tom@example.com',
+            ),
         validator=colander.Email(),
         )
 
@@ -138,7 +140,9 @@ class BrevetSchema(colander.MappingSchema):
         widget=SelectWidget(
             values=[(k, v) for k, v
                     in sorted(Brevet.REGIONS.items(), key=itemgetter(0))],
-            autofocus=True),
+            autofocus=True,
+            placeholder='Please choose...',
+            ),
         validator=colander.OneOf(Brevet.REGIONS.keys()),
         )
     distance = colander.SchemaNode(
@@ -152,17 +156,14 @@ class BrevetSchema(colander.MappingSchema):
     date_time = colander.SchemaNode(
         colander.DateTime(),
         title='Date and Start Time',
-        widget=DateTimeInputWidget(),
-            # options={
-            #     # 'dateFormat': 'dd-M-yy',
-            #     # 'separator': ' ',
-            #     # 'timeFormat': 'HH:mm',
-            #     'dateFormat': 'yy-mm-dd',
-            #     'separator': 'T',
-            #     'timeFormat': 'HH:mm:ss',
-            #     'hourGrid': 6,
-            #     'minuteGrid': 15,
-            # }),
+        widget=DateTimeInputWidget(
+            options={
+                'dateFormat': 'dd-M-yy',
+                'separator': ' ',
+                'timeFormat': 'HH:mm',
+                'hourGrid': 6,
+                'minuteGrid': 15,
+            }),
         # validator=colander.Range(
         #     min=datetime.now(),
         #     min_err='Brevet date cannot be in the past',
@@ -180,6 +181,10 @@ class BrevetSchema(colander.MappingSchema):
     organizer_email = colander.SchemaNode(
         colander.String(),
         title='Organizer Email(s)',
-        widget=TextInputWidget(template='emailinput'),
+        widget=TextInputWidget(
+            template='emailinput',
+            placeholder='tom@example.com, harry@example.com',
+            css_class='input-xlarge',
+            ),
         validator=colander.Email(),
         )

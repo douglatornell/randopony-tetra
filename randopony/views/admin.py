@@ -5,7 +5,9 @@ from deform import (
     Button,
     Form,
     ValidationFailure,
+    ZPTRendererFactory,
     )
+from pkg_resources import resource_filename
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.response import Response
@@ -29,6 +31,11 @@ from ..models import (
 def login(request):
     body = render('admin/login.mako', {'logout_btn': False}, request=request)
     return Response(body, status='403 Forbidden')
+
+
+deform_templates = resource_filename('deform', 'deform_templates')
+search_path = ('randopony/templates/deform', deform_templates)
+renderer = ZPTRendererFactory(search_path)
 
 
 @view_defaults(permission='admin')
@@ -111,7 +118,7 @@ class AdminViews(object):
         if brevet == 'new':
             form = Form(
                 BrevetSchema(),
-                renderer=mako_renderer,
+                renderer=renderer,
                 buttons=(
                     Button(name='add', css_class='btn btn-primary'),
                     Button(name='cancel', css_class='btn'),
@@ -153,7 +160,7 @@ class AdminViews(object):
         if userid == 'new':
             form = Form(
                 AdministratorSchema(),
-                renderer=mako_renderer,
+                renderer=renderer,
                 buttons=(
                     Button(name='add', css_class='btn btn-primary'),
                     Button(name='cancel', css_class='btn'),
@@ -164,7 +171,7 @@ class AdminViews(object):
             appstruct = {'persona_email': userid}
             form = Form(
                 AdministratorSchema(),
-                renderer=mako_renderer,
+                renderer=renderer,
                 buttons=(
                     Button(name='save', css_class='btn btn-primary'),
                     Button(name='cancel', css_class='btn'),

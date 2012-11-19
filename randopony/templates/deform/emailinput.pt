@@ -1,0 +1,21 @@
+<span tal:define="name name|field.name;
+                  size size|field.widget.size;
+                  css_class css_class|field.widget.css_class;
+                  oid oid|field.oid;
+                  style style|field.widget.style|None;
+                  autofocus autofocus|field.widget.autofocus|None;
+                  placeholder placeholder|field.widget.placeholder|None;
+                 "
+      tal:omit-tag="">
+<div class="input-prepend">
+    <span class="add-on"><i class="icon-envelope"></i></span>
+    <input type="email" name="${name}" value="${cstruct}"
+           tal:attributes="size size;
+                           class css_class;
+                           style style;
+                           autofocus autofocus;
+                           placeholder placeholder;
+                          "
+           id="${oid}">
+</div>
+</span>
