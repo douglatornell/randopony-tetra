@@ -46,7 +46,6 @@ def main(global_config, **settings):
         settings=settings,
         root_factory=Root)
     config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_static_view('deform_static', 'deform:static')
     auth_config(config, settings)
     map_routes(config)
     config.scan()
@@ -68,17 +67,29 @@ def map_routes(config):
     """Routes map for RandoPony.
     """
     config.add_route('home', '/')
-    # admin routes
+    # admin core routes
     config.add_route('admin.home', '/admin')
     config.add_route('admin.list', '/admin/{list}/')
     config.add_route('admin.delete', '/admin/{list}/{item}/delete')
+    # brevet admin routes
     config.add_route(
-        'admin.brevets.create', '/admin/brevets/new')
+        'admin.brevets.create',
+        '/admin/brevets/new',
+        )
     config.add_route(
-        'admin.brevets.edit', '/admin/brevets/{item}/edit')
+        'admin.brevets.edit',
+        '/admin/brevets/{item}/edit',
+        )
     config.add_route(
-        'admin.brevets.view', '/admin/brevets/{item}')
+        'admin.brevets.view',
+        '/admin/brevets/{item}',
+        )
+    # administrators (aka pony wranglers) admin routes
     config.add_route(
-        'admin.wranglers.create', '/admin/wranglers/new')
+        'admin.wranglers.create',
+        '/admin/wranglers/new',
+        )
     config.add_route(
-        'admin.wranglers.edit', '/admin/wranglers/{item}')
+        'admin.wranglers.edit',
+        '/admin/wranglers/{item}',
+        )
