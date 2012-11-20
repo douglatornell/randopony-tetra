@@ -73,4 +73,7 @@ def map_routes(config):
     config.add_route('admin.list', '/admin/{list}/')
     config.add_route('admin.delete', '/admin/{list}/{item}/delete')
     config.add_route('admin.brevets', '/admin/brevets/{item}')
-    config.add_route('admin.wranglers', '/admin/wranglers/{item}')
+    config.add_route(
+        'admin.wranglers.create', '/admin/wranglers/new')
+    config.add_route(
+        'admin.wranglers.edit', '/admin/wranglers/{item}')

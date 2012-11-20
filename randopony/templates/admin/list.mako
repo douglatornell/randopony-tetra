@@ -3,7 +3,7 @@
 <div class="container">
   <h4>${list_title}
   <a class='btn btn-primary add-btn',
-     href="${request.route_url('admin.{}'.format(list), item='new')}">
+     href="${request.route_url('admin.{}.create'.format(list))}">
     <i class="icon-plus icon-white"></i>
     <span class="hidden-phone">Add New</span>
   </a>
@@ -15,7 +15,7 @@
     %for item in items:
     <li class="admin-list">
         <a href="${request.route_url(
-                    'admin.{}'.format(list), item=str(item))}">
+                    'admin.{}.edit'.format(list), item=str(item))}">
           ${item}
         </a>
         <a class="btn btn-danger pull-right"

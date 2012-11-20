@@ -54,7 +54,16 @@
               type="${button.type}"
               class="btnText submit ${button.css_class}"
               value="${button.value}">
-            <span>${button.title}</span>
+            <i tal:condition="button.name == 'add'"
+               class="icon-plus icon-white">
+            </i>
+            <i tal:condition="button.name == 'cancel'"
+               class="icon-remove">
+            </i>
+            <i tal:condition="button.name == 'save'"
+               class="icon-ok icon-white">
+            </i>
+            <span class="hidden-phone">${button.title}</span>
           </button>
         </tal:block>
       </li>

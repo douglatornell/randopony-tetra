@@ -5,4 +5,4 @@
 
 number = '2013'
 release = 'dev'
-dev_status = '1 - Planning'
+dev_status = '2 - Pre-Alpha'

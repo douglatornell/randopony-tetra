@@ -10,6 +10,7 @@ requires = [
     'colander',
     'deform',
     'pyramid',
+    'pyramid_deform',
     'pyramid_debugtoolbar',
     'pyramid_persona',
     'pyramid_tm',

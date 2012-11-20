@@ -8,6 +8,7 @@ from deform import (
     ZPTRendererFactory,
     )
 from pkg_resources import resource_filename
+from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.response import Response
@@ -72,7 +73,8 @@ class AdminViews(object):
         params = self.lists[list_name]
         tmpl_vars = {
             'logout_btn': True,
-            'items': DBSession.query(params['model']).order_by(params['order_by']),
+            'items': (DBSession.query(params['model'])
+                .order_by(params['order_by'])),
             'action': params['action'],
             'list': list_name,
             'list_title': params['list_title'],
@@ -150,56 +152,70 @@ class AdminViews(object):
             return HTTPFound(list_view)
         return tmpl_vars
 
-    @view_config(route_name='admin.wranglers', renderer='admin/wrangler.mako')
-    def wrangler(self):
-        """Wrangler (aka administrator) create/update form handler.
-        """
-        tmpl_vars = {'logout_btn': True}
-        # Render create/update form
-        userid = self.request.matchdict['item']
-        if userid == 'new':
-            form = Form(
-                AdministratorSchema(),
-                renderer=renderer,
-                buttons=(
-                    Button(name='add', css_class='btn btn-primary'),
-                    Button(name='cancel', css_class='btn'),
-                    ),
-                )
-            tmpl_vars['form'] = form.render()
-        else:
-            appstruct = {'persona_email': userid}
-            form = Form(
-                AdministratorSchema(),
-                renderer=renderer,
-                buttons=(
-                    Button(name='save', css_class='btn btn-primary'),
-                    Button(name='cancel', css_class='btn'),
-                    ),
-                )
-            tmpl_vars['form'] = form.render(appstruct)
-        # Handle form submission
-        list_view = self.request.route_url('admin.list', list='wranglers')
-        if 'cancel' in self.request.POST:
-            return HTTPFound(list_view)
-        if 'add' in self.request.POST or 'save' in self.request.POST:
-            controls = self.request.POST.items()
-            try:
-                appstruct = form.validate(controls)
-            except ValidationFailure as e:
-                tmpl_vars['form'] = e.render()
-                return tmpl_vars
-            with transaction.manager:
-                if 'add' in self.request.POST:
-                    admin = Administrator(appstruct['persona_email'])
-                    DBSession.add(admin)
-                else:
-                    admin = DBSession.query(Administrator).\
-                        filter_by(persona_email=userid).first()
-                    admin.persona_email = appstruct['persona_email']
-            return HTTPFound(list_view)
+
+@view_config(
+    route_name='admin.wranglers.create',
+    renderer='admin/wrangler.mako',
+    permission='admin',
+    )
+class WranglerCreate(FormView):
+    schema = AdministratorSchema()
+    buttons = (
+        Button(name='add', css_class='btn btn-primary'),
+        Button(name='cancel', css_class='btn', type='reset'),
+        )
+
+    def list_url(self):
+        return self.request.route_url('admin.list', list='wranglers')
+
+    def show(self, form):
+        tmpl_vars = super(WranglerCreate, self).show(form)
+        tmpl_vars.update({
+            'logout_btn': True,
+            'list_url': self.list_url()
+            })
         return tmpl_vars
 
+    def add_success(self, appstruct):
+        with transaction.manager:
+            admin = Administrator(appstruct['persona_email'])
+            DBSession.add(admin)
+        return HTTPFound(self.list_url())
 
-def mako_renderer(tmpl_name, **kwargs):
-    return render('{}.mako'.format(tmpl_name), kwargs)
+
+@view_config(
+    route_name='admin.wranglers.edit',
+    renderer='admin/wrangler.mako',
+    permission='admin',
+    )
+class WranglerEdit(FormView):
+    schema = AdministratorSchema()
+    buttons = (
+        Button(name='save', css_class='btn btn-primary'),
+        Button(name='cancel', css_class='btn', type='reset'),
+        )
+
+    def list_url(self):
+        return self.request.route_url('admin.list', list='wranglers')
+
+    def get_userid(self):
+        return self.request.matchdict['item']
+
+    def appstruct(self):
+        return {'persona_email': self.get_userid()}
+
+    def show(self, form):
+        tmpl_vars = super(WranglerEdit, self).show(form)
+        tmpl_vars.update({
+            'logout_btn': True,
+            'list_url': self.list_url()
+            })
+        return tmpl_vars
+
+    def save_success(self, appstruct):
+        with transaction.manager:
+            admin = (DBSession.query(Administrator)
+                .filter_by(persona_email=self.get_userid())
+                .first())
+            admin.persona_email = appstruct['persona_email']
+        return HTTPFound(self.list_url())
