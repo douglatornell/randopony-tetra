@@ -94,12 +94,14 @@ class AdminViews(object):
         if 'cancel' in self.request.POST:
             return HTTPFound(list_view)
         if 'delete' in self.request.POST:
-            criterion = {
-                'wranglers': Administrator.persona_email == item,
-            }
+            if list_name == 'brevets':
+                criterion = Brevet.id == get_brevet(*item.split()).id
+            elif list_name == 'wranglers':
+                criterion = Administrator.persona_email == item
             with transaction.manager:
-                DBSession.query(params['model']).\
-                    filter(criterion[list_name]).delete()
+                (DBSession.query(params['model'])
+                    .filter(criterion)
+                    .delete())
             return HTTPFound(list_view)
         return tmpl_vars
 
