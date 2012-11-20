@@ -6,6 +6,7 @@ from operator import itemgetter
 import colander
 from deform.widget import (
     DateTimeInputWidget,
+    HiddenWidget,
     RadioChoiceWidget,
     SelectWidget,
     TextInputWidget,
@@ -63,6 +64,10 @@ class Administrator(Base):
 class AdministratorSchema(CSRFSchema):
     """Form schema for admin interface for Administrator model.
     """
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=HiddenWidget(),
+        )
     persona_email = colander.SchemaNode(
         colander.String(),
         widget=TextInputWidget(
@@ -93,9 +98,9 @@ class Brevet(Base):
     __tablename__ = 'brevets'
 
     id = Column(Integer, primary_key=True)
-    region = Column(Text)
+    region = Column(Text, index=True)
     distance = Column(Integer)
-    date_time = Column(DateTime)
+    date_time = Column(DateTime, index=True)
     alt_date_time = Column(DateTime)
     route_name = Column(Text)
     start_locn = Column(Text)
@@ -133,6 +138,10 @@ class Brevet(Base):
 class BrevetSchema(CSRFSchema):
     """Form schema for admin interface for Brevet model.
     """
+    id = colander.SchemaNode(
+        colander.Integer(),
+        widget=HiddenWidget(),
+        )
     region = colander.SchemaNode(
         colander.String(),
         widget=SelectWidget(

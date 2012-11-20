@@ -196,6 +196,7 @@ class BrevetEdit(FormView):
         code, date = self.request.matchdict['item'].split()
         brevet = get_brevet(code, date)
         return {
+            'id': brevet.id,
             'region': brevet.region,
             'distance': brevet.distance,
             'date_time': brevet.date_time,
@@ -215,8 +216,9 @@ class BrevetEdit(FormView):
 
     def save_success(self, appstruct):
         with transaction.manager:
-            code, date = self.request.matchdict['item'].split()
-            brevet = get_brevet(code, date)
+            brevet = (DBSession.query(Brevet)
+                .filter_by(id=appstruct['id'])
+                .one())
             brevet.region = appstruct['region']
             brevet.distance = appstruct['distance']
             brevet.date_time = appstruct['date_time']
@@ -224,7 +226,11 @@ class BrevetEdit(FormView):
             brevet.start_locn = appstruct['start_locn']
             brevet.organizer_email = appstruct['organizer_email']
             brevet.registration_end = appstruct['registration_end']
-        return HTTPFound(self.view_url())
+        brevet = (DBSession.query(Brevet)
+            .filter_by(id=appstruct['id'])
+            .one())
+        return HTTPFound(
+            self.request.route_url('admin.brevets.view', item=str(brevet)))
 
     def failure(self, e):
         tmpl_vars = super(BrevetEdit, self).failure(e)
@@ -288,11 +294,14 @@ class WranglerEdit(FormView):
     def list_url(self):
         return self.request.route_url('admin.list', list='wranglers')
 
-    def get_userid(self):
-        return self.request.matchdict['item']
-
     def appstruct(self):
-        return {'persona_email': self.get_userid()}
+        admin = (DBSession.query(Administrator)
+            .filter_by(persona_email=self.request.matchdict['item'])
+            .one())
+        return {
+            'id': admin.id,
+            'persona_email': admin.persona_email,
+            }
 
     def show(self, form):
         tmpl_vars = super(WranglerEdit, self).show(form)
@@ -305,7 +314,7 @@ class WranglerEdit(FormView):
     def save_success(self, appstruct):
         with transaction.manager:
             admin = (DBSession.query(Administrator)
-                .filter_by(persona_email=self.get_userid())
+                .filter_by(id=appstruct['id'])
                 .one())
             admin.persona_email = appstruct['persona_email']
         return HTTPFound(self.list_url())
