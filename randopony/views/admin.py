@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """RandoPony admin views.
 """
-from deform import (
-    Button,
-    Form,
-    ValidationFailure,
-    ZPTRendererFactory,
+from datetime import (
+    datetime,
+    timedelta,
     )
-from pkg_resources import resource_filename
+from deform import Button
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
@@ -32,11 +30,6 @@ from ..models import (
 def login(request):
     body = render('admin/login.mako', {'logout_btn': False}, request=request)
     return Response(body, status='403 Forbidden')
-
-
-deform_templates = resource_filename('deform', 'deform_templates')
-search_path = ('randopony/templates/deform', deform_templates)
-renderer = ZPTRendererFactory(search_path)
 
 
 @view_defaults(permission='admin')
@@ -110,47 +103,97 @@ class AdminViews(object):
             return HTTPFound(list_view)
         return tmpl_vars
 
-    @view_config(route_name='admin.brevets', renderer='admin/brevet.mako')
-    def brevet(self):
-        """Brevet create/update/view form handler.
-        """
-        tmpl_vars = {'logout_btn': True}
-        # Render create/update form
-        brevet = self.request.matchdict['item']
-        if brevet == 'new':
-            form = Form(
-                BrevetSchema(),
-                renderer=renderer,
-                buttons=(
-                    Button(name='add', css_class='btn btn-primary'),
-                    Button(name='cancel', css_class='btn'),
-                    ),
-                )
-            tmpl_vars['form'] = form.render()
-        # Handle form submission
-        list_view = self.request.route_url('admin.list', list='brevets')
-        if 'cancel' in self.request.POST:
-            return HTTPFound(list_view)
-        if 'add' in self.request.POST or 'save' in self.request.POST:
-            controls = self.request.POST.items()
-            try:
-                appstruct = form.validate(controls)
-            except ValidationFailure as e:
-                tmpl_vars['form'] = e.render()
-                return tmpl_vars
-            with transaction.manager:
-                if 'add' in self.request.POST:
-                    brevet = Brevet(
-                        region=appstruct['region'],
-                        distance=appstruct['distance'],
-                        date_time=appstruct['date_time'],
-                        route_name=appstruct['route_name'],
-                        start_locn=appstruct['start_locn'],
-                        organizer_email=appstruct['organizer_email'],
-                        )
-                    DBSession.add(brevet)
-            return HTTPFound(list_view)
+
+@view_config(
+    route_name='admin.brevets.create',
+    renderer='admin/brevet_edit.mako',
+    permission='admin',
+    )
+class BrevetCreate(FormView):
+    schema = BrevetSchema()
+    buttons = (
+        Button(name='add', css_class='btn btn-primary'),
+        Button(name='cancel', css_class='btn', type='reset'),
+        )
+
+    def list_url(self):
+        return self.request.route_url('admin.list', list='brevets')
+
+    def show(self, form):
+        tmpl_vars = super(BrevetCreate, self).show(form)
+        tmpl_vars.update({
+            'logout_btn': True,
+            'cancel_url': self.list_url()
+            })
         return tmpl_vars
+
+    def add_success(self, appstruct):
+        with transaction.manager:
+            brevet = Brevet(
+                region=appstruct['region'],
+                distance=appstruct['distance'],
+                date_time=appstruct['date_time'],
+                route_name=appstruct['route_name'],
+                start_locn=appstruct['start_locn'],
+                organizer_email=appstruct['organizer_email'],
+                )
+            DBSession.add(brevet)
+        return HTTPFound(self.list_url())
+
+
+@view_config(
+    route_name='admin.brevets.edit',
+    renderer='admin/brevet_edit.mako',
+    permission='admin',
+    )
+class BrevetEdit(FormView):
+    schema = BrevetSchema()
+    buttons = (
+        Button(name='save', css_class='btn btn-primary'),
+        Button(name='cancel', css_class='btn', type='reset'),
+        )
+
+    def view_url(self):
+        return self.request.route_url(
+            'admin.brevets.view', item=self.request.matchdict['item'])
+
+    def get_brevet(self):
+        code, date = self.request.matchdict['item'].split()
+        region = code[:2]
+        distance = code[2:]
+        date = datetime.strptime(date, '%d%b%Y')
+        return (DBSession.query(Brevet)
+            .filter_by(region=region)
+            .filter_by(distance=distance)
+            .filter(Brevet.date_time >= date)
+            .filter(Brevet.date_time < date + timedelta(days=1))
+            .one()
+            )
+
+    def appstruct(self):
+        brevet = self.get_brevet()
+        return {
+            'region': brevet.region,
+            'distance': brevet.distance,
+            'date_time': brevet.date_time,
+            'route_name': brevet.route_name,
+            'start_locn': brevet.start_locn,
+            'organizer_email': brevet.organizer_email,
+        }
+
+    def show(self, form):
+        tmpl_vars = super(BrevetEdit, self).show(form)
+        tmpl_vars.update({
+            'logout_btn': True,
+            'cancel_url': self.view_url()
+            })
+        return tmpl_vars
+
+    def save_success(self, appstruct):
+        with transaction.manager:
+            brevet = self.get_brevet()
+
+        return HTTPFound(self.view_url())
 
 
 @view_config(
@@ -216,6 +259,6 @@ class WranglerEdit(FormView):
         with transaction.manager:
             admin = (DBSession.query(Administrator)
                 .filter_by(persona_email=self.get_userid())
-                .first())
+                .one())
             admin.persona_email = appstruct['persona_email']
         return HTTPFound(self.list_url())

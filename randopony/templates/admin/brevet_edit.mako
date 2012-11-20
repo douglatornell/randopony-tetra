@@ -19,3 +19,12 @@
 </%block>
 
 ${form | n}
+
+<script>
+  $(document).ready(function(){
+    $("#deformcancel").click(function(event){
+      window.location = '${cancel_url}';
+      event.preventDefault();
+    });
+  });
+</script>

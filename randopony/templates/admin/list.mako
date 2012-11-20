@@ -15,11 +15,13 @@
     %for item in items:
     <li class="admin-list">
         <a href="${request.route_url(
-                    'admin.{}.edit'.format(list), item=str(item))}">
+                   'admin.{}.{}'.format(list, action),
+                   item=str(item))}">
           ${item}
         </a>
         <a class="btn btn-danger pull-right"
-           href="${request.route_url('admin.delete', list=list, item=str(item))}">
+           href="${request.route_url(
+                   'admin.delete', list=list, item=str(item))}">
           <i class="icon-trash icon-white"></i>
           <span class="hidden-phone">Delete</span>
         </a>
