@@ -139,7 +139,8 @@ def brevet_details(request):
     )
 class BrevetCreate(FormView):
     schema = BrevetSchema()
-    schema.__delitem__('registration_end')
+    for field in 'id registration_end start_map_url'.split():
+        schema.__delitem__(field)
     buttons = (
         Button(name='add', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),
@@ -170,6 +171,7 @@ class BrevetCreate(FormView):
         return HTTPFound(self.list_url())
 
     def failure(self, e):
+        print(e)
         tmpl_vars = super(BrevetCreate, self).failure(e)
         tmpl_vars.update({
             'logout_btn': True,
@@ -204,6 +206,7 @@ class BrevetEdit(FormView):
             'date_time': brevet.date_time,
             'route_name': brevet.route_name,
             'start_locn': brevet.start_locn,
+            'start_map_url': brevet.start_map_url,
             'organizer_email': brevet.organizer_email,
             'registration_end': brevet.registration_end,
         }
@@ -226,6 +229,7 @@ class BrevetEdit(FormView):
             brevet.date_time = appstruct['date_time']
             brevet.route_name = appstruct['route_name']
             brevet.start_locn = appstruct['start_locn']
+            brevet.start_map_url = appstruct['start_map_url']
             brevet.organizer_email = appstruct['organizer_email']
             brevet.registration_end = appstruct['registration_end']
         brevet = (DBSession.query(Brevet)
@@ -250,6 +254,7 @@ class BrevetEdit(FormView):
     )
 class WranglerCreate(FormView):
     schema = AdministratorSchema()
+    schema.__delitem__('id')
     buttons = (
         Button(name='add', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),

@@ -112,7 +112,7 @@ class Brevet(Base):
 
     def __init__(self, region, distance, date_time, route_name, start_locn,
         organizer_email, info_question=None, alt_date_time=None,
-        registration_end=None):
+        registration_end=None, start_map_url=None):
         self.region = region
         self.distance = distance
         self.date_time = date_time
@@ -127,6 +127,12 @@ class Brevet(Base):
                 replace(hour=12, minute=0, second=0)
         else:
             self.registration_end = registration_end
+        if start_map_url is None:
+            self.start_map_url = (
+                'https://maps.google.com/maps?q={}'
+                .format('+'.join(self.start_locn.split())))
+        else:
+            self.start_map_url = start_map_url
 
     def __str__(self):
         return '{0.region}{0.distance} {0.date_time:%d%b%Y}'.format(self)
@@ -178,7 +184,18 @@ class BrevetSchema(CSRFSchema):
     start_locn = colander.SchemaNode(
         colander.String(),
         title='Start Location',
-        widget=TextInputWidget(placeholder='Venue, Address, City')
+        widget=TextInputWidget(
+            css_class='input-xxlarge',
+            placeholder='Venue, Address, City',
+            )
+        )
+    start_map_url = colander.SchemaNode(
+        colander.String(),
+        title='Map URL for Start',
+        widget=TextInputWidget(
+            template='locationinput',
+            css_class='input-xxlarge',
+            )
         )
     organizer_email = colander.SchemaNode(
         colander.String(),

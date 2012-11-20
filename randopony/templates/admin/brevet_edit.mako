@@ -22,6 +22,18 @@ ${form | n}
 
 <script>
   $(document).ready(function(){
+    function setMapURL(start_map_url) {
+      $("input[name=start_map_url]")
+          .next("span.help-block")
+          .children("a")
+          .attr("href", start_map_url);
+    };
+    setMapURL($("input[name=start_map_url]").val());
+
+    $("input[name=start_map_url]").change(function(event){
+      setMapURL($(this).val());
+    });
+
     $("#deformcancel").click(function(event){
       // Redirect to brevets list on Cancel buton click.
       window.location = "${cancel_url}";
