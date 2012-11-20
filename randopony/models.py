@@ -151,17 +151,17 @@ class BrevetSchema(CSRFSchema):
             css_class='radio inline'),
         validator=colander.OneOf(Brevet.DISTANCES.keys()),
         )
+    datetimeinputwidget_options = {
+        'dateFormat': 'yy-mm-dd',
+        'separator': ' ',
+        'timeFormat': 'HH:mm:ss',
+        'hourGrid': 6,
+        'minuteGrid': 15,
+    }
     date_time = colander.SchemaNode(
         colander.DateTime(),
         title='Date and Start Time',
-        widget=DateTimeInputWidget(
-            options={
-                'dateFormat': 'dd-M-yy',
-                'separator': ' ',
-                'timeFormat': 'HH:mm',
-                'hourGrid': 6,
-                'minuteGrid': 15,
-            }),
+        widget=DateTimeInputWidget(options=datetimeinputwidget_options),
         )
     route_name = colander.SchemaNode(
         colander.String()
@@ -180,4 +180,9 @@ class BrevetSchema(CSRFSchema):
             css_class='input-xlarge',
             ),
         validator=colander.Email(),
+        )
+    registration_end = colander.SchemaNode(
+        colander.DateTime(),
+        title='Registration Closes',
+        widget=DateTimeInputWidget(options=datetimeinputwidget_options),
         )

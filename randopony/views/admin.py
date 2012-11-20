@@ -137,6 +137,7 @@ def brevet_details(request):
     )
 class BrevetCreate(FormView):
     schema = BrevetSchema()
+    schema.__delitem__('registration_end')
     buttons = (
         Button(name='add', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),
@@ -166,6 +167,14 @@ class BrevetCreate(FormView):
             DBSession.add(brevet)
         return HTTPFound(self.list_url())
 
+    def failure(self, e):
+        tmpl_vars = super(BrevetCreate, self).failure(e)
+        tmpl_vars.update({
+            'logout_btn': True,
+            'cancel_url': self.list_url()
+            })
+        return tmpl_vars
+
 
 @view_config(
     route_name='admin.brevets.edit',
@@ -193,6 +202,7 @@ class BrevetEdit(FormView):
             'route_name': brevet.route_name,
             'start_locn': brevet.start_locn,
             'organizer_email': brevet.organizer_email,
+            'registration_end': brevet.registration_end,
         }
 
     def show(self, form):
@@ -213,7 +223,16 @@ class BrevetEdit(FormView):
             brevet.route_name = appstruct['route_name']
             brevet.start_locn = appstruct['start_locn']
             brevet.organizer_email = appstruct['organizer_email']
+            brevet.registration_end = appstruct['registration_end']
         return HTTPFound(self.view_url())
+
+    def failure(self, e):
+        tmpl_vars = super(BrevetEdit, self).failure(e)
+        tmpl_vars.update({
+            'logout_btn': True,
+            'cancel_url': self.view_url()
+            })
+        return tmpl_vars
 
 
 @view_config(
@@ -244,6 +263,14 @@ class WranglerCreate(FormView):
             admin = Administrator(appstruct['persona_email'])
             DBSession.add(admin)
         return HTTPFound(self.list_url())
+
+    def failure(self, e):
+        tmpl_vars = super(WranglerCreate, self).failure(e)
+        tmpl_vars.update({
+            'logout_btn': True,
+            'list_url': self.list_url()
+            })
+        return tmpl_vars
 
 
 @view_config(
@@ -282,3 +309,11 @@ class WranglerEdit(FormView):
                 .one())
             admin.persona_email = appstruct['persona_email']
         return HTTPFound(self.list_url())
+
+    def failure(self, e):
+        tmpl_vars = super(WranglerEdit, self).failure(e)
+        tmpl_vars.update({
+            'logout_btn': True,
+            'list_url': self.list_url()
+            })
+        return tmpl_vars

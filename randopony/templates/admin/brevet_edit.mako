@@ -23,7 +23,8 @@ ${form | n}
 <script>
   $(document).ready(function(){
     $("#deformcancel").click(function(event){
-      window.location = '${cancel_url}';
+      // Redirect to brevets list on Cancel buton click.
+      window.location = "${cancel_url}";
       event.preventDefault();
     });
   });
