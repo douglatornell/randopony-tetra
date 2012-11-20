@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 """RandoPony data model.
 """
-from datetime import (
-    datetime,
-    timedelta,
-    )
+from datetime import timedelta
 from operator import itemgetter
 import colander
 from deform.widget import (
@@ -13,6 +10,7 @@ from deform.widget import (
     SelectWidget,
     TextInputWidget,
     )
+from pyramid_deform import CSRFSchema
 from sqlalchemy import (
     Column,
     DateTime,
@@ -62,7 +60,7 @@ class Administrator(Base):
         return '<Administrator({})>'.format(self)
 
 
-class AdministratorSchema(colander.MappingSchema):
+class AdministratorSchema(CSRFSchema):
     """Form schema for admin interface for Administrator model.
     """
     persona_email = colander.SchemaNode(
@@ -132,7 +130,7 @@ class Brevet(Base):
         return '<Brevet({})>'.format(self)
 
 
-class BrevetSchema(colander.MappingSchema):
+class BrevetSchema(CSRFSchema):
     """Form schema for admin interface for Brevet model.
     """
     region = colander.SchemaNode(
@@ -164,11 +162,6 @@ class BrevetSchema(colander.MappingSchema):
                 'hourGrid': 6,
                 'minuteGrid': 15,
             }),
-        # validator=colander.Range(
-        #     min=datetime.now(),
-        #     min_err='Brevet date cannot be in the past',
-        #     max=datetime(datetime.today().year + 1, 12, 31),
-        #     )
         )
     route_name = colander.SchemaNode(
         colander.String()
