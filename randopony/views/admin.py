@@ -104,6 +104,32 @@ class AdminViews(object):
         return tmpl_vars
 
 
+def get_brevet(code, date):
+    region = code[:2]
+    distance = code[2:]
+    date = datetime.strptime(date, '%d%b%Y')
+    return (DBSession.query(Brevet)
+        .filter_by(region=region)
+        .filter_by(distance=distance)
+        .filter(Brevet.date_time >= date)
+        .filter(Brevet.date_time < date + timedelta(days=1))
+        .one()
+        )
+
+
+@view_config(
+    route_name='admin.brevets.view',
+    renderer='admin/brevet.mako',
+    permission='admin',
+    )
+def brevet_details(request):
+    code, date = request.matchdict['item'].split()
+    brevet = get_brevet(code, date)
+    return {
+        'logout_btn': True,
+        'brevet': brevet,
+        }
+
 @view_config(
     route_name='admin.brevets.create',
     renderer='admin/brevet_edit.mako',
@@ -157,21 +183,9 @@ class BrevetEdit(FormView):
         return self.request.route_url(
             'admin.brevets.view', item=self.request.matchdict['item'])
 
-    def get_brevet(self):
-        code, date = self.request.matchdict['item'].split()
-        region = code[:2]
-        distance = code[2:]
-        date = datetime.strptime(date, '%d%b%Y')
-        return (DBSession.query(Brevet)
-            .filter_by(region=region)
-            .filter_by(distance=distance)
-            .filter(Brevet.date_time >= date)
-            .filter(Brevet.date_time < date + timedelta(days=1))
-            .one()
-            )
-
     def appstruct(self):
-        brevet = self.get_brevet()
+        code, date = self.request.matchdict['item'].split()
+        brevet = get_brevet(code, date)
         return {
             'region': brevet.region,
             'distance': brevet.distance,
@@ -191,8 +205,14 @@ class BrevetEdit(FormView):
 
     def save_success(self, appstruct):
         with transaction.manager:
-            brevet = self.get_brevet()
-
+            code, date = self.request.matchdict['item'].split()
+            brevet = get_brevet(code, date)
+            brevet.region = appstruct['region']
+            brevet.distance = appstruct['distance']
+            brevet.date_time = appstruct['date_time']
+            brevet.route_name = appstruct['route_name']
+            brevet.start_locn = appstruct['start_locn']
+            brevet.organizer_email = appstruct['organizer_email']
         return HTTPFound(self.view_url())
 
 
