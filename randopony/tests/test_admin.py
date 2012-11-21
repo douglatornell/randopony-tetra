@@ -2,6 +2,7 @@
 """Tests for RandoPony admin views and functionality.
 """
 import unittest
+from unittest.mock import MagicMock
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
@@ -11,8 +12,8 @@ from ..models import (
     )
 
 
-class TestAdminViews(unittest.TestCase):
-    """Unit tests for admin interface views.
+class TestCoreAdminViews(unittest.TestCase):
+    """Unit tests for core admin interface views.
     """
     def _get_target_class(self):
         from ..views.admin import AdminViews
@@ -67,59 +68,6 @@ class TestAdminViews(unittest.TestCase):
         self.assertEqual(
             admins, 'harry@example.com tom@example.com'.split())
 
-    def test_add_wrangler_form(self):
-        """admin form to add new wrangler has empty input control
-        """
-        self.config.add_route('admin.list', '/admin/wranglers/')
-        request = testing.DummyRequest()
-        request.matchdict['item'] = 'new'
-        admin = self._make_one(request)
-        tmpl_vars = admin.wrangler()
-        self.assertIn(
-            '<input type="text" name="persona_email" value=""',
-            tmpl_vars['form'])
-
-    def test_add_wrangler(self):
-        """admin add wrangler POST adds persona email to database
-        """
-        from ..models import Administrator
-        self.config.add_route('admin.list', '/admin/wranglers/')
-        request = testing.DummyRequest(
-            post={'add': 'add', 'persona_email': 'tom@example.com'})
-        request.matchdict['item'] = 'new'
-        admin = self._make_one(request)
-        admin.wrangler()
-        wrangler = DBSession.query(Administrator).first()
-        self.assertEqual(wrangler.persona_email, 'tom@example.com')
-
-    def test_update_wrangler_form(self):
-        """admin form to update wrangler has persona email input control value
-        """
-        self.config.add_route('admin.list', '/admin/wranglers/')
-        request = testing.DummyRequest()
-        request.matchdict['item'] = 'tom@example.com'
-        admin = self._make_one(request)
-        tmpl_vars = admin.wrangler()
-        self.assertIn(
-            '<input type="text" name="persona_email" value="tom@example.com"',
-            tmpl_vars['form'])
-
-    def test_update_wrangler(self):
-        """admin update wrangler POST changes persona email in database
-        """
-        from ..models import Administrator
-        with transaction.manager:
-            admin = Administrator(persona_email='tom@example.com')
-            DBSession.add(admin)
-        self.config.add_route('admin.list', '/admin/wranglers/')
-        request = testing.DummyRequest(
-            post={'save': 'save', 'persona_email': 'harry@example.com'})
-        request.matchdict['item'] = 'tom@example.com'
-        admin = self._make_one(request)
-        admin.wrangler()
-        wrangler = DBSession.query(Administrator).first()
-        self.assertEqual(wrangler.persona_email, 'harry@example.com')
-
     def test_delete_wrangler_confirmation(self):
         """admin delete confirmation view for wrangler has exp template vars
         """
@@ -155,3 +103,104 @@ class TestAdminViews(unittest.TestCase):
         query = DBSession.query(Administrator)
         with self.assertRaises(NoResultFound):
             query.filter_by(persona_email='tom@example.com').one()
+
+
+class TestWranglerCreate(unittest.TestCase):
+    """Unit tests for administrator (aka pony wrangler) object creation
+       admin interface views.
+
+       *TODO*: Add integration tests:
+
+         * form renders empty email input control
+         * POST with valid email address adds record to database
+         * POST with email address already in db fails gracefully
+    """
+    def _get_target_class(self):
+        from ..views.admin import WranglerCreate
+        return WranglerCreate
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_add_success(self):
+        """admin add wrangler success adds persona email to database
+        """
+        from ..models import Administrator
+        self.config.add_route('admin.list', '/admin/wranglers/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        create.add_success({'persona_email': 'tom@example.com'})
+        wrangler = DBSession.query(Administrator).first()
+        self.assertEqual(wrangler.persona_email, 'tom@example.com')
+
+
+class TestWranglerEdit(unittest.TestCase):
+    """Unit tests for administrator (aka pony wrangler) object edit
+       admin interface views.
+
+       *TODO*: Add integration tests:
+
+         * form renders populated email input control
+         * POST with valid email address updates record in database
+    """
+    def _get_target_class(self):
+        from ..views.admin import WranglerEdit
+        return WranglerEdit
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_appstruct(self):
+        """admin edit wrangler appstruct method returns dict to populate form
+        """
+        from ..models import Administrator
+        with transaction.manager:
+            admin = Administrator(persona_email='tom@example.com')
+            DBSession.add(admin)
+        self.config.add_route('admin.list', '/admin/wranglers/')
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'tom@example.com'
+        edit = self._make_one(request)
+        appstruct = edit.appstruct()
+        self.assertEqual(
+            appstruct, {
+                'id': 1,
+                'persona_email': 'tom@example.com',
+            })
+
+    def test_save_success(self):
+        """admin edit wrangler success updates persona email in database
+        """
+        from ..models import Administrator
+        with transaction.manager:
+            admin = Administrator(persona_email='tom@example.com')
+            DBSession.add(admin)
+        self.config.add_route('admin.list', '/admin/wranglers/')
+        request = testing.DummyRequest()
+        edit = self._make_one(request)
+        edit.save_success({
+            'id': 1,
+            'persona_email': 'harry@example.com',
+            })
+        wrangler = DBSession.query(Administrator).first()
+        self.assertEqual(wrangler.persona_email, 'harry@example.com')
