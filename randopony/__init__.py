@@ -67,6 +67,8 @@ def map_routes(config):
     """Routes map for RandoPony.
     """
     config.add_route('home', '/')
+    config.add_route('organizer-info', '/organizer-info/')
+    config.add_route('about', '/about-pony/')
     # admin core routes
     config.add_route('admin.home', '/admin')
     config.add_route('admin.list', '/admin/{list}/')

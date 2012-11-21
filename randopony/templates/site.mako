@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width initial-scale=1.0" name="viewport">
-  <%block name="title"><title>RandoPony</title></%block>
+  <title><%block name="title">RandoPony</%block></title>
   <link rel="stylesheet"
     href="${request.static_url('randopony:static/css/bootstrap.min.css')}">
   <link rel="stylesheet"

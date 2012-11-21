@@ -1,0 +1,73 @@
+/* Styles for public RandoPony pages */
+
+body {
+    background-color: rgb(51, 51, 51);
+}
+.container {
+
+    margin-top: 30px;
+    border-top: 6px solid rgb(65, 65, 65);
+    border-right: 6px solid rgb(65, 65, 65);
+    border-left: 6px solid rgb(65, 65, 65);
+    border-radius: 40px 40px 0 0;
+    background-color: rgb(174, 0, 0);
+}
+.navbar .navbar-inner {
+    border: none;
+    border-radius: 40px 40px 0 0;
+    background-color: rgb(174, 0, 0);
+    background-image: none;
+}
+.navbar-wrapper {
+    margin-top: 0;
+    border: none;
+}
+h1 {
+    color: rgb(255, 255, 255);
+}
+h3 {
+    margin-top: -10px;
+    color: rgb(74, 0, 0);
+    text-shadow: none;
+}
+.tabbable {
+    background-color: rgb(174, 0, 0);
+}
+.tab-content {
+    background-color: rgb(255, 255, 255);
+    padding: 10px;
+}
+.tabs-right > .nav-tabs {
+    margin-left: -1px;
+}
+.nav-tab {
+    color: rgb(255, 255, 255);
+}
+.nav-collapse .nav > li > a {
+    color: rgb(255, 255, 255);
+}
+.img-container {
+    margin-bottom: 20px;
+}
+.filler-img {
+    margin-top: 20px;
+    margin-left: 5%;
+    width: 90%;
+}
+.photo-credit {
+    padding-right: 5%;
+}
+.footer {
+    padding-top: 20px;
+    color: rgb(255, 255, 255);
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 24px;
+    }
+    h3 {
+        font-size: 16px;
+    }
+}
