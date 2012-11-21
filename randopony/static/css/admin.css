@@ -1,22 +1,18 @@
 /* Styles for RandoPony admin interface pages */
 
 .container .admin-list {
-    width: 320px;
     margin-left: 0;
+    width: 320px;
 }
-
 ul.admin-list {
     padding-left: 30px;
 }
-
 ul.admin-list li, li.admin-list {
     line-height: 35px;
 }
-
 .add-btn {
     margin-left: 15px;
 }
-
 .deformSet {
     margin: 6px 0;
     padding: 3px;
