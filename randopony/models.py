@@ -30,17 +30,6 @@ DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
 
-class MyModel(Base):
-    __tablename__ = 'models'
-    id = Column(Integer, primary_key=True)
-    name = Column(Text, unique=True)
-    value = Column(Integer)
-
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-
-
 class Administrator(Base):
     """App administrator (aka Pony Wrangler).
 
@@ -77,6 +66,54 @@ class AdministratorSchema(CSRFSchema):
             ),
         validator=colander.Email(),
         )
+
+
+class EmailAddress(Base):
+    """Email address.
+
+    Storage for "static" email addresses used in views;
+    e.g. site administrator(s), club web master, etc.
+
+    .. note::
+
+       There is presently no admin interface for this model.
+       Use `pshell` to manage instances.
+    """
+    __tablename__ = 'email_addresses'
+    id = Column(Integer, primary_key=True)
+    key = Column(Text, unique=True, index=True)
+    email = Column(Text)
+
+    def __init__(self, key, email):
+        self.key = key
+        self.email = email
+
+    def __repr__(self):
+        return '<EmailAddress({.email})>'.format(self)
+
+
+class Link(Base):
+    """Off-site link.
+
+    Storage for URLs for content outside the RandoPony app;
+    e.g. event waiver on club site.
+
+    .. note::
+
+       There is presently no admin interface for this model.
+       Use `pshell` to manage instances.
+    """
+    __tablename__ = 'links'
+    id = Column(Integer, primary_key=True)
+    key = Column(Text, unique=True, index=True)
+    url = Column(Text)
+
+    def __init__(self, key, email):
+        self.key = key
+        self.email = email
+
+    def __repr__(self):
+        return '<Link({.email})>'.format(self)
 
 
 class Brevet(Base):

@@ -13,7 +13,6 @@ from ..models import (
     Administrator,
     Base,
     DBSession,
-    MyModel,
     )
 
 
@@ -34,7 +33,5 @@ def main(argv=sys.argv):
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
     with transaction.manager:
-        model = MyModel(name='one', value=1)
-        DBSession.add(model)
         admin = Administrator(persona_email='djl@douglatornell.ca')
         DBSession.add(admin)
