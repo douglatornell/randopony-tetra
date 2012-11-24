@@ -30,7 +30,7 @@
         </a>
         <div class="nav-collapse collapse visible-phone">
           <ul class="nav">
-            ${next.nav_tabs()}
+            ${self.nav_tabs(active_tab)}
           </ul>
         </div>
       </div>
@@ -39,7 +39,7 @@
 
   <div class="tabbable tabs-right">
     <ul class="nav nav-tabs hidden-phone">
-      ${next.nav_tabs()}
+      ${self.nav_tabs(active_tab)}
     </ul>
 
   <div class="tab-content">
@@ -58,3 +58,53 @@
       </p>
   </div>
 </div>
+
+<%def name="nav_tabs(active_tab)">
+  %if active_tab == 'home':
+  <li class="active">
+  %else:
+  <li>
+  %endif
+    <a href="${request.route_url('home')}" class="nav-tab">
+      Home
+    </a>
+  </li>
+  %if brevets.count() > 0:
+  %if active_tab == 'brevets':
+  <li class="active">
+  %else:
+  <li>
+  %endif
+    <a href="${request.route_url('brevets')}" class="nav-tab">
+      Brevets
+    </a>
+  </li>
+  %endif
+  %if active_tab == 'club-site':
+  <li class="active">
+  %else:
+  <li>
+  %endif
+    <a href="http://randonneurs.bc.ca/" class="nav-tab">
+      randonneurs.bc.ca
+    </a>
+  </li>
+  %if active_tab == 'organizer-info':
+  <li class="active">
+  %else:
+  <li>
+  %endif
+    <a href="${request.route_url('organizer-info')}" class="nav-tab">
+      Info for Event Organizers
+    </a>
+  </li>
+  %if active_tab == 'about':
+  <li class="active">
+  %else:
+  <li>
+  %endif
+    <a href="${request.route_url('about')}" class="nav-tab">
+    What's up with the pony?
+    </a>
+  </li>
+</%def>

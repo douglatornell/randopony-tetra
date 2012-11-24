@@ -2,7 +2,6 @@
 """Tests for RandoPony admin views and functionality.
 """
 import unittest
-from unittest.mock import MagicMock
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction

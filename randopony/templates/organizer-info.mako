@@ -8,30 +8,7 @@
   getting the randopony to help with your brevet
 </%block>
 
-<%def name="nav_tabs()">
-  <li>
-    <a href="${request.route_url('home')}" class="nav-tab">
-      Home
-    </a>
-  </li>
-  <li>
-    <a href="http://randonneurs.bc.ca/" class="nav-tab">
-      randonneurs.bc.ca
-    </a>
-  </li>
-  <li class="active">
-    <a href="${request.route_url('organizer-info')}" class="nav-tab">
-      Info for Event Organizers
-    </a>
-  </li>
-  <li>
-    <a href="${request.route_url('about')}" class="nav-tab">
-    What's up with the pony?
-    </a>
-  </li>
-</%def>
-
-<div id="tab3" class="tab-pane active">
+<div class="tab-pane active">
   <p>
     So you've read the blurb on the <a href="${request.route_url('home')}">
     Home</a> page and maybe even pre-registered for a brevet or two.

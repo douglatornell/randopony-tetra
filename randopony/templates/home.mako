@@ -8,30 +8,7 @@
   event pre-registration
 </%block>
 
-<%def name="nav_tabs()">
-  <li class="active">
-    <a href="${request.route_url('home')}" class="nav-tab">
-      Home
-    </a>
-  </li>
-  <li>
-    <a href="http://randonneurs.bc.ca/" class="nav-tab">
-      randonneurs.bc.ca
-    </a>
-  </li>
-  <li>
-    <a href="${request.route_url('organizer-info')}" class="nav-tab">
-      Info for Event Organizers
-    </a>
-  </li>
-  <li>
-    <a href="${request.route_url('about')}" class="nav-tab">
-    What's up with the pony?
-    </a>
-  </li>
-</%def>
-
-<div id="tab1" class="tab-pane active">
+<div class="tab-pane active">
   <p>
     Welcome to the pre-registration site for the BC Randonneurs Cycling
     Club brevets,

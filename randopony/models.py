@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """RandoPony data model.
 """
-from datetime import timedelta
+from datetime import (
+    datetime,
+    timedelta,
+    )
 from operator import itemgetter
 import colander
 from deform.widget import (
@@ -176,6 +179,16 @@ class Brevet(Base):
 
     def __repr__(self):
         return '<Brevet({})>'.format(self)
+
+    @classmethod
+    def get_current(cls, recent_days=7):
+        """Return query object for current brevets.
+        """
+        today = datetime.today()
+        today = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        days_ago = today - timedelta(days=recent_days)
+        brevets = DBSession.query(Brevet).filter(Brevet.date_time >= days_ago)
+        return brevets
 
 
 class BrevetSchema(CSRFSchema):

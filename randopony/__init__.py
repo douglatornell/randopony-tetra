@@ -66,11 +66,13 @@ def auth_config(config, settings):
 def map_routes(config):
     """Routes map for RandoPony.
     """
+    # public site routes
     config.add_route('home', '/')
     config.add_route('organizer-info', '/organizer-info/')
     config.add_route('about', '/about-pony/')
+    config.add_route('brevets', '/brevets/')
     # admin core routes
-    config.add_route('admin.home', '/admin')
+    config.add_route('admin.home', '/admin/')
     config.add_route('admin.list', '/admin/{list}/')
     config.add_route('admin.delete', '/admin/{list}/{item}/delete')
     # brevet admin routes
