@@ -1,6 +1,6 @@
 <%inherit file="../site.mako"/>
 
-<%block name="title"><title>RandoPony::Admin</title></%block>
+<%block name="title">RandoPony::Admin</%block>
 
 <%block name="page_css">
   <link

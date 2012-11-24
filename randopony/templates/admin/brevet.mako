@@ -1,6 +1,6 @@
 <%inherit file="page.mako"/>
 
-<%block name="title"><title>RandoPony::Admin::${brevet}</title></%block>
+<%block name="title">RandoPony::Admin::${brevet}</%block>
 
 <h4>Region, Distance, and Date</h4>
 <p>${brevet}</p>
