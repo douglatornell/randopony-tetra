@@ -23,7 +23,7 @@
   </p>
   <p>
     This is <em>not</em> a credit card payment site,
-    so you'll still need to cash or a cheque with you to the event to pay for
+    so you'll need to bring cash or a cheque with you to the event to pay for
     the your participation.
   </p>
   <p>

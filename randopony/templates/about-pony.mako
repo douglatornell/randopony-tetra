@@ -23,7 +23,7 @@
 
   <p>
     Times change,
-    technololy moves on,
+    technology moves on,
     and the site is now implemented using the
     <a href="http://www.pylonsproject.org/">Pyramid</a> web framework,
     and the <a href="http://www.sqlalchemy.org/">SQLAlchemy</a> database toolkit,

@@ -14,31 +14,42 @@ class SiteViews(object):
     """
     def __init__(self, request):
         self.request = request
+        self.tmpl_vars = {
+            'brevets': Brevet.get_current(),
+        }
 
     @view_config(route_name='home', renderer='home.mako')
     def home(self):
-        tmpl_vars = {
+        self.tmpl_vars.update({
             'active_tab': 'home',
-            'brevets': Brevet.get_current(),
-        }
-        return tmpl_vars
+        })
+        return self.tmpl_vars
 
     @view_config(route_name='organizer-info', renderer='organizer-info.mako')
     def organizer_info(self):
         admin_email = (DBSession.query(EmailAddress)
             .filter_by(key='admin_email')
             .one())
-        tmpl_vars = {
+        self.tmpl_vars.update({
             'active_tab': 'organizer-info',
             'admin_email': admin_email.email,
-            'brevets': Brevet.get_current(),
-        }
-        return tmpl_vars
+        })
+        return self.tmpl_vars
 
     @view_config(route_name='about', renderer='about-pony.mako')
     def about(self):
-        tmpl_vars = {
+        self.tmpl_vars.update({
             'active_tab': 'about',
-            'brevets': Brevet.get_current(),
-        }
-        return tmpl_vars
+        })
+        return self.tmpl_vars
+
+    @view_config(route_name='brevet-list', renderer='brevet-list.mako')
+    def brevet_list(self):
+        admin_email = (DBSession.query(EmailAddress)
+            .filter_by(key='admin_email')
+            .one())
+        self.tmpl_vars.update({
+            'active_tab': 'brevets',
+            'admin_email': admin_email.email,
+        })
+        return self.tmpl_vars

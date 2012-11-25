@@ -48,7 +48,8 @@
 
     <div class="footer">
       <p>
-        &copy; 2013 douglatornell.ca
+        &copy; 2013
+        <a href="http://douglatornell.ca" class="footer">douglatornell.ca</a>
       </p>
       <p>
         <a href="http://www.pylonsproject.org/" title="Not Built by Aliens">
@@ -60,51 +61,37 @@
 </div>
 
 <%def name="nav_tabs(active_tab)">
-  %if active_tab == 'home':
-  <li class="active">
-  %else:
-  <li>
-  %endif
+  <li id="home">
     <a href="${request.route_url('home')}" class="nav-tab">
       Home
     </a>
   </li>
   %if brevets.count() > 0:
-  %if active_tab == 'brevets':
-  <li class="active">
-  %else:
-  <li>
-  %endif
-    <a href="${request.route_url('brevets')}" class="nav-tab">
+  <li id="brevets">
+    <a href="${request.route_url('brevet-list')}" class="nav-tab">
       Brevets
     </a>
   </li>
   %endif
-  %if active_tab == 'club-site':
-  <li class="active">
-  %else:
-  <li>
-  %endif
+  <li id="club-site">
     <a href="http://randonneurs.bc.ca/" class="nav-tab">
       randonneurs.bc.ca
     </a>
   </li>
-  %if active_tab == 'organizer-info':
-  <li class="active">
-  %else:
-  <li>
-  %endif
+  <li id="organizer-info">
     <a href="${request.route_url('organizer-info')}" class="nav-tab">
       Info for Event Organizers
     </a>
   </li>
-  %if active_tab == 'about':
-  <li class="active">
-  %else:
-  <li>
-  %endif
+  <li id="about">
     <a href="${request.route_url('about')}" class="nav-tab">
     What's up with the pony?
     </a>
   </li>
+
+  <script>
+    $(document).ready(function(){
+      $("li#${active_tab}").addClass("active");
+    });
+  </script>
 </%def>
