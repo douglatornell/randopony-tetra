@@ -115,7 +115,7 @@ def get_brevet(code, date):
         .filter_by(distance=distance)
         .filter(Brevet.date_time >= date)
         .filter(Brevet.date_time < date + timedelta(days=1))
-        .one()
+        .first()
         )
 
 
@@ -167,8 +167,10 @@ class BrevetCreate(FormView):
                 start_locn=appstruct['start_locn'],
                 organizer_email=appstruct['organizer_email'],
                 )
+            brevet_id = str(brevet)
             DBSession.add(brevet)
-        return HTTPFound(self.list_url())
+        return HTTPFound(
+            self.request.route_url('admin.brevets.view', item=brevet_id))
 
     def failure(self, e):
         print(e)
@@ -232,11 +234,9 @@ class BrevetEdit(FormView):
             brevet.start_map_url = appstruct['start_map_url']
             brevet.organizer_email = appstruct['organizer_email']
             brevet.registration_end = appstruct['registration_end']
-        brevet = (DBSession.query(Brevet)
-            .filter_by(id=appstruct['id'])
-            .one())
+            brevet_id = str(brevet)
         return HTTPFound(
-            self.request.route_url('admin.brevets.view', item=str(brevet)))
+            self.request.route_url('admin.brevets.view', item=brevet_id))
 
     def failure(self, e):
         tmpl_vars = super(BrevetEdit, self).failure(e)
