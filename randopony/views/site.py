@@ -60,3 +60,34 @@ class SiteViews(object):
             'admin_email': admin_email.email,
         })
         return self.tmpl_vars
+
+    @view_config(route_name='brevet.list', renderer='brevet-list.mako')
+    def brevet_list(self):
+        region = self.request.matchdict['region']
+        region_brevets = (self.tmpl_vars['brevets']
+            .filter_by(region=region)
+            )
+        images = {
+            'LM': {
+                'file': 'LowerMainlandQuartet.jpg',
+                'alt': 'Harrison Hotsprings Road',
+                'credit': 'Nobo Yonemitsu',
+                },
+            'SI': {
+                'file': 'SouthIntLivestock.jpg',
+                'alt': 'Southern Interior Peloton',
+                'credit': 'Bud MacRae',
+            },
+            'VI': {
+                'file': 'VanIsDuo.jpg',
+                'alt': 'Van Isle Duo',
+                'credit': 'Raymond Parker'},
+        }
+        self.tmpl_vars.update({
+            'active_tab': 'brevets',
+            'region': region,
+            'regions': Brevet.REGIONS,
+            'region_brevets': region_brevets,
+            'image': images[region],
+        })
+        return self.tmpl_vars

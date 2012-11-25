@@ -189,6 +189,7 @@ class Brevet(Base):
         days_ago = today - timedelta(days=recent_days)
         brevets = (DBSession.query(Brevet)
             .filter(Brevet.date_time >= days_ago)
+            .order_by(Brevet.date_time)
             )
         return brevets
 

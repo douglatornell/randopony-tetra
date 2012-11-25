@@ -74,6 +74,7 @@ def map_routes(config):
     # TODO: add routes to cover legacy of when /brevets/ was /register/
     config.add_route('region.list', '/brevets/')
     config.add_route('brevet.list', '/brevets/{region}/')
+    config.add_route('brevet', '/brevets/{region}/{distance}/{date}')
     # admin core routes
     config.add_route('admin.home', '/admin/')
     config.add_route('admin.list', '/admin/{list}/')

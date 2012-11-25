@@ -14,8 +14,8 @@
     pre-register for is:
   </p>
   <ul class="nav nav-pills">
-    %for region, brevets in region_brevets.items():
-    %if brevets.count() > 0:
+    %for region in sorted(regions, key=regions.get):
+    %if region_brevets[region].count() > 0:
     <li>
       <a href="${request.route_url('brevet.list', region=region)}">
         ${regions[region]}
