@@ -72,7 +72,8 @@ def map_routes(config):
     config.add_route('about', '/about-pony/')
     # brevet routes
     # TODO: add routes to cover legacy of when /brevets/ was /register/
-    config.add_route('brevet-list', '/brevets/')
+    config.add_route('region.list', '/brevets/')
+    config.add_route('brevet.list', '/brevets/{region}/')
     # admin core routes
     config.add_route('admin.home', '/admin/')
     config.add_route('admin.list', '/admin/{list}/')

@@ -68,7 +68,7 @@
   </li>
   %if brevets.count() > 0:
   <li id="brevets">
-    <a href="${request.route_url('brevet-list')}" class="nav-tab">
+    <a href="${request.route_url('region.list')}" class="nav-tab">
       Brevets
     </a>
   </li>

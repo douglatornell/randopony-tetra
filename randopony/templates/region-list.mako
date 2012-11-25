@@ -11,8 +11,19 @@
 <div class="tab-pane active">
   <p>
     Please choose the link for the region where the brevet that you want to
-    pre-register for is.
+    pre-register for is:
   </p>
+  <ul class="nav nav-pills">
+    %for region, brevets in region_brevets.items():
+    %if brevets.count() > 0:
+    <li>
+      <a href="${request.route_url('brevet.list', region=region)}">
+        ${regions[region]}
+      </a>
+    </li>
+    %endif
+    %endfor
+  </ul>
   <p>
     This site provides a pre-registration service for brevets that simply lets
     the organizer know that you are intending to ride.

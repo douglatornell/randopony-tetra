@@ -43,13 +43,20 @@ class SiteViews(object):
         })
         return self.tmpl_vars
 
-    @view_config(route_name='brevet-list', renderer='brevet-list.mako')
-    def brevet_list(self):
+    @view_config(route_name='region.list', renderer='region-list.mako')
+    def region_list(self):
+        region_brevets = {
+            region: self.tmpl_vars['brevets']
+                .filter_by(region=region)
+                for region in Brevet.REGIONS.keys()}
         admin_email = (DBSession.query(EmailAddress)
             .filter_by(key='admin_email')
-            .one())
+            .one()
+            )
         self.tmpl_vars.update({
             'active_tab': 'brevets',
+            'regions': Brevet.REGIONS,
+            'region_brevets': region_brevets,
             'admin_email': admin_email.email,
         })
         return self.tmpl_vars
