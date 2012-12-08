@@ -5,7 +5,7 @@ import unittest
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
-from ..models import (
+from ..models.meta import (
     Base,
     DBSession,
     )

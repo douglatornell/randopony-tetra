@@ -7,7 +7,7 @@ from unittest.mock import patch
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
-from ..models import (
+from ..models.meta import (
     Base,
     DBSession,
     )
@@ -107,7 +107,7 @@ class TestBrevet(unittest.TestCase):
     def test_get_current_future_brevet(self):
         """get_current class method returns brevet in future
         """
-        from .. import models
+        from ..models import brevet as brevet_model
         brevet = self._make_one(
             region='LM',
             distance=200,
@@ -119,7 +119,7 @@ class TestBrevet(unittest.TestCase):
         with transaction.manager:
             DBSession.add(brevet)
         Brev = self._get_target_class()
-        with patch.object(models, 'datetime') as mock_datetime:
+        with patch.object(brevet_model, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 1, 7, 36, 42)
             brevets = Brev.get_current()
         self.assertEqual(
@@ -128,7 +128,7 @@ class TestBrevet(unittest.TestCase):
     def test_get_current_recent_brevet(self):
         """get_current class method returns brevet in within last 7 days
         """
-        from .. import models
+        from ..models import brevet as brevet_model
         brevet = self._make_one(
             region='LM',
             distance=200,
@@ -140,7 +140,7 @@ class TestBrevet(unittest.TestCase):
         with transaction.manager:
             DBSession.add(brevet)
         Brev = self._get_target_class()
-        with patch.object(models, 'datetime') as mock_datetime:
+        with patch.object(brevet_model, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 12, 8, 33, 42)
             brevets = Brev.get_current()
         self.assertEqual(
@@ -149,7 +149,7 @@ class TestBrevet(unittest.TestCase):
     def test_get_current_exclude_old_brevet(self):
         """get_current class method excludes brevet longer ago than 7 days
         """
-        from .. import models
+        from ..models import brevet as brevet_model
         brevet = self._make_one(
             region='LM',
             distance=200,
@@ -161,7 +161,7 @@ class TestBrevet(unittest.TestCase):
         with transaction.manager:
             DBSession.add(brevet)
         Brev = self._get_target_class()
-        with patch.object(models, 'datetime') as mock_datetime:
+        with patch.object(brevet_model, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 19, 8, 45, 42)
             brevets = Brev.get_current()
         self.assertEqual(brevets.all(), [])

@@ -2,11 +2,11 @@
 """RandoPony base site views.
 """
 from pyramid.view import view_config
-from .. models import (
+from ..models import (
     Brevet,
-    DBSession,
     EmailAddress,
     )
+from ..models.meta import DBSession
 
 
 class SiteViews(object):

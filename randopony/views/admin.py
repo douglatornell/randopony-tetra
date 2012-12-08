@@ -22,8 +22,8 @@ from ..models import (
     AdministratorSchema,
     Brevet,
     BrevetSchema,
-    DBSession,
     )
+from ..models.meta import DBSession
 
 
 @forbidden_view_config()
@@ -131,6 +131,7 @@ def brevet_details(request):
         'logout_btn': True,
         'brevet': brevet,
         }
+
 
 @view_config(
     route_name='admin.brevets.create',

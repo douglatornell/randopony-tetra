@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""RandoPony data model.
+"""RandoPony brevet data model.
 """
 from datetime import (
     datetime,
@@ -21,102 +21,10 @@ from sqlalchemy import (
     Integer,
     Text,
     )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import (
-    scoped_session,
-    sessionmaker,
+from .meta import (
+    Base,
+    DBSession,
     )
-from zope.sqlalchemy import ZopeTransactionExtension
-
-
-DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
-Base = declarative_base()
-
-
-class Administrator(Base):
-    """App administrator (aka Pony Wrangler).
-
-    Authentication is via Mozilla Persona, so all we store is the admin's
-    Persona email address.
-    """
-    __tablename__ = 'admins'
-    id = Column(Integer, primary_key=True)
-    persona_email = Column(Text, index=True, unique=True)
-
-    def __init__(self, persona_email):
-        self.persona_email = persona_email
-
-    def __str__(self):
-        return self.persona_email
-
-    def __repr__(self):
-        return '<Administrator({})>'.format(self)
-
-
-class AdministratorSchema(CSRFSchema):
-    """Form schema for admin interface for Administrator model.
-    """
-    id = colander.SchemaNode(
-        colander.Integer(),
-        widget=HiddenWidget(),
-        )
-    persona_email = colander.SchemaNode(
-        colander.String(),
-        widget=TextInputWidget(
-            template='emailinput',
-            autofocus=True,
-            placeholder='tom@example.com',
-            ),
-        validator=colander.Email(),
-        )
-
-
-class EmailAddress(Base):
-    """Email address.
-
-    Storage for "static" email addresses used in views;
-    e.g. site administrator(s), club web master, etc.
-
-    .. note::
-
-       There is presently no admin interface for this model.
-       Use `pshell` to manage instances.
-    """
-    __tablename__ = 'email_addresses'
-    id = Column(Integer, primary_key=True)
-    key = Column(Text, unique=True, index=True)
-    email = Column(Text)
-
-    def __init__(self, key, email):
-        self.key = key
-        self.email = email
-
-    def __repr__(self):
-        return '<EmailAddress({.email})>'.format(self)
-
-
-class Link(Base):
-    """Off-site link.
-
-    Storage for URLs for content outside the RandoPony app;
-    e.g. event waiver on club site.
-
-    .. note::
-
-       There is presently no admin interface for this model.
-       Use `pshell` to manage instances.
-    """
-    __tablename__ = 'links'
-    id = Column(Integer, primary_key=True)
-    key = Column(Text, unique=True, index=True)
-    url = Column(Text)
-
-    def __init__(self, key, email):
-        self.key = key
-        self.email = email
-
-    def __repr__(self):
-        return '<Link({.email})>'.format(self)
 
 
 class Brevet(Base):

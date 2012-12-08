@@ -7,7 +7,7 @@ from unittest.mock import patch
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
-from ..models import (
+from ..models.meta import (
     Base,
     DBSession,
     )
@@ -92,7 +92,7 @@ class TestSiteViews(unittest.TestCase):
     def test_region_list_brevet(self):
         """region_list view has expected tmpl_vars
         """
-        from .. import models
+        from ..models import brevet as brevet_model
         from ..models import (
             Brevet,
             EmailAddress,
@@ -111,7 +111,7 @@ class TestSiteViews(unittest.TestCase):
             DBSession.add(brevet)
             DBSession.add(email)
         request = testing.DummyRequest()
-        with patch.object(models, 'datetime') as mock_datetime:
+        with patch.object(brevet_model, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 1, 12, 55, 42)
             views = self._make_one(request)
             tmpl_vars = views.region_list()
@@ -121,7 +121,7 @@ class TestSiteViews(unittest.TestCase):
     def test_brevet_list(self):
         """brevet_list view has expected tmpl_vars
         """
-        from .. import models
+        from ..models import brevet as brevet_model
         from ..models import (
             Brevet,
             EmailAddress,
@@ -141,7 +141,7 @@ class TestSiteViews(unittest.TestCase):
             DBSession.add(email)
         request = testing.DummyRequest()
         request.matchdict['region'] = 'LM'
-        with patch.object(models, 'datetime') as mock_datetime:
+        with patch.object(brevet_model, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 1, 12, 55, 42)
             views = self._make_one(request)
             tmpl_vars = views.brevet_list()

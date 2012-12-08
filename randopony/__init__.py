@@ -4,10 +4,10 @@ from pyramid.security import ALL_PERMISSIONS
 from pyramid.security import Allow
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm.exc import NoResultFound
-from .models import (
+from .models import Administrator
+from .models.meta import (
     DBSession,
     Base,
-    Administrator,
     )
 
 
