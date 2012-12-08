@@ -174,7 +174,6 @@ class BrevetCreate(FormView):
             self.request.route_url('admin.brevets.view', item=brevet_id))
 
     def failure(self, e):
-        print(e)
         tmpl_vars = super().failure(e)
         tmpl_vars.update({
             'logout_btn': True,
