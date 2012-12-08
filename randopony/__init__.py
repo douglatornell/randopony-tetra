@@ -71,10 +71,13 @@ def map_routes(config):
     config.add_route('organizer-info', '/organizer-info/')
     config.add_route('about', '/about-pony/')
     # brevet routes
-    # TODO: add routes to cover legacy of when /brevets/ was /register/
     config.add_route('region.list', '/brevets/')
     config.add_route('brevet.list', '/brevets/{region}/')
     config.add_route('brevet', '/brevets/{region}/{distance}/{date}')
+    # legacy routes to cover when /brevets/ was /register/
+    config.add_route('register', '/register/')
+    config.add_route('register.region', '/register/{region}-events/')
+    config.add_route('register.brevet', '/register/{region}{distance}/{date}/')
     # admin core routes
     config.add_route('admin.home', '/admin/')
     config.add_route('admin.list', '/admin/{list}/')

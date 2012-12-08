@@ -44,6 +44,7 @@ class SiteViews(object):
         return self.tmpl_vars
 
     @view_config(route_name='region.list', renderer='region-list.mako')
+    @view_config(route_name='register', renderer='region-list.mako')
     def region_list(self):
         region_brevets = {
             region: self.tmpl_vars['brevets']
@@ -62,6 +63,7 @@ class SiteViews(object):
         return self.tmpl_vars
 
     @view_config(route_name='brevet.list', renderer='brevet-list.mako')
+    @view_config(route_name='register.region', renderer='brevet-list.mako')
     def brevet_list(self):
         region = self.request.matchdict['region']
         region_brevets = (self.tmpl_vars['brevets']
