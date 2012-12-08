@@ -11,6 +11,8 @@ from pyramid.paster import (
 from sqlalchemy import engine_from_config
 from ..models import (
     Administrator,
+    )
+from ..models.meta import (
     Base,
     DBSession,
     )
