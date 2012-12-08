@@ -3,7 +3,10 @@
 """
 from datetime import datetime
 import unittest
-from unittest.mock import patch
+from unittest.mock import (
+    patch,
+    MagicMock,
+    )
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
@@ -76,7 +79,7 @@ class TestCoreAdminViews(unittest.TestCase):
         with transaction.manager:
             admin = Administrator(persona_email='tom@example.com')
             DBSession.add(admin)
-        self.config.add_route('admin.list', '/admin/wranglers/')
+        self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest(post={'cancel': 'cancel'})
         request.matchdict['list'] = 'wranglers'
         request.matchdict['item'] = 'tom@example.com'
@@ -88,7 +91,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_delete_wrangler_confirmation(self):
         """admin delete confirmation view for wrangler has exp template vars
         """
-        self.config.add_route('admin.list', '/admin/wranglers/')
+        self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         request.matchdict['list'] = 'wranglers'
         request.matchdict['item'] = 'tom@example.com'
@@ -111,7 +114,7 @@ class TestCoreAdminViews(unittest.TestCase):
         with transaction.manager:
             admin = Administrator(persona_email='tom@example.com')
             DBSession.add(admin)
-        self.config.add_route('admin.list', '/admin/wranglers/')
+        self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest(post={'delete': 'delete'})
         request.matchdict['list'] = 'wranglers'
         request.matchdict['item'] = 'tom@example.com'
@@ -139,7 +142,7 @@ class TestCoreAdminViews(unittest.TestCase):
                 )
             brevet_id = str(brevet)
             DBSession.add(brevet)
-        self.config.add_route('admin.list', '/admin/wranglers/')
+        self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest(post={'delete': 'delete'})
         request.matchdict['list'] = 'brevets'
         request.matchdict['item'] = brevet_id
@@ -149,6 +152,112 @@ class TestCoreAdminViews(unittest.TestCase):
         admin.delete()
         with self.assertRaises(NoResultFound):
             Brevet.get_current().one()
+
+
+class TestBrevetDetails(unittest.TestCase):
+    """Unit test for brevet details view.
+    """
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_brevet_details(self):
+        """brevet_details view has expected template vsriables
+        """
+        from ..models import Brevet
+        from ..views.admin import brevet_details
+        with transaction.manager:
+            brevet = Brevet(
+                region='LM',
+                distance=200,
+                date_time=datetime(2012, 11, 11, 7, 0, 0),
+                route_name='11th Hour',
+                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                           '123 Carrie Cates Ct, North Vancouver',
+                organizer_email='tracy@example.com',
+                )
+            brevet_id = str(brevet)
+            DBSession.add(brevet)
+        request = testing.DummyRequest()
+        request.matchdict['item'] = brevet_id
+        tmpl_vars = brevet_details(request)
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(str(tmpl_vars['brevet']), brevet_id)
+
+
+class TestBrevetCreate(unittest.TestCase):
+    """Unit tests for brevet object creation admin interface views.
+
+       *TODO*: Add integration tests:
+
+         * form renders expected controls with expected default values
+         * POST with valid data adds record to database
+         * POST with brevet that is already in db fails gracefully
+    """
+    def _get_target_class(self):
+        from ..views.admin import BrevetCreate
+        return BrevetCreate
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_list_url(self):
+        """list_url returns expected brevets list URL
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        url = create.list_url()
+        self.assertEqual(url, 'http://example.com/admin/brevets/')
+
+    def test_show(self):
+        """show returns expected template variables
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        tmpl_vars = create.show(MagicMock(name='form'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['cancel_url'], 'http://example.com/admin/brevets/')
+
+    def test_add_success(self):
+        """add brevet success adds brevet to database
+        """
+        from ..models import Brevet
+        self.config.add_route('admin.list', '/admin/{list}/')
+        self.config.add_route('admin.brevets.view', '/admin/brevets/{item}')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        url = create.add_success({
+            'region': 'LM',
+            'distance': 200,
+            'date_time': datetime(2012, 11, 11, 7, 0),
+            'route_name': '11th Hour',
+            'start_locn': 'Bean Around the World Coffee, Lonsdale Quay, '
+                          '123 Carrie Cates Ct, North Vancouver',
+            'organizer_email': 'tracy@example.com',
+            })
+        brevet = DBSession.query(Brevet).first()
+        self.assertEqual(str(brevet), 'LM200 11Nov2012')
+        self.assertEqual(
+            url.location, 'http://example.com/admin/brevets/LM200%2011Nov2012')
 
 
 class TestWranglerCreate(unittest.TestCase):
@@ -182,12 +291,13 @@ class TestWranglerCreate(unittest.TestCase):
         """admin add wrangler success adds persona email to database
         """
         from ..models import Administrator
-        self.config.add_route('admin.list', '/admin/wranglers/')
+        self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
-        create.add_success({'persona_email': 'tom@example.com'})
+        url = create.add_success({'persona_email': 'tom@example.com'})
         wrangler = DBSession.query(Administrator).first()
         self.assertEqual(wrangler.persona_email, 'tom@example.com')
+        self.assertEqual(url.location, 'http://example.com/admin/wranglers/')
 
 
 class TestWranglerEdit(unittest.TestCase):
@@ -223,7 +333,7 @@ class TestWranglerEdit(unittest.TestCase):
         with transaction.manager:
             admin = Administrator(persona_email='tom@example.com')
             DBSession.add(admin)
-        self.config.add_route('admin.list', '/admin/wranglers/')
+        self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         request.matchdict['item'] = 'tom@example.com'
         edit = self._make_one(request)
@@ -241,7 +351,7 @@ class TestWranglerEdit(unittest.TestCase):
         with transaction.manager:
             admin = Administrator(persona_email='tom@example.com')
             DBSession.add(admin)
-        self.config.add_route('admin.list', '/admin/wranglers/')
+        self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         edit = self._make_one(request)
         edit.save_success({
