@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Tests for RandoPony admin views and functionality.
 """
+from datetime import datetime
 import unittest
+from unittest.mock import patch
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
@@ -67,6 +69,22 @@ class TestCoreAdminViews(unittest.TestCase):
         self.assertEqual(
             admins, 'harry@example.com tom@example.com'.split())
 
+    def test_delete_cancel(self):
+        """admin delete cancel leaves item in database
+        """
+        from ..models import Administrator
+        with transaction.manager:
+            admin = Administrator(persona_email='tom@example.com')
+            DBSession.add(admin)
+        self.config.add_route('admin.list', '/admin/wranglers/')
+        request = testing.DummyRequest(post={'cancel': 'cancel'})
+        request.matchdict['list'] = 'wranglers'
+        request.matchdict['item'] = 'tom@example.com'
+        admin = self._make_one(request)
+        admin.delete()
+        wrangler = DBSession.query(Administrator).first()
+        self.assertEqual(wrangler.persona_email, 'tom@example.com')
+
     def test_delete_wrangler_confirmation(self):
         """admin delete confirmation view for wrangler has exp template vars
         """
@@ -102,6 +120,35 @@ class TestCoreAdminViews(unittest.TestCase):
         query = DBSession.query(Administrator)
         with self.assertRaises(NoResultFound):
             query.filter_by(persona_email='tom@example.com').one()
+
+    def test_delete_brevet(self):
+        """admin delete for brevet deletes item from database
+        """
+        from sqlalchemy.orm.exc import NoResultFound
+        from ..models import brevet as brevet_model
+        from ..models import Brevet
+        with transaction.manager:
+            brevet = Brevet(
+                region='LM',
+                distance=200,
+                date_time=datetime(2012, 11, 11, 7, 0, 0),
+                route_name='11th Hour',
+                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                           '123 Carrie Cates Ct, North Vancouver',
+                organizer_email='tracy@example.com',
+                )
+            brevet_id = str(brevet)
+            DBSession.add(brevet)
+        self.config.add_route('admin.list', '/admin/wranglers/')
+        request = testing.DummyRequest(post={'delete': 'delete'})
+        request.matchdict['list'] = 'brevets'
+        request.matchdict['item'] = brevet_id
+        with patch.object(brevet_model, 'datetime') as mock_datetime:
+            mock_datetime.today.return_value = datetime(2012, 11, 1, 12, 55, 42)
+            admin = self._make_one(request)
+        admin.delete()
+        with self.assertRaises(NoResultFound):
+            Brevet.get_current().one()
 
 
 class TestWranglerCreate(unittest.TestCase):
