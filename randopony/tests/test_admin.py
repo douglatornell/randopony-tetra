@@ -238,7 +238,7 @@ class TestBrevetCreate(unittest.TestCase):
             tmpl_vars['cancel_url'], 'http://example.com/admin/brevets/')
 
     def test_add_success(self):
-        """add brevet success adds brevet to database
+        """create brevet success adds brevet to database
         """
         from ..models import Brevet
         self.config.add_route('admin.list', '/admin/{list}/')
@@ -258,6 +258,17 @@ class TestBrevetCreate(unittest.TestCase):
         self.assertEqual(str(brevet), 'LM200 11Nov2012')
         self.assertEqual(
             url.location, 'http://example.com/admin/brevets/LM200%2011Nov2012')
+
+    def test_failure(self):
+        """create brevet failure returns expected template variables
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        tmpl_vars = create.failure(MagicMock(name='ValidationError'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['cancel_url'], 'http://example.com/admin/brevets/')
 
 
 class TestWranglerCreate(unittest.TestCase):
@@ -287,8 +298,28 @@ class TestWranglerCreate(unittest.TestCase):
         DBSession.remove()
         testing.tearDown()
 
+    def test_list_url(self):
+        """list_url returns expected wranglers list URL
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        url = create.list_url()
+        self.assertEqual(url, 'http://example.com/admin/wranglers/')
+
+    def test_show(self):
+        """show returns expected template variables
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        tmpl_vars = create.show(MagicMock(name='form'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['list_url'], 'http://example.com/admin/wranglers/')
+
     def test_add_success(self):
-        """admin add wrangler success adds persona email to database
+        """create wrangler success adds persona email to database
         """
         from ..models import Administrator
         self.config.add_route('admin.list', '/admin/{list}/')
@@ -298,6 +329,17 @@ class TestWranglerCreate(unittest.TestCase):
         wrangler = DBSession.query(Administrator).first()
         self.assertEqual(wrangler.persona_email, 'tom@example.com')
         self.assertEqual(url.location, 'http://example.com/admin/wranglers/')
+
+    def test_failure(self):
+        """create wrangler failure returns expected template variables
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        tmpl_vars = create.failure(MagicMock(name='ValidationError'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['list_url'], 'http://example.com/admin/wranglers/')
 
 
 class TestWranglerEdit(unittest.TestCase):
