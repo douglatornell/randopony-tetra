@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 """RandoPony brevet data model.
 """
-from datetime import (
-    datetime,
-    timedelta,
-    )
+from datetime import timedelta
 from operator import itemgetter
 import colander
 from deform.widget import (
@@ -21,14 +18,13 @@ from sqlalchemy import (
     Integer,
     Text,
     )
-from .meta import (
-    Base,
-    DBSession,
-    )
+from .core import EventMixin
+from .meta import Base
 
 
-class Brevet(Base):
-    """Brevet event."""
+class Brevet(EventMixin, Base):
+    """Brevet event.
+    """
     REGIONS = {
         'LM': 'Lower Mainland',
         'PR': 'Peace Region',
@@ -48,19 +44,15 @@ class Brevet(Base):
     id = Column(Integer, primary_key=True)
     region = Column(Text, index=True)
     distance = Column(Integer)
-    date_time = Column(DateTime, index=True)
     alt_date_time = Column(DateTime)
     route_name = Column(Text)
     start_locn = Column(Text)
     start_map_url = Column(Text)
-    organizer_email = Column(Text)
-    registration_end = Column(DateTime)
     info_question = Column(Text)
-    google_doc_id = Column(Text)
 
     def __init__(self, region, distance, date_time, route_name, start_locn,
         organizer_email, info_question=None, alt_date_time=None,
-        registration_end=None, start_map_url=None):
+        registration_end=None):
         self.region = region
         self.distance = distance
         self.date_time = date_time
@@ -75,31 +67,15 @@ class Brevet(Base):
                 replace(hour=12, minute=0, second=0)
         else:
             self.registration_end = registration_end
-        if start_map_url is None:
-            self.start_map_url = (
-                'https://maps.google.com/maps?q={}'
-                .format('+'.join(self.start_locn.split())))
-        else:
-            self.start_map_url = start_map_url
+        self.start_map_url = (
+            'https://maps.google.com/maps?q={}'
+            .format('+'.join(self.start_locn.split())))
 
     def __str__(self):
         return '{0.region}{0.distance} {0.date_time:%d%b%Y}'.format(self)
 
     def __repr__(self):
         return '<Brevet({})>'.format(self)
-
-    @classmethod
-    def get_current(cls, recent_days=7):
-        """Return query object for current brevets.
-        """
-        today = datetime.today()
-        today = today.replace(hour=0, minute=0, second=0, microsecond=0)
-        days_ago = today - timedelta(days=recent_days)
-        brevets = (DBSession.query(Brevet)
-            .filter(Brevet.date_time >= days_ago)
-            .order_by(Brevet.date_time)
-            )
-        return brevets
 
 
 class BrevetSchema(CSRFSchema):

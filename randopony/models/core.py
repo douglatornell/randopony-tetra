@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
 """RandoPony data model core components.
 """
+from datetime import (
+    datetime,
+    timedelta,
+    )
 from sqlalchemy import (
     Column,
+    DateTime,
     Integer,
     Text,
     )
-from .meta import Base
+from .meta import (
+    Base,
+    DBSession,
+    )
 
 
 class EmailAddress(Base):
@@ -30,7 +38,7 @@ class EmailAddress(Base):
         self.email = email
 
     def __repr__(self):
-        return '<EmailAddress({.email})>'.format(self)
+        return '<EmailAddress({0.key}={0.email})>'.format(self)
 
 
 class Link(Base):
@@ -49,9 +57,32 @@ class Link(Base):
     key = Column(Text, unique=True, index=True)
     url = Column(Text)
 
-    def __init__(self, key, email):
+    def __init__(self, key, url):
         self.key = key
-        self.email = email
+        self.url = url
 
     def __repr__(self):
-        return '<Link({.email})>'.format(self)
+        return '<Link({0.key}={0.url})>'.format(self)
+
+
+class EventMixin(object):
+    """Common database columns and properties for all event data models.
+    """
+    id = Column(Integer, primary_key=True)
+    date_time = Column(DateTime, index=True)
+    organizer_email = Column(Text)
+    registration_end = Column(DateTime)
+    google_doc_id = Column(Text)
+
+    @classmethod
+    def get_current(cls, recent_days=7):
+        """Return query object for current events.
+        """
+        today = datetime.today()
+        today = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        days_ago = today - timedelta(days=recent_days)
+        brevets = (DBSession.query(cls)
+            .filter(cls.date_time >= days_ago)
+            .order_by(cls.date_time)
+            )
+        return brevets

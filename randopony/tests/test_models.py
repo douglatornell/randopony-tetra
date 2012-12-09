@@ -30,14 +30,46 @@ class TestAdministrator(unittest.TestCase):
         self.assertEqual(str(admin), 'tom@example.com')
 
     def test_repr(self):
-        """Administrator model string rep is persona email address
-        """
         admin = self._make_one('tom@example.com')
         self.assertEqual(repr(admin), '<Administrator(tom@example.com)>')
 
 
+class TestEmailAddress(unittest.TestCase):
+    """Unit tests for EmailAddress data model.
+    """
+    def _get_target_class(self):
+        from ..models import EmailAddress
+        return EmailAddress
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def test_repr(self):
+        email = self._make_one(key='webmaster', email='tom@example.com')
+        self.assertEqual(
+            repr(email), '<EmailAddress(webmaster=tom@example.com)>')
+
+
+class TestLink(unittest.TestCase):
+    """Unit tests for Link data model.
+    """
+    def _get_target_class(self):
+        from ..models import Link
+        return Link
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def test_repr(self):
+        email = self._make_one(
+            key='club_site', url='http://randonneurs.bc.ca')
+        self.assertEqual(
+            repr(email), '<Link(club_site=http://randonneurs.bc.ca)>')
+
+
 class TestBrevet(unittest.TestCase):
-    """Unit tests for Brevet data model."""
+    """Unit tests for Brevet data model.
+    """
     def _get_target_class(self):
         from ..models import Brevet
         return Brevet
@@ -64,8 +96,9 @@ class TestBrevet(unittest.TestCase):
             organizer_email='tracy@example.com')
         self.assertEqual(str(brevet), 'LM200 11Nov2012')
 
-    def test_epr(self):
-        """Brevet model string rep is like 'LM200 11Nov2012'."""
+    def test_repr(self):
+        """Brevet model repr is like '<Brevet(LM200 11Nov2012)>'.
+        """
         brevet = self._make_one(region='LM', distance=200,
             date_time=datetime(2012, 11, 11, 7, 0, 0), route_name='11th Hour',
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
@@ -73,8 +106,24 @@ class TestBrevet(unittest.TestCase):
             organizer_email='tracy@example.com')
         self.assertEqual(repr(brevet), '<Brevet(LM200 11Nov2012)>')
 
+    def test_registration_end(self):
+        """Brevet end of registration specified
+        """
+        brevet = self._make_one(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            registration_end=datetime(2012, 11, 11, 7, 0, 0),
+            )
+        self.assertEqual(
+            brevet.registration_end, datetime(2012, 11, 11, 7, 0, 0))
+
     def test_default_registration_end(self):
-        """Brevet end of registration default to noon before event
+        """Brevet end of registration defaults to noon before event
         """
         brevet = self._make_one(
             region='LM',
@@ -107,7 +156,7 @@ class TestBrevet(unittest.TestCase):
     def test_get_current_future_brevet(self):
         """get_current class method returns brevet in future
         """
-        from ..models import brevet as brevet_model
+        from ..models import core
         brevet = self._make_one(
             region='LM',
             distance=200,
@@ -119,7 +168,7 @@ class TestBrevet(unittest.TestCase):
         with transaction.manager:
             DBSession.add(brevet)
         Brev = self._get_target_class()
-        with patch.object(brevet_model, 'datetime') as mock_datetime:
+        with patch.object(core, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 1, 7, 36, 42)
             brevets = Brev.get_current()
         self.assertEqual(
@@ -128,7 +177,7 @@ class TestBrevet(unittest.TestCase):
     def test_get_current_recent_brevet(self):
         """get_current class method returns brevet in within last 7 days
         """
-        from ..models import brevet as brevet_model
+        from ..models import core
         brevet = self._make_one(
             region='LM',
             distance=200,
@@ -140,7 +189,7 @@ class TestBrevet(unittest.TestCase):
         with transaction.manager:
             DBSession.add(brevet)
         Brev = self._get_target_class()
-        with patch.object(brevet_model, 'datetime') as mock_datetime:
+        with patch.object(core, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 12, 8, 33, 42)
             brevets = Brev.get_current()
         self.assertEqual(
@@ -149,7 +198,7 @@ class TestBrevet(unittest.TestCase):
     def test_get_current_exclude_old_brevet(self):
         """get_current class method excludes brevet longer ago than 7 days
         """
-        from ..models import brevet as brevet_model
+        from ..models import core
         brevet = self._make_one(
             region='LM',
             distance=200,
@@ -161,7 +210,64 @@ class TestBrevet(unittest.TestCase):
         with transaction.manager:
             DBSession.add(brevet)
         Brev = self._get_target_class()
-        with patch.object(brevet_model, 'datetime') as mock_datetime:
+        with patch.object(core, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 19, 8, 45, 42)
             brevets = Brev.get_current()
         self.assertEqual(brevets.all(), [])
+
+
+class TestPopulaire(unittest.TestCase):
+    """Unit tests for Populaire data model.
+    """
+    def _get_target_class(self):
+        from ..models import Populaire
+        return Populaire
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_str(self):
+        """Populaire model string repr is like 'VicPop 24Mar2011'.
+        """
+        populaire = self._make_one(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            entry_form_url_label='Entry Form (PDF)',
+            )
+        self.assertEqual(str(populaire), 'VicPop 27Mar2011')
+
+    def test_repr(self):
+        """Populaire model repr is like '<Populaire(VicPop 27Mar2011)>'.
+        """
+        populaire = self._make_one(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            entry_form_url_label='Entry Form (PDF)',
+            )
+        self.assertEqual(repr(populaire), '<Populaire(VicPop 27Mar2011)>')

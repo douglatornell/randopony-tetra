@@ -128,7 +128,7 @@ class TestCoreAdminViews(unittest.TestCase):
         """admin delete for brevet deletes item from database
         """
         from sqlalchemy.orm.exc import NoResultFound
-        from ..models import brevet as brevet_model
+        from ..models import core
         from ..models import Brevet
         with transaction.manager:
             brevet = Brevet(
@@ -146,7 +146,7 @@ class TestCoreAdminViews(unittest.TestCase):
         request = testing.DummyRequest(post={'delete': 'delete'})
         request.matchdict['list'] = 'brevets'
         request.matchdict['item'] = brevet_id
-        with patch.object(brevet_model, 'datetime') as mock_datetime:
+        with patch.object(core, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 1, 12, 55, 42)
             admin = self._make_one(request)
         admin.delete()

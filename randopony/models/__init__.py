@@ -13,3 +13,6 @@ from .brevet import (
     Brevet,
     BrevetSchema,
     )
+from .populaire import (
+    Populaire,
+    )
