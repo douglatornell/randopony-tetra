@@ -35,7 +35,7 @@ database use:
 
 .. code-block:: python
 
-   >>> m.Base.create_all()
+   >>> m.meta.Base.metadata.create_all()
 
 
 Manipulation of Database Model Instances
