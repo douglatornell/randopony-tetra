@@ -36,7 +36,7 @@ def groupfinder(userid, request):
         return None
 
 
-def main(global_config, **settings):
+def main(global_config, **settings):  # pragma: no cover
     """ Configure RandoPony and return its Pyramid WSGI application.
     """
     engine = engine_from_config(settings, 'sqlalchemy.')
@@ -52,7 +52,7 @@ def main(global_config, **settings):
     return config.make_wsgi_app()
 
 
-def auth_config(config, settings):
+def auth_config(config, settings):    # pragma: no cover
     """Authentication configuration.
     """
     config.include('pyramid_persona')
@@ -63,7 +63,7 @@ def auth_config(config, settings):
     config.set_authentication_policy(authn_policy)
 
 
-def map_routes(config):
+def map_routes(config):               # pragma: no cover
     """Routes map for RandoPony.
     """
     # public site routes
