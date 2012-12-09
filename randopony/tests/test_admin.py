@@ -238,7 +238,7 @@ class TestBrevetCreate(unittest.TestCase):
             tmpl_vars['cancel_url'], 'http://example.com/admin/brevets/')
 
     def test_add_success(self):
-        """create brevet success adds brevet to database
+        """admin create brevet success adds brevet to database
         """
         from ..models import Brevet
         self.config.add_route('admin.list', '/admin/{list}/')
@@ -269,6 +269,143 @@ class TestBrevetCreate(unittest.TestCase):
         self.assertTrue(tmpl_vars['logout_btn'])
         self.assertEqual(
             tmpl_vars['cancel_url'], 'http://example.com/admin/brevets/')
+
+
+class TestBrevetEdit(unittest.TestCase):
+    """Unit tests for brevet object edit admin interface views.
+
+       *TODO*: Add integration tests:
+
+         * form renders populated controls
+         * POST with valid data updates record in database
+    """
+    def _get_target_class(self):
+        from ..views.admin import BrevetEdit
+        return BrevetEdit
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_appstruct(self):
+        """admin brevet edit appstruct returns dict to populate form
+        """
+        from ..models import Brevet
+        with transaction.manager:
+            brevet = Brevet(
+                region='LM',
+                distance=200,
+                date_time=datetime(2012, 11, 11, 7, 0, 0),
+                route_name='11th Hour',
+                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                           '123 Carrie Cates Ct, North Vancouver',
+                organizer_email='tracy@example.com',
+                )
+            DBSession.add(brevet)
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'LM200 11Nov2012'
+        edit = self._make_one(request)
+        appstruct = edit.appstruct()
+        self.assertEqual(
+            appstruct, {
+                'id': 1,
+                'region': 'LM',
+                'distance': 200,
+                'date_time': datetime(2012, 11, 11, 7, 0),
+                'route_name': '11th Hour',
+                'start_locn': 'Bean Around the World Coffee, Lonsdale Quay, '
+                              '123 Carrie Cates Ct, North Vancouver',
+                'start_map_url': 'https://maps.google.com/maps?q='
+                                 'Bean+Around+the+World+Coffee,+Lonsdale+Quay,'
+                                 '+123+Carrie+Cates+Ct,+North+Vancouver',
+                'organizer_email': 'tracy@example.com',
+                'registration_end': datetime(2012, 11, 10, 12, 0),
+            })
+
+    def test_show(self):
+        """admin brevet edit show returns expected template variables
+        """
+        from ..models import Brevet
+        with transaction.manager:
+            brevet = Brevet(
+                region='LM',
+                distance=200,
+                date_time=datetime(2012, 11, 11, 7, 0, 0),
+                route_name='11th Hour',
+                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                           '123 Carrie Cates Ct, North Vancouver',
+                organizer_email='tracy@example.com',
+                )
+            DBSession.add(brevet)
+        self.config.add_route('admin.brevets.view', '/admin/brevets/{item}')
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'LM200 11Nov2012'
+        edit = self._make_one(request)
+        tmpl_vars = edit.show(MagicMock(name='form'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['cancel_url'],
+            'http://example.com/admin/brevets/LM200%2011Nov2012')
+
+    def test_save_success(self):
+        """admin edit brevet save success updates brevet in database
+        """
+        from ..models import Brevet
+        with transaction.manager:
+            brevet = Brevet(
+                region='LM',
+                distance=200,
+                date_time=datetime(2012, 11, 11, 7, 0, 0),
+                route_name='11th Hour',
+                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                           '123 Carrie Cates Ct, North Vancouver',
+                organizer_email='tracy@example.com',
+                )
+            DBSession.add(brevet)
+        self.config.add_route('admin.brevets.view', '/admin/brevets/{item}')
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'LM200 11Nov2012'
+        edit = self._make_one(request)
+        url = edit.save_success({
+                'id': 1,
+                'region': 'LM',
+                'distance': 200,
+                'date_time': datetime(2012, 11, 11, 7, 0),
+                'route_name': '11th Hour',
+                'start_locn': 'Bean Around the World Coffee, Lonsdale Quay, '
+                              '123 Carrie Cates Ct, North Vancouver',
+                'start_map_url': 'https://maps.google.com/maps?q='
+                                 'Bean+Around+the+World+Coffee,+Lonsdale+Quay,'
+                                 '+123+Carrie+Cates+Ct,+North+Vancouver',
+                'organizer_email': 'tom@example.com',
+                'registration_end': datetime(2012, 11, 10, 12, 0),
+            })
+        brevet = DBSession.query(Brevet).first()
+        self.assertEqual(brevet.organizer_email, 'tom@example.com')
+        self.assertEqual(
+            url.location, 'http://example.com/admin/brevets/LM200%2011Nov2012')
+
+    def test_failure(self):
+        """edit brevet failure returns expected template variables
+        """
+        self.config.add_route('admin.brevets.view', '/admin/brevets/{item}')
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'LM200 11Nov2012'
+        create = self._make_one(request)
+        tmpl_vars = create.failure(MagicMock(name='ValidationError'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['cancel_url'],
+            'http://example.com/admin/brevets/LM200%2011Nov2012')
 
 
 class TestWranglerCreate(unittest.TestCase):
@@ -386,6 +523,22 @@ class TestWranglerEdit(unittest.TestCase):
                 'persona_email': 'tom@example.com',
             })
 
+    def test_show(self):
+        """admin edit wrangler show returns expected template variables
+        """
+        from ..models import Administrator
+        with transaction.manager:
+            admin = Administrator(persona_email='tom@example.com')
+            DBSession.add(admin)
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'tom@example.com'
+        edit = self._make_one(request)
+        tmpl_vars = edit.show(MagicMock(name='form'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['list_url'], 'http://example.com/admin/wranglers/')
+
     def test_save_success(self):
         """admin edit wrangler success updates persona email in database
         """
@@ -396,9 +549,22 @@ class TestWranglerEdit(unittest.TestCase):
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         edit = self._make_one(request)
-        edit.save_success({
+        url = edit.save_success({
             'id': 1,
             'persona_email': 'harry@example.com',
             })
         wrangler = DBSession.query(Administrator).first()
         self.assertEqual(wrangler.persona_email, 'harry@example.com')
+        self.assertEqual(
+            url.location, 'http://example.com/admin/wranglers/')
+
+    def test_failure(self):
+        """admin edit wrangler failure returns expected template variables
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        edit = self._make_one(request)
+        tmpl_vars = edit.failure(MagicMock(name='ValidationError'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['list_url'], 'http://example.com/admin/wranglers/')
