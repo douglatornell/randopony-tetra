@@ -1,6 +1,6 @@
 <%inherit file="page.mako"/>
 
-<%block name="title">RandoPony::Brevet</%block>
+<%block name="title">RandoPony::Populaire</%block>
 
 <%block name="view_css">
   <link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/south-street/jquery-ui.css"

@@ -250,9 +250,8 @@ class TestPopulaire(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            entry_form_url_label='Entry Form (PDF)',
             )
-        self.assertEqual(str(populaire), 'VicPop 27Mar2011')
+        self.assertEqual(str(populaire), 'VicPop')
 
     def test_repr(self):
         """Populaire model repr is like '<Populaire(VicPop 27Mar2011)>'.
@@ -268,6 +267,5 @@ class TestPopulaire(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            entry_form_url_label='Entry Form (PDF)',
             )
-        self.assertEqual(repr(populaire), '<Populaire(VicPop 27Mar2011)>')
+        self.assertEqual(repr(populaire), '<Populaire(VicPop)>')

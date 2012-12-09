@@ -41,7 +41,6 @@ class Brevet(EventMixin, Base):
 
     __tablename__ = 'brevets'
 
-    id = Column(Integer, primary_key=True)
     region = Column(Text, index=True)
     distance = Column(Integer)
     alt_date_time = Column(DateTime)

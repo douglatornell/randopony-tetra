@@ -78,29 +78,21 @@ def map_routes(config):               # pragma: no cover
     config.add_route('register', '/register/')
     config.add_route('register.region', '/register/{region}-events/')
     config.add_route('register.brevet', '/register/{region}{distance}/{date}/')
+    # populaire routes
+    config.add_route('populaire.list', '/populaires/')
+    config.add_route('populaire', '/populaires/{short_name}')
     # admin core routes
     config.add_route('admin.home', '/admin/')
     config.add_route('admin.list', '/admin/{list}/')
     config.add_route('admin.delete', '/admin/{list}/{item}/delete')
     # brevet admin routes
-    config.add_route(
-        'admin.brevets.create',
-        '/admin/brevets/new',
-        )
-    config.add_route(
-        'admin.brevets.edit',
-        '/admin/brevets/{item}/edit',
-        )
-    config.add_route(
-        'admin.brevets.view',
-        '/admin/brevets/{item}',
-        )
+    config.add_route('admin.brevets.create', '/admin/brevets/new')
+    config.add_route('admin.brevets.edit', '/admin/brevets/{item}/edit')
+    config.add_route('admin.brevets.view', '/admin/brevets/{item}')
+     # populaire admin routes
+    config.add_route('admin.populaires.create', '/admin/populaire/new')
+    config.add_route('admin.populaires.edit', '/admin/populaire/{item}/edit')
+    config.add_route('admin.populaires.view', '/admin/populaire/{item}')
     # administrators (aka pony wranglers) admin routes
-    config.add_route(
-        'admin.wranglers.create',
-        '/admin/wranglers/new',
-        )
-    config.add_route(
-        'admin.wranglers.edit',
-        '/admin/wranglers/{item}',
-        )
+    config.add_route('admin.wranglers.create', '/admin/wranglers/new')
+    config.add_route('admin.wranglers.edit', '/admin/wranglers/{item}')

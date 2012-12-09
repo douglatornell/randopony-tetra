@@ -73,6 +73,13 @@
     </a>
   </li>
   %endif
+  %if populaires.count() > 0:
+  <li id="populaires">
+    <a href="${request.route_url('populaire.list')}" class="nav-tab">
+      Populaires
+    </a>
+    </li>
+  %endif
   <li id="club-site">
     <a href="http://randonneurs.bc.ca/" class="nav-tab">
       randonneurs.bc.ca

@@ -51,7 +51,7 @@
     (and another $10 if you'll be paying for membership at the start too).
   </p>
   <p>
-    Questions about the brevets should be directed to the rider organizers.
+    Questions about the brevets should be directed to the riderorganizers.
     Feedback about this site can be sent to
     <a href="mailto:${admin_email}">${admin_email}</a>.
   </p>

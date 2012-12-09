@@ -408,6 +408,90 @@ class TestBrevetEdit(unittest.TestCase):
             'http://example.com/admin/brevets/LM200%2011Nov2012')
 
 
+class TestPopulaireCreate(unittest.TestCase):
+    """Unit tests for populaire object creation admin interface views.
+
+       *TODO*: Add integration tests:
+
+         * form renders expected controls with expected default values
+         * POST with valid data adds record to database
+         * POST with populaire that is already in db fails gracefully
+    """
+    def _get_target_class(self):
+        from ..views.admin import PopulaireCreate
+        return PopulaireCreate
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_list_url(self):
+        """list_url returns expected populaires list URL
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        url = create.list_url()
+        self.assertEqual(url, 'http://example.com/admin/populaires/')
+
+    def test_show(self):
+        """show returns expected template variables
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        tmpl_vars = create.show(MagicMock(name='form'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['cancel_url'], 'http://example.com/admin/populaires/')
+
+    def test_add_success(self):
+        """admin create populaire success adds populaire to database
+        """
+        from ..models import Populaire
+        self.config.add_route('admin.list', '/admin/{list}/')
+        self.config.add_route('admin.populaires.view', '/admin/populaires/{item}')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        url = create.add_success({
+            'event_name': 'Victoria Populaire',
+            'short_name': 'VicPop',
+            'distance': '50 km, 100 km',
+            'date_time': datetime(2011, 3, 27, 10, 0),
+            'start_locn': 'University of Victoria, Parking Lot #2 '
+                          '(Gabriola Road, near McKinnon Gym)',
+            'organizer_email': 'mjansson@example.com',
+            'registration_end': datetime(2011, 3, 24, 12, 0),
+            'entry_form_url': 'http://www.randonneurs.bc.ca/VicPop/'
+                              'VicPop11_registration.pdf',
+            'entry_form_url_label': 'Entry Form (PDF)',
+            })
+        populaire = DBSession.query(Populaire).first()
+        self.assertEqual(str(populaire), 'VicPop')
+        self.assertEqual(
+            url.location, 'http://example.com/admin/populaires/VicPop')
+
+    def test_failure(self):
+        """create populaire failure returns expected template variables
+        """
+        self.config.add_route('admin.list', '/admin/{list}/')
+        request = testing.DummyRequest()
+        create = self._make_one(request)
+        tmpl_vars = create.failure(MagicMock(name='ValidationError'))
+        self.assertTrue(tmpl_vars['logout_btn'])
+        self.assertEqual(
+            tmpl_vars['cancel_url'], 'http://example.com/admin/populaires/')
+
+
 class TestWranglerCreate(unittest.TestCase):
     """Unit tests for administrator (aka pony wrangler) object creation
        admin interface views.

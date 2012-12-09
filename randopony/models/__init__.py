@@ -15,4 +15,5 @@ from .brevet import (
     )
 from .populaire import (
     Populaire,
+    PopulaireSchema,
     )
