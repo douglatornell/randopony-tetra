@@ -40,6 +40,7 @@ class TestSiteViews(unittest.TestCase):
         views = self._make_one(request)
         self.assertEqual(views.request, request)
         self.assertIn('brevets', views.tmpl_vars)
+        self.assertIn('populaires', views.tmpl_vars)
 
     def test_home(self):
         """home view has home tab set as active tab
@@ -156,3 +157,16 @@ class TestSiteViews(unittest.TestCase):
                 'alt': 'Harrison Hotsprings Road',
                 'credit': 'Nobo Yonemitsu',
             })
+
+    def test_populaire_list(self):
+        """populaire_list view has expected tmpl_vars
+        """
+        from ..models import EmailAddress
+        email = EmailAddress(key='admin_email', email='tom@example.com')
+        with transaction.manager:
+            DBSession.add(email)
+        request = testing.DummyRequest()
+        views = self._make_one(request)
+        tmpl_vars = views.populaire_list()
+        self.assertEqual(tmpl_vars['active_tab'], 'populaires')
+        self.assertEqual(tmpl_vars['admin_email'], 'tom@example.com')
