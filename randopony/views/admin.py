@@ -340,9 +340,8 @@ class PopulaireEdit(FormView):
         Button(name='cancel', css_class='btn', type='reset'),
         )
 
-    def view_url(self):
-        return self.request.route_url(
-            'admin.populaires.view', item=self.request.matchdict['item'])
+    def _redirect_url(self, item):
+        return self.request.route_url('admin.populaires.view', item=item)
 
     def appstruct(self):
         short_name = self.request.matchdict['item']
@@ -364,7 +363,7 @@ class PopulaireEdit(FormView):
         tmpl_vars = super().show(form)
         tmpl_vars.update({
             'logout_btn': True,
-            'cancel_url': self.view_url()
+            'cancel_url': self._redirect_url(self.request.matchdict['item']),
             })
         return tmpl_vars
 
@@ -383,14 +382,13 @@ class PopulaireEdit(FormView):
             populaire.registration_end = appstruct['registration_end']
             populaire.entry_form_url = appstruct['entry_form_url']
             populaire_id = str(populaire)
-        return HTTPFound(
-            self.request.route_url('admin.populaires.view', item=populaire_id))
+        return HTTPFound(self._redirect_url(populaire_id))
 
     def failure(self, e):
         tmpl_vars = super().failure(e)
         tmpl_vars.update({
             'logout_btn': True,
-            'cancel_url': self.view_url()
+            'cancel_url': self._redirect_url(self.request.matchdict['item']),
             })
         return tmpl_vars
 
