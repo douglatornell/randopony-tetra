@@ -13,7 +13,7 @@ It uses:
 * Python 3
 * Pyramid for the web application framework
 * SQLAlchemy for the database interface layer
-* Bootstrap for responsive layout
+* Bootstrap for responsive layout in the browser
 
 The app is presently under development for the 2013 season.
 
@@ -26,6 +26,7 @@ Contents:
    :maxdepth: 2
 
    DataModelMgmt
+   Development
 
 
 Indices and tables
@@ -34,4 +35,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
