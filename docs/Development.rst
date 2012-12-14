@@ -27,15 +27,18 @@ and install the :obj:`distribute` library in it:
    (randopony-test) tom:tmp$ curl -O http://python-distribute.org/distribute_setup.py
    (randopony-test) tom:tmp$ python distribute_setup.py
 
-Clone the code repository from Bitbucket:
+Clone the `code repository`_ from Bitbucket:
 
 .. code-block:: sh
 
    (randopony-test) tom:$ cd python
    (randopony-test) tom:python$ hg clone https://bitbucket.org/douglatornell/randopony-tetra
 
+.. _code repository: https://bitbucket.org/douglatornell/randopony-tetra/
 
-.. TestingAndCoverage-section:
+
+
+.. _TestingAndCoverage-section:
 
 Testing and Coverage
 --------------------
@@ -107,7 +110,7 @@ limit coverage analysis to the :mod:`randopony` package and its sub-packages,
 and include the line number of code without test coverage in the report.
 
 
-.. Documentation-section:
+.. _Documentation-section:
 
 Documentation
 -------------
@@ -129,3 +132,10 @@ Build the docs with:
    (sphinx-3.2)tom:randopony-tetra$ (cd docs && make html)
 
 The results are browsable in :file:`randopony-tetra/docs/_build/html/`.
+
+Online,
+the docs are hosted at https://randopony.readthedocs.org/ where they
+are automatically updated whenever changes are pushed to the `Bitbucket
+repository`_.
+
+.. _Bitbucket repository: https://bitbucket.org/douglatornell/randopony-tetra/
