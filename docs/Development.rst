@@ -120,8 +120,10 @@ and built with Sphinx.
 
 .. note::
 
-   As of early December 2012 parts of the Sphinx tool chain does not work
-   under Python 3.3.
+   As of early December 2012 an import issue in docutils 0.9.1 prevents Sphinx
+   from working under Python 3.3.
+   The issue appear to have been resolved in the repo and so the 0.10 release
+   should work.
    Setting up a Python 2.7 or 3.2 virtualenv with Sphinx installed in it is
    thus required to build the documentation.
 
