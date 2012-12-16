@@ -12,7 +12,8 @@ Development Environment
 -----------------------
 
 Development in a virtualenv is *strongly* recommended to isolate
-:obj:`randopony-tetra` and the packages it depends on from other installed Python packages.
+:obj:`randopony-tetra` and the packages it depends on from other installed
+Python packages.
 Using the virtualenv tool built into Python 3.3,
 create a virtualenv,
 activate it,
@@ -21,21 +22,37 @@ and install the :obj:`distribute` library in it:
 .. code-block:: sh
 
    tom:$ cd ~/.virtualenvs
-   tom:.virtualenvs$ pyvenv-3.3 randopony-test
-   tom:.virtualenvs$ source randopony-test/bin/activate
-   (randopony-test) tom:.virtualenvs$ cd /tmp/
-   (randopony-test) tom:tmp$ curl -O http://python-distribute.org/distribute_setup.py
-   (randopony-test) tom:tmp$ python distribute_setup.py
+   tom:.virtualenvs$ pyvenv-3.3 randopony-tetra
+   tom:.virtualenvs$ source randopony-tetra/bin/activate
+   (randopony-tetra) tom:.virtualenvs$ curl http://python-distribute.org/distribute_setup.py | python
 
 Clone the `code repository`_ from Bitbucket:
 
 .. code-block:: sh
 
-   (randopony-test) tom:$ cd python
-   (randopony-test) tom:python$ hg clone https://bitbucket.org/douglatornell/randopony-tetra
+   (randopony-tetra) tom:$ cd python
+   (randopony-tetra) tom:python$ hg clone https://bitbucket.org/douglatornell/randopony-tetra
 
 .. _code repository: https://bitbucket.org/douglatornell/randopony-tetra/
 
+Install RandoPony as a development package:
+
+.. code-block:: sh
+
+   (randopony-tetra) tom:randopony-tetra$ python setup.py develop
+
+.. note::
+
+   As of early December 2012 RandoPony was using features of the :obj:`deform`
+   library that had not yet been included in a release.
+   Cloning :obj:`deform` from Github and doing a development install from
+   revision :kbd:`@8bec7ecb88` is known to work.
+
+Run the development server:
+
+.. code-block:: sh
+
+   (randopony-tetra) tom:randopony-tetra$ pserve --reload development.ini
 
 
 .. _TestingAndCoverage-section:
