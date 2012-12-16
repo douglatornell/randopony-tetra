@@ -3,6 +3,11 @@
 Development
 ===========
 
+.. _PythonVersions-section:
+
+Python Versions
+---------------
+
 RandoPony-tetra is developed and tested with Python 3.3.
 
 
@@ -158,3 +163,23 @@ are automatically updated whenever changes are pushed to the `Bitbucket
 repository`_.
 
 .. _Bitbucket repository: https://bitbucket.org/douglatornell/randopony-tetra/
+
+
+.. _SourceCode-section:
+
+Source Code
+-----------
+
+The source repository is hosted on Bitbucket:
+
+* https://bitbucket.org/douglatornell/randopony-tetra/
+
+
+.. _ReportingBugs-section:
+
+Reporting Bugs
+--------------
+
+Please report bugs via the Bitbucket issue tracker:
+
+* https://bitbucket.org/douglatornell/randopony-tetra/issues/
