@@ -121,4 +121,5 @@ class PopulaireSchema(CSRFSchema):
             css_class='input-xxlarge',
             placeholder='http://randonneurs.bc.ca/...',
             ),
+        missing=None,
         )
