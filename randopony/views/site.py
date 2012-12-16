@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """RandoPony base site views.
 """
-from pyramid.view import view_config
+from pyramid.view import (
+    notfound_view_config,
+    view_config,
+    )
 from ..models import (
     Brevet,
     EmailAddress,
@@ -42,6 +45,14 @@ class SiteViews(object):
     def about(self):
         self.tmpl_vars.update({
             'active_tab': 'about',
+        })
+        return self.tmpl_vars
+
+    @notfound_view_config(renderer='404.mako')
+    def notfound(self):
+        self.request.response.status = '404 Not Found'
+        self.tmpl_vars.update({
+            'active_tab': None,
         })
         return self.tmpl_vars
 
