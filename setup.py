@@ -1,6 +1,6 @@
 import os
 from setuptools import setup, find_packages
-from randopony import __version__
+import __version__
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
