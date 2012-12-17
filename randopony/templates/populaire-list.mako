@@ -13,7 +13,7 @@
     Please choose the link for the populaire that you want to pre-register
     for:
   </p>
-  <ul class="nav nav-pills nav-stacked">
+  <ul class="nav nav-pills">
     %for populaire in populaires:
     <li>
       <a href="${request.route_url(
