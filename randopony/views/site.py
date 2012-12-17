@@ -117,3 +117,15 @@ class SiteViews(object):
             'admin_email': admin_email.email,
         })
         return self.tmpl_vars
+
+    @view_config(route_name='populaire', renderer='populaire.mako')
+    def populaire_page(self):
+        populaire = (DBSession.query(Populaire)
+            .filter_by(short_name=self.request.matchdict['short_name'])
+            .first()
+            )
+        self.tmpl_vars.update({
+            'active_tab': 'populaires',
+            'populaire': populaire,
+        })
+        return self.tmpl_vars
