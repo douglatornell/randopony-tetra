@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """RandoPony base site views.
 """
+from deform import Button
+from pyramid_deform import FormView
 from pyramid.view import (
     notfound_view_config,
     view_config,
@@ -9,6 +11,7 @@ from ..models import (
     Brevet,
     EmailAddress,
     Populaire,
+    PopulaireEntrySchema,
     )
 from ..models.meta import DBSession
 
@@ -120,12 +123,45 @@ class SiteViews(object):
 
     @view_config(route_name='populaire', renderer='populaire.mako')
     def populaire_page(self):
-        populaire = (DBSession.query(Populaire)
-            .filter_by(short_name=self.request.matchdict['short_name'])
-            .first()
-            )
+        populaire = get_populaire(self.request.matchdict['short_name'])
         self.tmpl_vars.update({
             'active_tab': 'populaires',
             'populaire': populaire,
         })
         return self.tmpl_vars
+
+
+def get_populaire(short_name):
+    populaire = (DBSession.query(Populaire)
+        .filter_by(short_name=short_name)
+        .first()
+        )
+    return populaire
+
+
+@view_config(
+    route_name='populaire.entry',
+    renderer='populaire-entry.mako',
+    )
+class PopulaireEntry(FormView):
+    schema = PopulaireEntrySchema()
+    buttons = (
+        Button(name='register', css_class='btn btn-primary'),
+        Button(name='cancel', css_class='btn', type='reset'),
+        )
+
+    def _redirect_url(self, short_name):
+        return self.request.route_url('populaire', short_name=short_name)
+
+    def show(self, form):
+        tmpl_vars = super().show(form)
+        populaire = get_populaire(self.request.matchdict['short_name'])
+        tmpl_vars.update({
+            'active_tab': 'populaires',
+            'brevets': Brevet.get_current(),
+            'populaires': Populaire.get_current(),
+            'populaire': populaire,
+            'cancel_url': self._redirect_url(
+                self.request.matchdict['short_name']),
+            })
+        return tmpl_vars

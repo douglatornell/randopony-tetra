@@ -81,6 +81,7 @@ def map_routes(config):               # pragma: no cover
     # populaire routes
     config.add_route('populaire.list', '/populaires/')
     config.add_route('populaire', '/populaires/{short_name}')
+    config.add_route('populaire.entry', '/populaires/{short_name}/entry')
     # admin core routes
     config.add_route('admin.home', '/admin/')
     config.add_route('admin.list', '/admin/{list}/')

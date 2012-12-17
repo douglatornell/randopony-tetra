@@ -123,3 +123,7 @@ class PopulaireSchema(CSRFSchema):
             ),
         missing=None,
         )
+
+
+class PopulaireEntrySchema(CSRFSchema):
+    pass

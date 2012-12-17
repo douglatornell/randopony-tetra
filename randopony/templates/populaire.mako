@@ -28,7 +28,9 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
   <p>
     Nobody has pre-registered
     <br>
-    <a class="btn btn-success" href="#">
+    <a class="btn btn-success"
+       href="${request.route_url('populaire.entry',
+                                 short_name=populaire.short_name)}">
       Be the first!
     </a>
   </p>
