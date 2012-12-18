@@ -17,4 +17,5 @@ from .populaire import (
     Populaire,
     PopulaireSchema,
     PopulaireEntrySchema,
+    PopulaireRider,
     )

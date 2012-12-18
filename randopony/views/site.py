@@ -1,19 +1,26 @@
 # -*- coding: utf-8 -*-
 """RandoPony base site views.
 """
+import logging
 from deform import Button
 from pyramid_deform import FormView
+from pyramid.httpexceptions import HTTPFound
 from pyramid.view import (
     notfound_view_config,
     view_config,
     )
+import transaction
 from ..models import (
     Brevet,
     EmailAddress,
     Populaire,
     PopulaireEntrySchema,
+    PopulaireRider,
     )
 from ..models.meta import DBSession
+
+
+log = logging.getLogger(__name__)
 
 
 class SiteViews(object):
@@ -155,6 +162,34 @@ class PopulaireEntry(FormView):
 
     def show(self, form):
         tmpl_vars = super().show(form)
+        populaire = get_populaire(self.request.matchdict['short_name'])
+        tmpl_vars.update({
+            'active_tab': 'populaires',
+            'brevets': Brevet.get_current(),
+            'populaires': Populaire.get_current(),
+            'populaire': populaire,
+            'cancel_url': self._redirect_url(
+                self.request.matchdict['short_name']),
+            })
+        return tmpl_vars
+
+    def register_success(self, appstruct):
+        pop_short_name = self.request.matchdict['short_name']
+        with transaction.manager:
+            populaire = get_populaire(pop_short_name)
+            rider = PopulaireRider(
+                email=appstruct['email'],
+                first_name=appstruct['first_name'],
+                last_name=appstruct['last_name'],
+                distance=60,
+                comment=appstruct['comment'],
+                )
+            populaire.riders.append(rider)
+            DBSession.add(rider)
+        return HTTPFound(self._redirect_url(pop_short_name))
+
+    def failure(self, e):
+        tmpl_vars = super().failure(e)
         populaire = get_populaire(self.request.matchdict['short_name'])
         tmpl_vars.update({
             'active_tab': 'populaires',

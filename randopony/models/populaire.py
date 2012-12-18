@@ -10,8 +10,11 @@ from deform.widget import (
 from pyramid_deform import CSRFSchema
 from sqlalchemy import (
     Column,
+    ForeignKey,
+    Integer,
     Text,
     )
+from sqlalchemy.orm import relationship
 from .core import EventMixin
 from .meta import Base
 
@@ -27,6 +30,10 @@ class Populaire(EventMixin, Base):
     start_locn = Column(Text)
     start_map_url = Column(Text)
     entry_form_url = Column(Text)
+    riders = relationship(
+        'PopulaireRider',
+        order_by='PopulaireRider.lowercase_last_name',
+        )
 
     def __init__(self, event_name, short_name, distance, date_time,
         start_locn, organizer_email, registration_end, entry_form_url):
@@ -125,5 +132,67 @@ class PopulaireSchema(CSRFSchema):
         )
 
 
+class PopulaireRider(Base):
+    """Populaire rider.
+    """
+    __tablename__ = 'populaire_riders'
+
+    id = Column(Integer, primary_key=True)
+    email = Column(Text)
+    first_name = Column(Text)
+    last_name = Column(Text)
+    lowercase_last_name = Column(Text, index=True)
+    comment = Column(Text)
+    distance = Column(Integer)
+    populaire = Column(Integer, ForeignKey('populaires.id'))
+
+    def __init__(self, first_name, last_name, email, distance, comment):
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+        self.lowercase_last_name = self.last_name.lower()
+        self.distance = distance
+        self.comment = comment
+
+    def __str__(self):
+        return '{0.first_name} {0.last_name}'.format(self)
+
+    def __repr__(self):
+        return '<Rider({})>'.format(self)
+
+    @property
+    def full_name(self):
+        if self.comment:
+            full_name = (
+                '{0.first_name} "{0.comment}" {0.last_name}'.format(self))
+        else:
+            full_name = '{0.first_name} {0.last_name}'.format(self)
+        return full_name
+
 class PopulaireEntrySchema(CSRFSchema):
-    pass
+    """Form schema for populaire rider pre-regisration.
+    """
+    email = colander.SchemaNode(
+        colander.String(),
+        title='Email Address',
+        widget=TextInputWidget(
+            template='emailinput',
+            autofocus=True,
+            placeholder='you@example.com',
+            ),
+        validator=colander.Email(),
+        )
+    first_name = colander.SchemaNode(
+        colander.String(),
+        )
+    last_name = colander.SchemaNode(
+        colander.String(),
+        )
+    comment = colander.SchemaNode(
+        colander.String(),
+        missing=None,
+        )
+    distance = colander.SchemaNode(
+        colander.Integer(),
+        missing=None,
+        )
