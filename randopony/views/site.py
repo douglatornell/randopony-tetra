@@ -161,7 +161,7 @@ class PopulaireEntry(FormView):
         return self.request.route_url('populaire', short_name=short_name)
 
     def show(self, form):
-        tmpl_vars = super().show(form)
+        tmpl_vars = super(PopulaireEntry, self).show(form)
         populaire = get_populaire(self.request.matchdict['short_name'])
         tmpl_vars.update({
             'active_tab': 'populaires',
@@ -189,7 +189,7 @@ class PopulaireEntry(FormView):
         return HTTPFound(self._redirect_url(pop_short_name))
 
     def failure(self, e):
-        tmpl_vars = super().failure(e)
+        tmpl_vars = super(PopulaireEntry, self).failure(e)
         populaire = get_populaire(self.request.matchdict['short_name'])
         tmpl_vars.update({
             'active_tab': 'populaires',

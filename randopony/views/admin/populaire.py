@@ -52,7 +52,7 @@ class PopulaireCreate(FormView):
         return self.request.route_url('admin.list', list='populaires')
 
     def show(self, form):
-        tmpl_vars = super().show(form)
+        tmpl_vars = super(PopulaireCreate, self).show(form)
         tmpl_vars.update({
             'logout_btn': True,
             'cancel_url': self.list_url()
@@ -77,7 +77,7 @@ class PopulaireCreate(FormView):
             self.request.route_url('admin.populaires.view', item=populaire_id))
 
     def failure(self, e):
-        tmpl_vars = super().failure(e)
+        tmpl_vars = super(PopulaireCreate, self).failure(e)
         tmpl_vars.update({
             'logout_btn': True,
             'cancel_url': self.list_url()
@@ -117,7 +117,7 @@ class PopulaireEdit(FormView):
         }
 
     def show(self, form):
-        tmpl_vars = super().show(form)
+        tmpl_vars = super(PopulaireEdit, self).show(form)
         tmpl_vars.update({
             'logout_btn': True,
             'cancel_url': self._redirect_url(self.request.matchdict['item']),
@@ -142,7 +142,7 @@ class PopulaireEdit(FormView):
         return HTTPFound(self._redirect_url(populaire_id))
 
     def failure(self, e):
-        tmpl_vars = super().failure(e)
+        tmpl_vars = super(PopulaireEdit, self).failure(e)
         tmpl_vars.update({
             'logout_btn': True,
             'cancel_url': self._redirect_url(self.request.matchdict['item']),

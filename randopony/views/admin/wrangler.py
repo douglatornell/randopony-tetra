@@ -30,7 +30,7 @@ class WranglerCreate(FormView):
         return self.request.route_url('admin.list', list='wranglers')
 
     def show(self, form):
-        tmpl_vars = super().show(form)
+        tmpl_vars = super(WranglerCreate, self).show(form)
         tmpl_vars.update({
             'logout_btn': True,
             'list_url': self.list_url()
@@ -44,7 +44,7 @@ class WranglerCreate(FormView):
         return HTTPFound(self.list_url())
 
     def failure(self, e):
-        tmpl_vars = super().failure(e)
+        tmpl_vars = super(WranglerCreate, self).failure(e)
         tmpl_vars.update({
             'logout_btn': True,
             'list_url': self.list_url()
@@ -77,7 +77,7 @@ class WranglerEdit(FormView):
             }
 
     def show(self, form):
-        tmpl_vars = super().show(form)
+        tmpl_vars = super(WranglerEdit, self).show(form)
         tmpl_vars.update({
             'logout_btn': True,
             'list_url': self.list_url()
@@ -93,7 +93,7 @@ class WranglerEdit(FormView):
         return HTTPFound(self.list_url())
 
     def failure(self, e):
-        tmpl_vars = super().failure(e)
+        tmpl_vars = super(WranglerEdit, self).failure(e)
         tmpl_vars.update({
             'logout_btn': True,
             'list_url': self.list_url()

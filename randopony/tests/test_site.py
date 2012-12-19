@@ -3,7 +3,10 @@
 """
 from datetime import datetime
 import unittest
-from unittest.mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction

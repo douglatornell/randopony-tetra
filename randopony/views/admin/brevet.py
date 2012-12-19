@@ -62,7 +62,7 @@ class BrevetCreate(FormView):
         return self.request.route_url('admin.list', list='brevets')
 
     def show(self, form):
-        tmpl_vars = super().show(form)
+        tmpl_vars = super(BrevetCreate, self).show(form)
         tmpl_vars.update({
             'logout_btn': True,
             'cancel_url': self.list_url()
@@ -85,7 +85,7 @@ class BrevetCreate(FormView):
             self.request.route_url('admin.brevets.view', item=brevet_id))
 
     def failure(self, e):
-        tmpl_vars = super().failure(e)
+        tmpl_vars = super(BrevetCreate, self).failure(e)
         tmpl_vars.update({
             'logout_btn': True,
             'cancel_url': self.list_url()
@@ -125,7 +125,7 @@ class BrevetEdit(FormView):
         }
 
     def show(self, form):
-        tmpl_vars = super().show(form)
+        tmpl_vars = super(BrevetEdit, self).show(form)
         tmpl_vars.update({
             'logout_btn': True,
             'cancel_url': self.view_url()
@@ -150,7 +150,7 @@ class BrevetEdit(FormView):
             self.request.route_url('admin.brevets.view', item=brevet_id))
 
     def failure(self, e):
-        tmpl_vars = super().failure(e)
+        tmpl_vars = super(BrevetEdit, self).failure(e)
         tmpl_vars.update({
             'logout_btn': True,
             'cancel_url': self.view_url()
