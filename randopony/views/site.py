@@ -13,6 +13,7 @@ import transaction
 from ..models import (
     Brevet,
     EmailAddress,
+    Link,
     Populaire,
     PopulaireEntrySchema,
     PopulaireRider,
@@ -186,6 +187,13 @@ class PopulaireEntry(FormView):
                 )
             populaire.riders.append(rider)
             DBSession.add(rider)
+            self.request.session.flash(rider.email)
+            entry_form_url = (
+                populaire.entry_form_url
+                or DBSession.query(Link)
+                    .filter_by(key='entry_form')
+                    .one().url)
+            self.request.session.flash(entry_form_url)
         return HTTPFound(self._redirect_url(pop_short_name))
 
     def failure(self, e):

@@ -8,6 +8,7 @@
 ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 </%block>
 
+
 <div class="tab-pane active">
   <p>
     <h3>${populaire.event_name}</h3>
@@ -25,24 +26,30 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     <a href="${populaire.start_map_url}" target="_blank">Map</a>
   </p>
 
+  %if request.session.peek_flash():
+  ${self.confirmation(request.session.pop_flash())}
+  %endif
+
   %if len(populaire.riders) == 0:
-  <p>
-    Nobody has pre-registered
-    <br>
-    <a class="btn btn-success"
-       href="${request.route_url('populaire.entry',
-                                 short_name=populaire.short_name)}">
-      Be the first!
-    </a>
-  </p>
+    <p>
+      Nobody has pre-registered
+    </p>
+    <p>
+      <a class="btn btn-success"
+         href="${request.route_url('populaire.entry',
+                                   short_name=populaire.short_name)}">
+        Be the first!
+      </a>
+    </p>
   %else:
-  <p>
-    <a class="btn btn-success"
-       href="${request.route_url('populaire.entry',
-                                 short_name=populaire.short_name)}">
-      Register
-    </a>
-  </p>
+    <p>
+      <a class="btn btn-success"
+         href="${request.route_url('populaire.entry',
+                                   short_name=populaire.short_name)}">
+        Register
+      </a>
+    </p>
+
   <table class="table table-striped">
     <thead>
       <tr>
@@ -80,3 +87,33 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
   </div>
   %endif
 </div>
+
+
+<%def name="confirmation(notice_data)">
+<div class="row">
+  <div class="span6 notice">
+    <p>
+      You have pre-registered for this populaire.
+      Cool!
+      Your name should be on the list below.
+    </p>
+    <p>
+      A confirmation email has been sent to you at
+      <kbd>${notice_data[0]}</kbd>
+      and to the populaire organizer(s).
+    </p>
+    <p>
+      You can print out the
+      <a href="${notice_data[1]}">event waiver form</a>
+      from the club web site,
+      read it carefully,
+      fill it out,
+      and bring it with you to the start to save time and make the organizers
+      like you even more.
+    </p>
+    <p>
+      Have a great ride!
+    </p>
+  </div>
+</div>
+</%def>

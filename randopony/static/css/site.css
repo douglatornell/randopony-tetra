@@ -46,6 +46,13 @@ h3 {
 .nav-collapse .nav > li > a {
     color: rgb(255, 255, 255);
 }
+.notice {
+    background-color: #ffff90;
+    margin-bottom: 20px;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
 .img-container {
     margin-bottom: 20px;
 }
