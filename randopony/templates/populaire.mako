@@ -27,7 +27,11 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
   </p>
 
   %if request.session.peek_flash():
-  ${self.confirmation(request.session.pop_flash())}
+    %if request.session.peek_flash()[0] == 'success':
+    ${self.confirmation(request.session.pop_flash())}
+    %elif request.session.peek_flash()[0] == 'duplicate':
+    ${self.duplicate(request.session.pop_flash())}
+    %endif
   %endif
 
   %if len(populaire.riders) == 0:
@@ -99,12 +103,12 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     </p>
     <p>
       A confirmation email has been sent to you at
-      <kbd>${notice_data[0]}</kbd>
+      <kbd>${notice_data[1]}</kbd>
       and to the populaire organizer(s).
     </p>
     <p>
       You can print out the
-      <a href="${notice_data[1]}">event waiver form</a>
+      <a href="${notice_data[2]}">event waiver form</a>
       from the club web site,
       read it carefully,
       fill it out,
@@ -114,6 +118,27 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     <p>
       Have a great ride!
     </p>
+  </div>
+</div>
+</%def>
+
+
+<%def name="duplicate(notice_data)">
+<div class="row">
+  <div class="span6 notice">
+  <p>
+    Hmm...
+    Someone using the name ${notice_data[1]} and the email address
+    ${notice_data[2]} has already pre-registered for this populaire.
+    Are you sure that you are registering for the event you intended to?
+  </p>
+  <p>
+    If you are trying to change your email address by re-registering,
+    please contact the event organizer.
+    If you are trying to change the comment you embedded in your name,
+    sorry,
+    you can't do that.
+  </p>
   </div>
 </div>
 </%def>
