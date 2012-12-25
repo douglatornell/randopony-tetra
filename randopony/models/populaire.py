@@ -155,19 +155,18 @@ class PopulaireRider(Base):
         self.comment = comment
 
     def __str__(self):
-        return '{0.first_name} {0.last_name}'.format(self)
+        return ' '.join((self.first_name, self.last_name))
 
     def __repr__(self):
         return '<Rider({})>'.format(self)
 
     @property
     def full_name(self):
-        if self.comment:
-            full_name = (
-                '{0.first_name} "{0.comment}" {0.last_name}'.format(self))
-        else:
-            full_name = '{0.first_name} {0.last_name}'.format(self)
-        return full_name
+        return (
+            '{0.first_name} "{0.comment}" {0.last_name}'.format(self)
+            if self.comment
+            else str(self))
+
 
 class PopulaireEntrySchema(CSRFSchema):
     """Form schema for populaire rider pre-regisration.
