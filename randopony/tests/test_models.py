@@ -5,8 +5,8 @@ from datetime import datetime
 import unittest
 try:
     from unittest.mock import patch
-except ImportError:
-    from mock import patch
+except ImportError:                  # pragma: no cover
+    from mock import patch           # pragma: no cover
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
