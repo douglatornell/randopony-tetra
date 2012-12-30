@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for RandoPony public site views and functionality.
+"""Tests for RandoPony public site core views and functionality.
 """
 from datetime import datetime
 import unittest
@@ -20,7 +20,7 @@ class TestSiteViews(unittest.TestCase):
     """Unit tests for public site views.
     """
     def _get_target_class(self):
-        from ..views.site import SiteViews
+        from ..views.site.core import SiteViews
         return SiteViews
 
     def _make_one(self, *args, **kwargs):
