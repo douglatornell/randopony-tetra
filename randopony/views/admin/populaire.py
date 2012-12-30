@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""RandoPony brevet admin views.
+"""RandoPony populaire admin views.
 """
 from deform import Button
 from pyramid_deform import FormView
