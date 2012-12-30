@@ -5,7 +5,6 @@ from pyramid.view import (
     notfound_view_config,
     view_config,
     )
-from .populaire import get_populaire
 from ...models import (
     Brevet,
     EmailAddress,
@@ -105,25 +104,5 @@ class SiteViews(object):
             'regions': Brevet.REGIONS,
             'region_brevets': region_brevets,
             'image': images[region],
-        })
-        return self.tmpl_vars
-
-    @view_config(route_name='populaire.list', renderer='populaire-list.mako')
-    def populaire_list(self):
-        admin_email = (DBSession.query(EmailAddress)
-            .filter_by(key='admin_email')
-            .one())
-        self.tmpl_vars.update({
-            'active_tab': 'populaires',
-            'admin_email': admin_email.email,
-        })
-        return self.tmpl_vars
-
-    @view_config(route_name='populaire', renderer='populaire.mako')
-    def populaire_page(self):
-        populaire = get_populaire(self.request.matchdict['short_name'])
-        self.tmpl_vars.update({
-            'active_tab': 'populaires',
-            'populaire': populaire,
         })
         return self.tmpl_vars

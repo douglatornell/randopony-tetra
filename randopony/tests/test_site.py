@@ -74,6 +74,15 @@ class TestSiteViews(unittest.TestCase):
         tmpl_vars = views.about()
         self.assertEqual(tmpl_vars['active_tab'], 'about')
 
+    def test_notfound(self):
+        """notfound view has no active tab and 404 status
+        """
+        request = testing.DummyRequest()
+        views = self._make_one(request)
+        tmpl_vars = views.notfound()
+        self.assertIsNone(tmpl_vars['active_tab'])
+        self.assertEqual(request.response.status, '404 Not Found')
+
     def test_region_list(self):
         """region_list view has expected tmpl_vars
         """
@@ -161,6 +170,27 @@ class TestSiteViews(unittest.TestCase):
                 'credit': 'Nobo Yonemitsu',
             })
 
+
+class TestPopulaireViews(unittest.TestCase):
+    """Unit tests for public site populaire views.
+    """
+    def _get_target_class(self):
+        from ..views.site.populaire import PopulaireViews
+        return PopulaireViews
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
     def test_populaire_list(self):
         """populaire_list view has expected tmpl_vars
         """
@@ -173,3 +203,29 @@ class TestSiteViews(unittest.TestCase):
         tmpl_vars = views.populaire_list()
         self.assertEqual(tmpl_vars['active_tab'], 'populaires')
         self.assertEqual(tmpl_vars['admin_email'], 'tom@example.com')
+
+    def test_populaire_page(self):
+        """populaire_page view has expected tmpl_vars
+        """
+        from ..models import Populaire
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        populare_id = str(populaire)
+        with transaction.manager:
+            DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        views = self._make_one(request)
+        tmpl_vars = views.populaire_page()
+        self.assertEqual(tmpl_vars['active_tab'], 'populaires')
+        self.assertEqual(str(tmpl_vars['populaire']), populare_id)

@@ -7,8 +7,10 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 from sqlalchemy.orm.exc import NoResultFound
 import transaction
+from .core import SiteViews
 from ...models import (
     Brevet,
+    EmailAddress,
     Link,
     Populaire,
     PopulaireEntrySchema,
@@ -23,6 +25,33 @@ def get_populaire(short_name):
         .first()
         )
     return populaire
+
+
+class PopulaireViews(SiteViews):
+    """Views for populaires section of RandoPony public site
+    """
+    def __init__(self, request):
+        super(PopulaireViews, self).__init__(request)
+
+    @view_config(route_name='populaire.list', renderer='populaire-list.mako')
+    def populaire_list(self):
+        admin_email = (DBSession.query(EmailAddress)
+            .filter_by(key='admin_email')
+            .one())
+        self.tmpl_vars.update({
+            'active_tab': 'populaires',
+            'admin_email': admin_email.email,
+        })
+        return self.tmpl_vars
+
+    @view_config(route_name='populaire', renderer='populaire.mako')
+    def populaire_page(self):
+        populaire = get_populaire(self.request.matchdict['short_name'])
+        self.tmpl_vars.update({
+            'active_tab': 'populaires',
+            'populaire': populaire,
+        })
+        return self.tmpl_vars
 
 
 def get_populaire_rider(email, first_name, last_name, populaire):
