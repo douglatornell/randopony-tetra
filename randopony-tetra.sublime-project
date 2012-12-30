@@ -2,18 +2,7 @@
 	"folders":
 	[
 		{
-			"path": "/Users/doug/Documents/devel/python/randopony-tetra",
-            "folder_exclude_patterns": [
-                "__pycache__",
-                "*.egg-info"
-                ],
-            "file_exclude_patterns": [
-                ".coverage",
-                ".DS_Store",
-                "*~",
-                "*.sublime-workspace",
-                "*.pyc"
-                ]
+			"path": "/Users/doug/Documents/devel/python/randopony-tetra"
 		}
 	]
 }
