@@ -6,7 +6,7 @@ import unittest
 try:
     from unittest.mock import MagicMock
 except ImportError:                      # pragma: no cover
-    from mock import MagicMock           # pragma: no cover
+    from mock import MagicMock
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction

@@ -2,6 +2,7 @@
 """RandoPony-tetra version metadata.
 """
 
-number = '2013'                 # pragma: no cover
-release = 'dev'                 # pragma: no cover
-dev_status = '2 - Pre-Alpha'    # pragma: no cover
+# pragma: no cover
+number = '2013'
+release = 'dev'
+dev_status = '2 - Pre-Alpha'
