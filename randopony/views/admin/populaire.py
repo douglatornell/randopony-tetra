@@ -60,18 +60,18 @@ class PopulaireCreate(FormView):
         return tmpl_vars
 
     def add_success(self, appstruct):
+        populaire = Populaire(
+            event_name=appstruct['event_name'],
+            short_name=appstruct['short_name'],
+            distance=appstruct['distance'],
+            date_time=appstruct['date_time'],
+            start_locn=appstruct['start_locn'],
+            organizer_email=appstruct['organizer_email'],
+            registration_end=appstruct['registration_end'],
+            entry_form_url=appstruct['entry_form_url'],
+            )
+        populaire_id = str(populaire)
         with transaction.manager:
-            populaire = Populaire(
-                event_name=appstruct['event_name'],
-                short_name=appstruct['short_name'],
-                distance=appstruct['distance'],
-                date_time=appstruct['date_time'],
-                start_locn=appstruct['start_locn'],
-                organizer_email=appstruct['organizer_email'],
-                registration_end=appstruct['registration_end'],
-                entry_form_url=appstruct['entry_form_url'],
-                )
-            populaire_id = str(populaire)
             DBSession.add(populaire)
         return HTTPFound(
             self.request.route_url('admin.populaires.view', item=populaire_id))
