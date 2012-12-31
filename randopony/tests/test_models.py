@@ -218,6 +218,44 @@ class TestBrevet(unittest.TestCase):
             brevets = Brev.get_current()
         self.assertEqual(brevets.all(), [])
 
+    def test_registration_closed(self):
+        """registration_closed is True when current time > registration_end
+        """
+        from ..models import core
+        brevet = self._make_one(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            registration_end=datetime(2012, 11, 10, 12, 0, 0)
+            )
+        with patch.object(core, 'datetime') as mock_datetime:
+            mock_datetime.now.return_value = datetime(
+                2012, 11, 10, 19, 59, 42)
+            self.assertTrue(brevet.registration_closed)
+
+    def test_registration_not_closed(self):
+        """registration_closed is False when current time <= registration_end
+        """
+        from ..models import core
+        brevet = self._make_one(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            registration_end=datetime(2012, 11, 10, 12, 0, 0)
+            )
+        with patch.object(core, 'datetime') as mock_datetime:
+            mock_datetime.now.return_value = datetime(
+                2012, 11, 10, 11, 59, 42)
+            self.assertFalse(brevet.registration_closed)
+
 
 class TestPopulaire(unittest.TestCase):
     """Unit tests for Populaire data model.

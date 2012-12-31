@@ -26,6 +26,10 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     <a href="${populaire.start_map_url}" target="_blank">Map</a>
   </p>
 
+  %if populaire.registration_closed:
+  ${self.registration_closed()}
+  %endif
+
   %if request.session.peek_flash():
     %if request.session.peek_flash()[0] == 'success':
     ${self.confirmation(request.session.pop_flash())}
@@ -38,6 +42,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     <p>
       Nobody has pre-registered
     </p>
+    %if not populaire.registration_closed:
     <p>
       <a class="btn btn-success"
          href="${request.route_url('populaire.entry',
@@ -45,7 +50,9 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
         Be the first!
       </a>
     </p>
+    %endif
   %else:
+    %if not populaire.registration_closed:
     <p>
       <a class="btn btn-success"
          href="${request.route_url('populaire.entry',
@@ -53,6 +60,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
         Register
       </a>
     </p>
+    %endif
 
   <table class="table table-striped">
     <thead>
@@ -93,6 +101,23 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 </div>
 
 
+<%def name="registration_closed()">
+<div class="row">
+  <div class="span6 notice">
+    <p>
+      Pre-registration for this populaier is closed.
+      But you can still print out the <a href="${entry_form_url}"
+      title="Event Waiver Form">event waiver form</a> from the club web site,
+      read it carefully,
+      fill it out,
+      bring it with you to the start,
+      and register for the event there.
+    </p>
+  </div>
+</div>
+</%def>
+
+
 <%def name="confirmation(notice_data)">
 <div class="row">
   <div class="span6 notice">
@@ -108,7 +133,9 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     </p>
     <p>
       You can print out the
-      <a href="${notice_data[2]}">event waiver form</a>
+      <a href="${notice_data[2]}" title="Event Waiver Form">
+        event waiver form
+      </a>
       from the club web site,
       read it carefully,
       fill it out,

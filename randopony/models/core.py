@@ -86,3 +86,7 @@ class EventMixin(object):
             .order_by(cls.date_time)
             )
         return brevets
+
+    @property
+    def registration_closed(self):
+        return datetime.now() > self.registration_end
