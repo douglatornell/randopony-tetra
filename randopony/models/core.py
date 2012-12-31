@@ -11,6 +11,7 @@ from sqlalchemy import (
     Integer,
     Text,
     )
+from sqlalchemy.ext.declarative import declared_attr
 from .meta import (
     Base,
     DBSession,
@@ -86,3 +87,13 @@ class EventMixin(object):
             .order_by(cls.date_time)
             )
         return events
+
+    @declared_attr
+    def in_past(cls, recent_days=7):
+        """Return a boolean indicating if the event started more than
+        recent_days in the past.
+        """
+        today = datetime.today()
+        today = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        days_ago = today - timedelta(days=recent_days)
+        return cls.date_time > days_ago

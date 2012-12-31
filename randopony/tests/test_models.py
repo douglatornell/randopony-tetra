@@ -219,6 +219,63 @@ class TestBrevet(unittest.TestCase):
             brevets = Brev.get_current()
         self.assertEqual(brevets.all(), [])
 
+    def test_in_past_future_brevet(self):
+        """in_past class property is False for brevet in the future
+        """
+        from ..models import core
+        brevet = self._make_one(
+            region='LM',
+            distance=200,
+            date_time=datetime(2013, 11, 11, 7, 0, 0), route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            )
+        with transaction.manager:
+            DBSession.add(brevet)
+        Brev = self._get_target_class()
+        with patch.object(core, 'datetime') as mock_datetime:
+            mock_datetime.today.return_value = datetime(2012, 12, 31, 14, 2, 42)
+            self.assertFalse(Brev.in_past)
+
+    def test_in_past_recent_brevet(self):
+        """in_past class property is False for brevet within last 7 days
+        """
+        from ..models import core
+        brevet = self._make_one(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0), route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            )
+        with transaction.manager:
+            DBSession.add(brevet)
+        Brev = self._get_target_class()
+        with patch.object(core, 'datetime') as mock_datetime:
+            mock_datetime.today.return_value = datetime(2012, 11, 15, 14, 17, 42)
+            self.assertFalse(Brev.in_past)
+
+    def test_in_past_old_brevet(self):
+        """in_past class property is True for brevet longer ago than 7 days
+        """
+        from ..models import core
+        brevet = self._make_one(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0), route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            )
+        with transaction.manager:
+            DBSession.add(brevet)
+        Brev = self._get_target_class()
+        with patch.object(core, 'datetime') as mock_datetime:
+            mock_datetime.today.return_value = datetime(2012, 11, 19, 14, 19, 42)
+            self.assertFalse(Brev.in_past)
+
 
 class TestPopulaire(unittest.TestCase):
     """Unit tests for Populaire data model.
