@@ -179,18 +179,6 @@ class PopulaireRider(Base):
             else str(self))
 
 
-@colander.deferred
-def deferred_distance_widget(node, kw):
-    distances = kw.get('distances')
-    return RadioChoiceWidget(values=distances)
-
-
-@colander.deferred
-def deferred_distance_validator(node, kw):
-    distances = kw.get('distances')
-    return colander.OneOf([d[0] for d in distances])
-
-
 class PopulaireEntrySchema(CSRFSchema):
     """Form schema for populaire rider pre-regisration.
     """
@@ -214,8 +202,16 @@ class PopulaireEntrySchema(CSRFSchema):
         colander.String(),
         missing=None,
         )
+
+    @colander.deferred
+    def deferred_distance_widget(node, kw):
+        distances = kw.get('distances')
+        return RadioChoiceWidget(
+            values=distances,
+            css_class='radio inline',
+            )
+
     distance = colander.SchemaNode(
         colander.Integer(),
         widget=deferred_distance_widget,
-        validator=deferred_distance_validator,
         )

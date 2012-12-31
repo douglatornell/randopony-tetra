@@ -64,16 +64,15 @@ class PopulaireViews(SiteViews):
         return utc_now > utc_registration_end
 
 
-def maybe_include_distance(node, kw):
-    if not kw.get('include_distance'):
-        del node['distance']
-
-
 @view_config(
     route_name='populaire.entry',
     renderer='populaire-entry.mako',
     )
 class PopulaireEntry(FormView):
+    def maybe_include_distance(node, kw):
+        if not kw.get('include_distance'):
+            del node['distance']
+
     schema = PopulaireEntrySchema(after_bind=maybe_include_distance)
     buttons = (
         Button(name='register', css_class='btn btn-primary'),

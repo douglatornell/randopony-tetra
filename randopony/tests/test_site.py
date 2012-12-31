@@ -179,6 +179,11 @@ class TestSiteViews(unittest.TestCase):
 
 class TestPopulaireViews(unittest.TestCase):
     """Unit tests for public site populaire views.
+
+    *TODO*: Add integrations tests:
+
+      * Registration closed & no register button rendered after registration_end
+      * Past event template is rendered for events more than 7 days in the past
     """
     def _get_target_class(self):
         from ..views.site.populaire import PopulaireViews
@@ -272,6 +277,12 @@ class TestPopulaireViews(unittest.TestCase):
 
 class TestPopulaireEntry(unittest.TestCase):
     """Unit tests for populaire pre-registration form handler & views.
+
+    *TODO*: Add integrations tests:
+
+      * Distance radio buttons only rendered for multi-distance events
+      * Valid pre-registration renders confirmation message
+      * Duplicate pre-registration renders error message
     """
     def _get_target_class(self):
         from ..views.site.populaire import PopulaireEntry
