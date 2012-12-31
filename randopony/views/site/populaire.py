@@ -54,21 +54,6 @@ class PopulaireViews(SiteViews):
         return self.tmpl_vars
 
 
-def get_populaire_rider(email, first_name, last_name, populaire):
-    try:
-        rider = (DBSession.query(PopulaireRider)
-        .filter_by(
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            populaire=populaire,
-            )
-        .first())
-    except NoResultFound:
-        rider = None
-    return rider
-
-
 @view_config(
     route_name='populaire.entry',
     renderer='populaire-entry.mako',
@@ -100,12 +85,14 @@ class PopulaireEntry(FormView):
         pop_short_name = self.request.matchdict['short_name']
         populaire = get_populaire(pop_short_name)
         # Check for rider already registered
-        rider = get_populaire_rider(
-            email=appstruct['email'],
-            first_name=appstruct['first_name'],
-            last_name=appstruct['last_name'],
-            populaire=populaire.id,
-            )
+        rider = (DBSession.query(PopulaireRider)
+            .filter_by(
+                email=appstruct['email'],
+                first_name=appstruct['first_name'],
+                last_name=appstruct['last_name'],
+                populaire=populaire.id,
+                )
+            .first())
         if rider is not None:
             # Rider with same name and email already registered
             self.request.session.flash('duplicate')
@@ -114,15 +101,15 @@ class PopulaireEntry(FormView):
             self.request.session.flash(appstruct['email'])
         else:
             # New rider registration
+            rider = PopulaireRider(
+                email=appstruct['email'],
+                first_name=appstruct['first_name'],
+                last_name=appstruct['last_name'],
+                distance=60,
+                comment=appstruct['comment'],
+                )
             with transaction.manager:
                 populaire = get_populaire(pop_short_name)
-                rider = PopulaireRider(
-                    email=appstruct['email'],
-                    first_name=appstruct['first_name'],
-                    last_name=appstruct['last_name'],
-                    distance=60,
-                    comment=appstruct['comment'],
-                    )
                 populaire.riders.append(rider)
                 DBSession.add(rider)
                 self.request.session.flash('success')

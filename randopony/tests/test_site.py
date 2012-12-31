@@ -4,9 +4,15 @@
 from datetime import datetime
 import unittest
 try:
-    from unittest.mock import patch
+    from unittest.mock import (
+        MagicMock,
+        patch,
+        )
 except ImportError:                  # pragma: no cover
-    from mock import patch           # pragma: no cover
+    from mock import (
+        MagicMock,
+        patch,
+        )
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
@@ -229,3 +235,189 @@ class TestPopulaireViews(unittest.TestCase):
         tmpl_vars = views.populaire_page()
         self.assertEqual(tmpl_vars['active_tab'], 'populaires')
         self.assertEqual(str(tmpl_vars['populaire']), populare_id)
+
+
+class TestPopulaireEntry(unittest.TestCase):
+    """Unit tests for populaire pre-registration form handler & views.
+    """
+    def _get_target_class(self):
+        from ..views.site.populaire import PopulaireEntry
+        return PopulaireEntry
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_redirect_url(self):
+        """_redirect_url returns expected populaire page URL
+        """
+        self.config.add_route('populaire', '/populaires/{short_name}')
+        request = testing.DummyRequest()
+        entry = self._make_one(request)
+        url = entry._redirect_url('VicPop')
+        self.assertEqual(url, 'http://example.com/populaires/VicPop')
+
+    def test_show(self):
+        """show returns expected template variables
+        """
+        from ..models import Populaire
+        self.config.add_route('populaire', '/populaires/{short_name}')
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        populare_id = str(populaire)
+        with transaction.manager:
+            DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        entry = self._make_one(request)
+        tmpl_vars = entry.show(MagicMock(name='form'))
+        self.assertEqual(tmpl_vars['active_tab'], 'populaires')
+        self.assertIn('brevets', tmpl_vars)
+        self.assertIn('populaires', tmpl_vars)
+        self.assertEqual(str(tmpl_vars['populaire']), populare_id)
+        self.assertEqual(
+            tmpl_vars['cancel_url'], 'http://example.com/populaires/VicPop')
+
+    def test_register_success_duplicate_rider(self):
+        """valid entry w/ duplicate rider name & email sets expected flash msgs
+        """
+        from ..models import (
+            Populaire,
+            PopulaireRider,
+            )
+        self.config.add_route('populaire', '/populaires/{short_name}')
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        rider = PopulaireRider(
+            email='tom@example.com',
+            first_name='Tom',
+            last_name='Dickson',
+            distance=100,
+            comment='',
+            )
+        populaire.riders.append(rider)
+        with transaction.manager:
+            DBSession.add(populaire)
+            DBSession.add(rider)
+            populaire_id = populaire.id
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        entry = self._make_one(request)
+        url = entry.register_success({
+            'email': 'tom@example.com',
+            'first_name': 'Tom',
+            'last_name': 'Dickson',
+            'populaire': populaire_id,
+            })
+        self.assertEqual(url.location, 'http://example.com/populaires/VicPop')
+        self.assertEqual(
+            request.session.pop_flash(),
+            ['duplicate', 'Tom Dickson', 'tom@example.com'])
+
+    def test_register_success_new_rider(self):
+        """valid entry for new rider adds rider to db & sets exp flash msgs
+        """
+        from ..models import (
+            Populaire,
+            PopulaireRider,
+            )
+        self.config.add_route('populaire', '/populaires/{short_name}')
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+            populaire_id = populaire.id
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        entry = self._make_one(request)
+        url = entry.register_success({
+            'email': 'fred@example.com',
+            'first_name': 'Fred',
+            'last_name': 'Dickson',
+            'comment': 'Sunshine Man',
+            'distance': 100,
+            'populaire': populaire_id,
+            })
+        rider = DBSession.query(PopulaireRider).first()
+        self.assertEqual(rider.email, 'fred@example.com')
+        self.assertEqual(rider.full_name, 'Fred "Sunshine Man" Dickson')
+        self.assertEqual(rider.lowercase_last_name, 'dickson')
+        self.assertEqual(rider.distance, 100)
+        self.assertEqual(url.location, 'http://example.com/populaires/VicPop')
+        self.assertEqual(
+            request.session.pop_flash(), [
+                'success',
+                'fred@example.com',
+                'http://www.randonneurs.bc.ca/VicPop/VicPop11_registration.pdf',
+                ])
+
+    def test_failure(self):
+        """populaire entry form validation failure returns expected tmpl_vars
+        """
+        self.config.add_route('populaire', '/populaires/{short_name}')
+        from ..models import Populaire
+        self.config.add_route('populaire', '/populaires/{short_name}')
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        populare_id = str(populaire)
+        with transaction.manager:
+            DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        entry = self._make_one(request)
+        tmpl_vars = entry.failure(MagicMock(name='ValidationError'))
+        self.assertEqual(tmpl_vars['active_tab'], 'populaires')
+        self.assertIn('brevets', tmpl_vars)
+        self.assertIn('populaires', tmpl_vars)
+        self.assertEqual(str(tmpl_vars['populaire']), populare_id)
+        self.assertEqual(
+            tmpl_vars['cancel_url'], 'http://example.com/populaires/VicPop')
