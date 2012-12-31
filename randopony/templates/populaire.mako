@@ -8,7 +8,6 @@
 ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 </%block>
 
-
 <div class="tab-pane active">
   <p>
     <h3>${populaire.event_name}</h3>
@@ -26,8 +25,8 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     <a href="${populaire.start_map_url}" target="_blank">Map</a>
   </p>
 
-  %if populaire.registration_closed:
-  ${self.registration_closed()}
+  %if registration_closed:
+  ${self.registration_closed_msg()}
   %endif
 
   %if request.session.peek_flash():
@@ -42,7 +41,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     <p>
       Nobody has pre-registered
     </p>
-    %if not populaire.registration_closed:
+    %if not registration_closed:
     <p>
       <a class="btn btn-success"
          href="${request.route_url('populaire.entry',
@@ -52,7 +51,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     </p>
     %endif
   %else:
-    %if not populaire.registration_closed:
+    %if not registration_closed:
     <p>
       <a class="btn btn-success"
          href="${request.route_url('populaire.entry',
@@ -101,11 +100,11 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 </div>
 
 
-<%def name="registration_closed()">
+<%def name="registration_closed_msg()">
 <div class="row">
   <div class="span6 notice">
     <p>
-      Pre-registration for this populaier is closed.
+      Pre-registration for this populaire is closed.
       But you can still print out the <a href="${populaire.entry_form_url}"
       title="Event Waiver Form">event waiver form</a> from the club web site,
       read it carefully,

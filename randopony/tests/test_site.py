@@ -210,10 +210,12 @@ class TestPopulaireViews(unittest.TestCase):
         self.assertEqual(tmpl_vars['active_tab'], 'populaires')
         self.assertEqual(tmpl_vars['admin_email'], 'tom@example.com')
 
-    def test_populaire_page(self):
-        """populaire_page view has expected tmpl_vars
+    def test_populaire_page_registration_open(self):
+        """populaire_page view has expected tmpl_vars when registration is open
         """
         from ..models import Populaire
+        from ..views.site import populaire as pop_module
+        self.config.registry.settings['timezone'] = 'Canada/Pacific'
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -232,9 +234,40 @@ class TestPopulaireViews(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
-        tmpl_vars = views.populaire_page()
+        with patch.object(pop_module, 'datetime') as mock_datetime:
+            mock_datetime.utcnow.return_value = datetime(2011, 3, 22, 23, 18)
+            tmpl_vars = views.populaire_page()
         self.assertEqual(tmpl_vars['active_tab'], 'populaires')
         self.assertEqual(str(tmpl_vars['populaire']), populare_id)
+        self.assertFalse(tmpl_vars['registration_closed'])
+
+    def test_populaire_page_registration_closed(self):
+        """populaire_page view has expected tmpl_vars when registration closed
+        """
+        from ..models import Populaire
+        from ..views.site import populaire as pop_module
+        self.config.registry.settings['timezone'] = 'Canada/Pacific'
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        views = self._make_one(request)
+        with patch.object(pop_module, 'datetime') as mock_datetime:
+            mock_datetime.utcnow.return_value = datetime(2011, 3, 25, 23, 24)
+            tmpl_vars = views.populaire_page()
+        self.assertTrue(tmpl_vars['registration_closed'])
 
 
 class TestPopulaireEntry(unittest.TestCase):

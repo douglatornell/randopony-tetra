@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """RandoPony public site populaire views.
 """
+from datetime import datetime
 from deform import Button
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
-from sqlalchemy.orm.exc import NoResultFound
+import pytz
 import transaction
 from .core import SiteViews
 from ...models import (
     Brevet,
     EmailAddress,
-    Link,
     Populaire,
     PopulaireEntrySchema,
     PopulaireRider,
@@ -47,11 +47,21 @@ class PopulaireViews(SiteViews):
     @view_config(route_name='populaire', renderer='populaire.mako')
     def populaire_page(self):
         populaire = get_populaire(self.request.matchdict['short_name'])
+        registration_closed = self._registration_closed(
+            populaire.registration_end)
         self.tmpl_vars.update({
             'active_tab': 'populaires',
             'populaire': populaire,
+            'registration_closed': registration_closed,
         })
         return self.tmpl_vars
+
+    def _registration_closed(self, registration_end):
+        tz = pytz.timezone(self.request.registry.settings['timezone'])
+        utc_registration_end = (
+            tz.localize(registration_end).astimezone(pytz.utc))
+        utc_now = pytz.utc.localize(datetime.utcnow())
+        return utc_now > utc_registration_end
 
 
 @view_config(
