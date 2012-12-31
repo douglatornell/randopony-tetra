@@ -206,6 +206,7 @@ class TestPopulaireViews(unittest.TestCase):
         """populaire_list view has expected tmpl_vars
         """
         from ..models import EmailAddress
+        self.config.registry.settings['timezone'] = 'Canada/Pacific'
         email = EmailAddress(key='admin_email', email='tom@example.com')
         with transaction.manager:
             DBSession.add(email)
@@ -273,6 +274,62 @@ class TestPopulaireViews(unittest.TestCase):
             mock_datetime.utcnow.return_value = datetime(2011, 3, 25, 23, 24)
             tmpl_vars = views.populaire_page()
         self.assertTrue(tmpl_vars['registration_closed'])
+
+    def test_populaire_page_event_started(self):
+        """populaire_page view has expected tmpl_vars when event has started
+        """
+        from ..models import Populaire
+        from ..views.site import populaire as pop_module
+        self.config.registry.settings['timezone'] = 'Canada/Pacific'
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        views = self._make_one(request)
+        with patch.object(pop_module, 'datetime') as mock_datetime:
+            mock_datetime.utcnow.return_value = datetime(2011, 3, 27, 17, 1)
+            tmpl_vars = views.populaire_page()
+        self.assertTrue(tmpl_vars['event_started'])
+
+    def test_populaire_page_event_not_started(self):
+        """populaire_page view has exp tmpl_vars when event has yet to start
+        """
+        from ..models import Populaire
+        from ..views.site import populaire as pop_module
+        self.config.registry.settings['timezone'] = 'Canada/Pacific'
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        views = self._make_one(request)
+        with patch.object(pop_module, 'datetime') as mock_datetime:
+            mock_datetime.utcnow.return_value = datetime(2011, 3, 27, 16, 59)
+            tmpl_vars = views.populaire_page()
+        self.assertFalse(tmpl_vars['event_started'])
 
 
 class TestPopulaireEntry(unittest.TestCase):

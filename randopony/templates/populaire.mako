@@ -25,7 +25,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     <a href="${populaire.start_map_url}" target="_blank">Map</a>
   </p>
 
-  %if registration_closed:
+  %if registration_closed and not event_started:
   ${self.registration_closed_msg()}
   %endif
 

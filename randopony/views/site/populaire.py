@@ -32,6 +32,7 @@ class PopulaireViews(SiteViews):
     """
     def __init__(self, request):
         super(PopulaireViews, self).__init__(request)
+        self.tz = pytz.timezone(request.registry.settings['timezone'])
 
     @view_config(route_name='populaire.list', renderer='populaire-list.mako')
     def populaire_list(self):
@@ -49,19 +50,26 @@ class PopulaireViews(SiteViews):
         populaire = get_populaire(self.request.matchdict['short_name'])
         registration_closed = self._registration_closed(
             populaire.registration_end)
+        event_started = self._event_started(populaire.date_time)
         self.tmpl_vars.update({
             'active_tab': 'populaires',
             'populaire': populaire,
             'registration_closed': registration_closed,
+            'event_started': event_started,
         })
         return self.tmpl_vars
 
     def _registration_closed(self, registration_end):
-        tz = pytz.timezone(self.request.registry.settings['timezone'])
         utc_registration_end = (
-            tz.localize(registration_end).astimezone(pytz.utc))
+            self.tz.localize(registration_end).astimezone(pytz.utc))
         utc_now = pytz.utc.localize(datetime.utcnow())
         return utc_now > utc_registration_end
+
+    def _event_started(self, start_date_time):
+        utc_start_date_time = (
+            self.tz.localize(start_date_time).astimezone(pytz.utc))
+        utc_now = pytz.utc.localize(datetime.utcnow())
+        return utc_now > utc_start_date_time
 
 
 @view_config(
