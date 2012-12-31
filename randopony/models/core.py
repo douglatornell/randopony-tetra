@@ -81,12 +81,8 @@ class EventMixin(object):
         today = datetime.today()
         today = today.replace(hour=0, minute=0, second=0, microsecond=0)
         days_ago = today - timedelta(days=recent_days)
-        brevets = (DBSession.query(cls)
+        events = (DBSession.query(cls)
             .filter(cls.date_time >= days_ago)
             .order_by(cls.date_time)
             )
-        return brevets
-
-    @property
-    def registration_closed(self):
-        return datetime.now() > self.registration_end
+        return events
