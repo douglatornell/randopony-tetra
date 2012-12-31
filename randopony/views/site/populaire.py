@@ -47,15 +47,9 @@ class PopulaireViews(SiteViews):
     @view_config(route_name='populaire', renderer='populaire.mako')
     def populaire_page(self):
         populaire = get_populaire(self.request.matchdict['short_name'])
-        entry_form_url = (
-            populaire.entry_form_url
-            or DBSession.query(Link)
-                .filter_by(key='entry_form')
-                .one().url)
         self.tmpl_vars.update({
             'active_tab': 'populaires',
             'populaire': populaire,
-            'entry_form_url': entry_form_url,
         })
         return self.tmpl_vars
 
@@ -120,12 +114,6 @@ class PopulaireEntry(FormView):
                 DBSession.add(rider)
                 self.request.session.flash('success')
                 self.request.session.flash(rider.email)
-                entry_form_url = (
-                    populaire.entry_form_url
-                    or DBSession.query(Link)
-                        .filter_by(key='entry_form')
-                        .one().url)
-                self.request.session.flash(entry_form_url)
         return HTTPFound(self._redirect_url(pop_short_name))
 
     def failure(self, e):

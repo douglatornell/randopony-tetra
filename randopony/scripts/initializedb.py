@@ -11,6 +11,8 @@ from pyramid.paster import (
 from sqlalchemy import engine_from_config
 from ..models import (
     Administrator,
+    EmailAddress,
+    Link,
     )
 from ..models.meta import (
     Base,
@@ -34,6 +36,13 @@ def main(argv=sys.argv):
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
+    # Deployment specific initialization
+    admin = Administrator(persona_email='djl@douglatornell.ca')
+    admin_email = EmailAddress(key='admin_email', email='djl@douglatornell.ca')
+    entry_form_url = Link(
+        key='entry_form',
+        url='http://www.randonneurs.bc.ca/organize/eventform.pdf')
     with transaction.manager:
-        admin = Administrator(persona_email='djl@douglatornell.ca')
         DBSession.add(admin)
+        DBSession.add(admin_email)
+        DBSession.add(entry_form_url)

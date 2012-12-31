@@ -15,8 +15,14 @@ from sqlalchemy import (
     Text,
     )
 from sqlalchemy.orm import relationship
-from .core import EventMixin
-from .meta import Base
+from .core import (
+    EventMixin,
+    Link,
+    )
+from .meta import (
+    Base,
+    DBSession,
+    )
 
 
 class Populaire(EventMixin, Base):
@@ -36,7 +42,7 @@ class Populaire(EventMixin, Base):
         )
 
     def __init__(self, event_name, short_name, distance, date_time,
-        start_locn, organizer_email, registration_end, entry_form_url):
+        start_locn, organizer_email, registration_end, entry_form_url=None):
         self.event_name = event_name
         self.short_name = short_name
         self.distance = distance
@@ -44,7 +50,11 @@ class Populaire(EventMixin, Base):
         self.start_locn = start_locn
         self.organizer_email = organizer_email
         self.registration_end = registration_end
-        self.entry_form_url = entry_form_url
+        self.entry_form_url = (
+            entry_form_url
+            or DBSession.query(Link)
+            .filter_by(key='entry_form')
+            .one().url)
         self.start_map_url = (
             'https://maps.google.com/maps?q={}'
             .format('+'.join(self.start_locn.split())))

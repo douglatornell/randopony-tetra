@@ -10,6 +10,7 @@ except ImportError:                  # pragma: no cover
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
+from ..models import Link
 from ..models.meta import (
     Base,
     DBSession,
@@ -310,6 +311,48 @@ class TestPopulaire(unittest.TestCase):
                            'VicPop11_registration.pdf',
             )
         self.assertEqual(repr(populaire), '<Populaire(VicPop)>')
+
+    def test_entry_form_url(self):
+        """Populaire entry form URL specified
+        """
+        populaire = self._make_one(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        self.assertEqual(
+            populaire.entry_form_url,
+            'http://www.randonneurs.bc.ca/VicPop/VicPop11_registration.pdf')
+
+    def test_default_entry_form_url(self):
+        """Populaire entry form URL defaults to standard club form
+        """
+        entry_form_link = Link(
+            key='entry_form',
+            url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(entry_form_link)
+        populaire = self._make_one(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            )
+        self.assertEqual(
+            populaire.entry_form_url,
+            'http://www.randonneurs.bc.ca/organize/eventform.pdf')
 
 
 class TestPopulaireRider(unittest.TestCase):

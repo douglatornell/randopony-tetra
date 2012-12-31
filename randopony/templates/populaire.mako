@@ -106,7 +106,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
   <div class="span6 notice">
     <p>
       Pre-registration for this populaier is closed.
-      But you can still print out the <a href="${entry_form_url}"
+      But you can still print out the <a href="${populaire.entry_form_url}"
       title="Event Waiver Form">event waiver form</a> from the club web site,
       read it carefully,
       fill it out,
@@ -133,7 +133,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     </p>
     <p>
       You can print out the
-      <a href="${notice_data[2]}" title="Event Waiver Form">
+      <a href="${populaire.entry_form_url}" title="Event Waiver Form">
         event waiver form
       </a>
       from the club web site,
