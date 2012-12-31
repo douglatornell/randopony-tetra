@@ -8,6 +8,9 @@
 <h4>Date and Start Time</h4>
 <p>${"{:%a %d-%b-%Y %H:%M}".format(populaire.date_time)}</p>
 
+<h4>Distance(s)</h4>
+<p>${populaire.distance}</p>
+
 <h4>Start Location</h4>
 <p>
   ${populaire.start_locn}
