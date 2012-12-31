@@ -64,12 +64,17 @@ class PopulaireViews(SiteViews):
         return utc_now > utc_registration_end
 
 
+def maybe_include_distance(node, kw):
+    if not kw.get('include_distance'):
+        del node['distance']
+
+
 @view_config(
     route_name='populaire.entry',
     renderer='populaire-entry.mako',
     )
 class PopulaireEntry(FormView):
-    schema = PopulaireEntrySchema()
+    schema = PopulaireEntrySchema(after_bind=maybe_include_distance)
     buttons = (
         Button(name='register', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),
@@ -77,6 +82,19 @@ class PopulaireEntry(FormView):
 
     def _redirect_url(self, short_name):
         return self.request.route_url('populaire', short_name=short_name)
+
+    def get_bind_data(self):
+        data = super(PopulaireEntry, self).get_bind_data()
+        populaire = get_populaire(self.request.matchdict['short_name'])
+        distances = [
+            (int(d.split()[0]), d.strip())
+            for d in populaire.distance.split(',')
+            ]
+        data.update({
+            'distances': distances,
+            'include_distance': len(distances) > 1,
+            })
+        return data
 
     def show(self, form):
         tmpl_vars = super(PopulaireEntry, self).show(form)
@@ -111,15 +129,19 @@ class PopulaireEntry(FormView):
             self.request.session.flash(appstruct['email'])
         else:
             # New rider registration
-            rider = PopulaireRider(
-                email=appstruct['email'],
-                first_name=appstruct['first_name'],
-                last_name=appstruct['last_name'],
-                distance=60,
-                comment=appstruct['comment'],
-                )
             with transaction.manager:
                 populaire = get_populaire(pop_short_name)
+                try:
+                    distance = appstruct['distance']
+                except KeyError:
+                    distance = populaire.distance.split()[0]
+                rider = PopulaireRider(
+                    email=appstruct['email'],
+                    first_name=appstruct['first_name'],
+                    last_name=appstruct['last_name'],
+                    distance=distance,
+                    comment=appstruct['comment'],
+                    )
                 populaire.riders.append(rider)
                 DBSession.add(rider)
                 self.request.session.flash('success')

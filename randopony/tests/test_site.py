@@ -299,6 +299,56 @@ class TestPopulaireEntry(unittest.TestCase):
         url = entry._redirect_url('VicPop')
         self.assertEqual(url, 'http://example.com/populaires/VicPop')
 
+    def test_get_bind_data(self):
+        """get_bind_data returns expected data dict for multi-distance event
+        """
+        from ..models import Populaire
+        self.config.add_route('populaire', '/populaires/{short_name}')
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        entry = self._make_one(request)
+        data = entry.get_bind_data()
+        self.assertEqual(data['distances'], [(50, '50 km'), (100, '100 km')])
+        self.assertTrue(data['include_distance'])
+
+    def test_get_bind_data_exclude_distance(self):
+        """get_bind_data returns expected data dict for single distance event
+        """
+        from ..models import Populaire
+        self.config.add_route('populaire', '/populaires/{short_name}')
+        populaire = Populaire(
+            event_name="New Year's Populaire",
+            short_name='NewYearsPop',
+            distance='60 km',
+            date_time=datetime(2013, 1, 1, 10, 0),
+            start_locn='Kelseys Family Restaurant, 325 Burnside Rd W, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2012, 12, 31, 17, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'NewYearsPop'
+        entry = self._make_one(request)
+        data = entry.get_bind_data()
+        self.assertEqual(data['distances'], [(60, '60 km')])
+        self.assertFalse(data['include_distance'])
+
     def test_show(self):
         """show returns expected template variables
         """
@@ -417,11 +467,41 @@ class TestPopulaireEntry(unittest.TestCase):
         self.assertEqual(rider.distance, 100)
         self.assertEqual(url.location, 'http://example.com/populaires/VicPop')
         self.assertEqual(
-            request.session.pop_flash(), [
-                'success',
-                'fred@example.com',
-                'http://www.randonneurs.bc.ca/VicPop/VicPop11_registration.pdf',
-                ])
+            request.session.pop_flash(), ['success', 'fred@example.com'])
+
+    def test_register_success_single_distance(self):
+        """valid entry for single dstance populaire sets distance correctly
+        """
+        from ..models import (
+            Populaire,
+            PopulaireRider,
+            )
+        self.config.add_route('populaire', '/populaires/{short_name}')
+        populaire = Populaire(
+            event_name="New Year's Populaire",
+            short_name='NewYearsPop',
+            distance='60 km',
+            date_time=datetime(2013, 1, 1, 10, 0),
+            start_locn='Kelseys Family Restaurant, 325 Burnside Rd W, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2012, 12, 31, 17, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+            populaire_id = populaire.id
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'NewYearsPop'
+        entry = self._make_one(request)
+        entry.register_success({
+            'email': 'fred@example.com',
+            'first_name': 'Fred',
+            'last_name': 'Dickson',
+            'comment': 'Sunshine Man',
+            'populaire': populaire_id,
+            })
+        rider = DBSession.query(PopulaireRider).first()
+        self.assertEqual(rider.distance, 60)
 
     def test_failure(self):
         """populaire entry form validation failure returns expected tmpl_vars
