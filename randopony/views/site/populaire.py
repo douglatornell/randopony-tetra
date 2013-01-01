@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 """RandoPony public site populaire views.
 """
-from datetime import datetime
+from datetime import (
+    datetime,
+    timedelta,
+    )
 from deform import Button
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
+from pyramid.renderers import render
+from pyramid.response import Response
 from pyramid.view import view_config
 import pytz
 import transaction
@@ -12,6 +17,7 @@ from .core import SiteViews
 from ...models import (
     Brevet,
     EmailAddress,
+    Link,
     Populaire,
     PopulaireEntrySchema,
     PopulaireRider,
@@ -48,6 +54,9 @@ class PopulaireViews(SiteViews):
     @view_config(route_name='populaire', renderer='populaire.mako')
     def populaire_page(self):
         populaire = get_populaire(self.request.matchdict['short_name'])
+        if self._in_past(populaire.date_time):
+            body = self._moved_on_page(populaire)
+            return Response(body, status='200 OK')
         registration_closed = self._registration_closed(
             populaire.registration_end)
         event_started = self._event_started(populaire.date_time)
@@ -70,6 +79,32 @@ class PopulaireViews(SiteViews):
             self.tz.localize(start_date_time).astimezone(pytz.utc))
         utc_now = pytz.utc.localize(datetime.utcnow())
         return utc_now > utc_start_date_time
+
+    def _in_past(self, start_date_time, recent_days=7):
+        today = datetime.today()
+        today = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        days_ago = today - timedelta(days=recent_days)
+        return start_date_time < days_ago
+
+    def _moved_on_page(self, populaire):
+        results_link = (
+            DBSession.query(Link)
+            .filter_by(key='results_link')
+            .first().url
+            )
+        results_link = results_link.replace(
+            '{year}', str(populaire.date_time.year)[-2:])
+        body = render(
+            'moved-on.mako',
+            {
+            'active_tab': 'populaires',
+                'brevets': self.tmpl_vars['brevets'],
+                'populaires': self.tmpl_vars['populaires'],
+                'event': '{0} {0.date_time:%d-%b-%Y}'.format(populaire),
+                'results_link': results_link,
+            },
+            request=self.request)
+        return body
 
 
 @view_config(

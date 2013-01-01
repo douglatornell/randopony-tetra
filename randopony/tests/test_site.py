@@ -242,6 +242,7 @@ class TestPopulaireViews(unittest.TestCase):
         views = self._make_one(request)
         with patch.object(pop_module, 'datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = datetime(2011, 3, 22, 23, 18)
+            mock_datetime.today.return_value = datetime(2011, 3, 22, 23, 18)
             tmpl_vars = views.populaire_page()
         self.assertEqual(tmpl_vars['active_tab'], 'populaires')
         self.assertEqual(str(tmpl_vars['populaire']), populare_id)
@@ -272,6 +273,7 @@ class TestPopulaireViews(unittest.TestCase):
         views = self._make_one(request)
         with patch.object(pop_module, 'datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = datetime(2011, 3, 25, 23, 24)
+            mock_datetime.today.return_value = datetime(2011, 3, 25, 23, 24)
             tmpl_vars = views.populaire_page()
         self.assertTrue(tmpl_vars['registration_closed'])
 
@@ -300,6 +302,7 @@ class TestPopulaireViews(unittest.TestCase):
         views = self._make_one(request)
         with patch.object(pop_module, 'datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = datetime(2011, 3, 27, 17, 1)
+            mock_datetime.today.return_value = datetime(2011, 3, 27, 17, 1)
             tmpl_vars = views.populaire_page()
         self.assertTrue(tmpl_vars['event_started'])
 
@@ -328,8 +331,93 @@ class TestPopulaireViews(unittest.TestCase):
         views = self._make_one(request)
         with patch.object(pop_module, 'datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = datetime(2011, 3, 27, 16, 59)
+            mock_datetime.today.return_value = datetime(2011, 3, 27, 16, 59)
             tmpl_vars = views.populaire_page()
         self.assertFalse(tmpl_vars['event_started'])
+
+    def test_populaire_page_past_event(self):
+        """populaire_page view calls _moved_on_page for event >7 days ago
+        """
+        from ..models import (
+            Link,
+            Populaire,
+            )
+        from ..views.site import populaire as pop_module
+        self.config.registry.settings['timezone'] = 'Canada/Pacific'
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        results_link = Link(
+            key='results_link',
+            url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+            DBSession.add(results_link)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        views = self._make_one(request)
+        views._moved_on_page = MagicMock('_moved_on', return_value='moved-on body')
+        with patch.object(pop_module, 'datetime') as mock_datetime:
+            mock_datetime.today.return_value = datetime(2011, 4, 7, 15, 52)
+            resp = views.populaire_page()
+        self.assertEqual(resp.body, b'moved-on body')
+
+    def test_populaire_moved_on_page(self):
+        """_moved_on_page calls render with expected args
+        """
+        from ..models import (
+            Link,
+            Populaire,
+            )
+        from ..views.site import populaire as pop_module
+        self.config.registry.settings['timezone'] = 'Canada/Pacific'
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        results_link = Link(
+            key='results_link',
+            url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
+            )
+        with transaction.manager:
+            DBSession.add(results_link)
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'VicPop'
+        views = self._make_one(request)
+        with patch.object(pop_module, 'datetime') as mock_datetime, \
+             patch.object(pop_module, 'render') as mock_render:
+            mock_datetime.today.return_value = datetime(2011, 4, 7, 15, 52)
+            views._moved_on_page(populaire)
+        tmpl_name = mock_render.call_args[0][0]
+        tmpl_vars = mock_render.call_args[0][1]
+        kwargs = mock_render.call_args[1]
+        self.assertEqual(tmpl_name, 'moved-on.mako')
+        self.assertIn('brevets', tmpl_vars)
+        self.assertIn('populaires', tmpl_vars)
+        self.assertEqual(tmpl_vars['active_tab'], 'populaires')
+        self.assertEqual(tmpl_vars['event'], 'VicPop 27-Mar-2011')
+        self.assertEqual(
+            tmpl_vars['results_link'],
+            'http://randonneurs.bc.ca/results/11_times/11_times.html')
+        self.assertEqual(kwargs['request'], request)
 
 
 class TestPopulaireEntry(unittest.TestCase):
