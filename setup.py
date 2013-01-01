@@ -14,6 +14,7 @@ requires = [
     'pyramid_deform',
     'pyramid_persona',
     'pyramid_tm',
+    'pytz',
     'SQLAlchemy',
     'transaction',
     'waitress',
