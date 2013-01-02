@@ -14,6 +14,7 @@ except ImportError:                  # pragma: no cover
         patch,
         )
 from pyramid import testing
+from pyramid_mailer import get_mailer
 from sqlalchemy import create_engine
 import transaction
 from ..models.meta import (
@@ -437,10 +438,22 @@ class TestPopulaireEntry(unittest.TestCase):
         return self._get_target_class()(*args, **kwargs)
 
     def setUp(self):
-        self.config = testing.setUp()
+        from ..models import EmailAddress
+        self.config = testing.setUp(
+            settings={
+                'mako.directories': 'randopony:templates',
+            })
+        self.config.include('pyramid_mailer.testing')
+        self.config.add_route('populaire', '/populaires/{short_name}')
         engine = create_engine('sqlite://')
         DBSession.configure(bind=engine)
         Base.metadata.create_all(engine)
+        from_randopony = EmailAddress(
+            key='from_randopony',
+            email='randopony@randonneurs.bc.ca',
+            )
+        with transaction.manager:
+            DBSession.add(from_randopony)
 
     def tearDown(self):
         DBSession.remove()
@@ -449,7 +462,6 @@ class TestPopulaireEntry(unittest.TestCase):
     def test_redirect_url(self):
         """_redirect_url returns expected populaire page URL
         """
-        self.config.add_route('populaire', '/populaires/{short_name}')
         request = testing.DummyRequest()
         entry = self._make_one(request)
         url = entry._redirect_url('VicPop')
@@ -459,7 +471,6 @@ class TestPopulaireEntry(unittest.TestCase):
         """get_bind_data returns expected data dict for multi-distance event
         """
         from ..models import Populaire
-        self.config.add_route('populaire', '/populaires/{short_name}')
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -485,7 +496,6 @@ class TestPopulaireEntry(unittest.TestCase):
         """get_bind_data returns expected data dict for single distance event
         """
         from ..models import Populaire
-        self.config.add_route('populaire', '/populaires/{short_name}')
         populaire = Populaire(
             event_name="New Year's Populaire",
             short_name='NewYearsPop',
@@ -509,7 +519,6 @@ class TestPopulaireEntry(unittest.TestCase):
         """show returns expected template variables
         """
         from ..models import Populaire
-        self.config.add_route('populaire', '/populaires/{short_name}')
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -540,10 +549,10 @@ class TestPopulaireEntry(unittest.TestCase):
         """valid entry w/ duplicate rider name & email sets expected flash msgs
         """
         from ..models import (
+            EmailAddress,
             Populaire,
             PopulaireRider,
             )
-        self.config.add_route('populaire', '/populaires/{short_name}')
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -566,8 +575,8 @@ class TestPopulaireEntry(unittest.TestCase):
         populaire.riders.append(rider)
         with transaction.manager:
             DBSession.add(populaire)
-            DBSession.add(rider)
             populaire_id = populaire.id
+            DBSession.add(rider)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         entry = self._make_one(request)
@@ -586,10 +595,10 @@ class TestPopulaireEntry(unittest.TestCase):
         """valid entry for new rider adds rider to db & sets exp flash msgs
         """
         from ..models import (
+            EmailAddress,
             Populaire,
             PopulaireRider,
             )
-        self.config.add_route('populaire', '/populaires/{short_name}')
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -629,10 +638,10 @@ class TestPopulaireEntry(unittest.TestCase):
         """valid entry for single dstance populaire sets distance correctly
         """
         from ..models import (
+            EmailAddress,
             Populaire,
             PopulaireRider,
             )
-        self.config.add_route('populaire', '/populaires/{short_name}')
         populaire = Populaire(
             event_name="New Year's Populaire",
             short_name='NewYearsPop',
@@ -658,6 +667,57 @@ class TestPopulaireEntry(unittest.TestCase):
             })
         rider = DBSession.query(PopulaireRider).first()
         self.assertEqual(rider.distance, 60)
+
+    def test_register_success_email_to_rider(self):
+        """successful entry sends email to rider
+        """
+        from ..models import (
+            EmailAddress,
+            Populaire,
+            PopulaireRider,
+            )
+        populaire = Populaire(
+            event_name="New Year's Populaire",
+            short_name='NewYearsPop',
+            distance='60 km',
+            date_time=datetime(2013, 1, 1, 10, 0),
+            start_locn='Kelseys Family Restaurant, 325 Burnside Rd W, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2012, 12, 31, 17, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+            populaire_id = populaire.id
+            populaire_organizer_email = populaire.organizer_email
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'NewYearsPop'
+        mailer = get_mailer(request)
+        entry = self._make_one(request)
+        entry.register_success({
+            'email': 'fred@example.com',
+            'first_name': 'Fred',
+            'last_name': 'Dickson',
+            'comment': 'Sunshine Man',
+            'populaire': populaire_id,
+            })
+        msg = mailer.queue[0]
+        self.assertEqual(
+            msg.subject, 'Pre-registration Confirmation for NewYearsPop')
+        from_randopony = (
+            DBSession.query(EmailAddress)
+            .filter_by(key='from_randopony').first().email)
+        self.assertEqual(msg.sender, from_randopony)
+        self.assertEqual(msg.recipients, ['fred@example.com'])
+        self.assertEqual(msg.extra_headers['Sender'], from_randopony)
+        self.assertEqual(
+            msg.extra_headers['Reply-To'], populaire_organizer_email)
+        self.assertIn('NewYearsPop on Tue 01-Jan-2013', msg.body)
+        self.assertIn(
+            'list at <http://example.com/populaires/NewYearsPop>', msg.body)
+        self.assertIn(
+            'web site <http://www.randonneurs.bc.ca/organize/eventform.pdf>, '
+            'read it', msg.body)
 
     def test_failure(self):
         """populaire entry form validation failure returns expected tmpl_vars

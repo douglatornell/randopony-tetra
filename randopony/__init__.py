@@ -47,6 +47,7 @@ def main(global_config, **settings):  # pragma: no cover
         root_factory=Root)
     config.add_static_view('static', 'static', cache_max_age=3600)
     auth_config(config, settings)
+    config.include('pyramid_mailer')
     map_routes(config)
     config.scan()
     return config.make_wsgi_app()

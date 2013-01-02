@@ -12,6 +12,7 @@ requires = [
     'pyramid',
     'pyramid_debugtoolbar',
     'pyramid_deform',
+    'pyramid_mailer',
     'pyramid_persona',
     'pyramid_tm',
     'pytz',

@@ -8,6 +8,8 @@ from datetime import (
 from deform import Button
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
+from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message
 from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.view import view_config
@@ -97,7 +99,7 @@ class PopulaireViews(SiteViews):
         body = render(
             'moved-on.mako',
             {
-            'active_tab': 'populaires',
+                'active_tab': 'populaires',
                 'brevets': self.tmpl_vars['brevets'],
                 'populaires': self.tmpl_vars['populaires'],
                 'event': '{0} {0.date_time:%d-%b-%Y}'.format(populaire),
@@ -171,6 +173,7 @@ class PopulaireEntry(FormView):
             self.request.session.flash(appstruct['email'])
         else:
             # New rider registration
+            mailer = get_mailer(self.request)
             with transaction.manager:
                 populaire = get_populaire(pop_short_name)
                 try:
@@ -188,6 +191,8 @@ class PopulaireEntry(FormView):
                 DBSession.add(rider)
                 self.request.session.flash('success')
                 self.request.session.flash(rider.email)
+                message = self._rider_message(populaire, rider)
+                mailer.send_to_queue(message)
         return HTTPFound(self._redirect_url(pop_short_name))
 
     def failure(self, e):
@@ -202,3 +207,27 @@ class PopulaireEntry(FormView):
                 self.request.matchdict['short_name']),
             })
         return tmpl_vars
+
+    def _rider_message(self, populaire, rider):
+        from_randopony = (
+            DBSession.query(EmailAddress)
+            .filter_by(key='from_randopony')
+            .first().email
+            )
+        pop_page_url = self._redirect_url(populaire.short_name)
+        message = Message(
+            subject='Pre-registration Confirmation for {0}'
+                .format(populaire),
+            sender=from_randopony,
+            recipients=[rider.email],
+            extra_headers={
+                'Sender': from_randopony,
+                'Reply-To': populaire.organizer_email,
+            },
+            body=render(
+                'email/populaire_rider.mako',
+                {
+                    'populaire': populaire,
+                    'pop_page_url': pop_page_url,
+                }))
+        return message

@@ -42,6 +42,10 @@ def main(argv=sys.argv):
         key='admin_email',
         email='djl@douglatornell.ca',
         )
+    from_randopony = EmailAddress(
+        key='from_randopony',
+        email='randopony@randonneurs.bc.ca',
+        )
     entry_form_url = Link(
         key='entry_form',
         url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
@@ -52,8 +56,9 @@ def main(argv=sys.argv):
         )
     with transaction.manager:
         DBSession.add_all((
-            # admin,
-            # admin_email,
+            admin,
+            admin_email,
+            from_randopony,
             entry_form_url,
             results_url,
             ))
