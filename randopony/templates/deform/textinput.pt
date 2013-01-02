@@ -5,6 +5,7 @@
                   style style|field.widget.style|None;
                   autofocus autofocus|field.widget.autofocus|None;
                   placeholder placeholder|field.widget.placeholder|None;
+                  help_block help_block|field.widget.help_block|None;
                  "
       tal:omit-tag="">
     <input type="text" name="${name}" value="${cstruct}"
@@ -15,4 +16,5 @@
                            placeholder placeholder;
                           "
            id="${oid}">
+    <span class="help-block">${help_block}</span>
 </span>
