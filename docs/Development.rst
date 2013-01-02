@@ -8,7 +8,8 @@ Development
 Python Versions
 ---------------
 
-RandoPony-tetra is developed and tested with Python 3.3.
+RandoPony-tetra is developed with Python 3.3 and tested with Python 2.7
+and 3.3.
 
 
 .. _DevelopmentEnvironment-section:
@@ -139,15 +140,6 @@ Documentation
 
 The documentation is written using reStructuredText markup,
 and built with Sphinx.
-
-.. note::
-
-   As of early December 2012 an import issue in docutils 0.9.1 prevents Sphinx
-   from working under Python 3.3.
-   The issue appear to have been resolved in the repo and so the 0.10 release
-   should work.
-   Setting up a Python 2.7 or 3.2 virtualenv with Sphinx installed in it is
-   thus required to build the documentation.
 
 Build the docs with:
 
