@@ -38,11 +38,22 @@ def main(argv=sys.argv):
     Base.metadata.create_all(engine)
     # Deployment specific initialization
     admin = Administrator(persona_email='djl@douglatornell.ca')
-    admin_email = EmailAddress(key='admin_email', email='djl@douglatornell.ca')
+    admin_email = EmailAddress(
+        key='admin_email',
+        email='djl@douglatornell.ca',
+        )
     entry_form_url = Link(
         key='entry_form',
-        url='http://www.randonneurs.bc.ca/organize/eventform.pdf')
+        url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+        )
+    results_url = Link(
+        key='results_url',
+        url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
+        )
     with transaction.manager:
-        DBSession.add(admin)
-        DBSession.add(admin_email)
-        DBSession.add(entry_form_url)
+        DBSession.add_all((
+            # admin,
+            # admin_email,
+            entry_form_url,
+            results_url,
+            ))
