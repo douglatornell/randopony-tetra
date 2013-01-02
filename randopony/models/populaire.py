@@ -200,6 +200,15 @@ class PopulaireEntrySchema(CSRFSchema):
         )
     comment = colander.SchemaNode(
         colander.String(),
+        widget=TextInputWidget(
+            template='textinput',
+            placeholder='wit, wisdom, ...',
+            help_block=(
+                'Your comment will appear with your name like: '
+                'Tom "fueled by coffee" Dickson. It is optional. '
+                'Please be sensible and respectful. This is the Internet. '
+                'What is written once can never be unwritten.'),
+            ),
         missing=None,
         )
 
@@ -213,5 +222,6 @@ class PopulaireEntrySchema(CSRFSchema):
 
     distance = colander.SchemaNode(
         colander.Integer(),
+        title='Distance (choose one)',
         widget=deferred_distance_widget,
         )
