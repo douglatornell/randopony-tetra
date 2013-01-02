@@ -145,7 +145,7 @@ Build the docs with:
 
 .. code-block:: sh
 
-   randopony-tetra) tom:randopony-tetra$ (cd docs && make html)
+   (randopony-tetra) tom:randopony-tetra$ (cd docs && make html)
 
 The results are browsable in :file:`randopony-tetra/docs/_build/html/`.
 
