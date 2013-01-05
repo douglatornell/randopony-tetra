@@ -46,22 +46,14 @@ def main(global_config, **settings):  # pragma: no cover
         settings=settings,
         root_factory=Root)
     config.add_static_view('static', 'static', cache_max_age=3600)
-    auth_config(config, settings)
-    config.include('pyramid_mailer')
-    map_routes(config)
-    config.scan()
-    return config.make_wsgi_app()
-
-
-def auth_config(config, settings):    # pragma: no cover
-    """Authentication configuration.
-    """
-    config.include('pyramid_persona')
     authn_policy = AuthTktAuthenticationPolicy(
         settings['persona.secret'],
         # hashalg='sha512',  # required for pyramid>=1.4
         callback=groupfinder)
     config.set_authentication_policy(authn_policy)
+    map_routes(config)
+    config.scan()
+    return config.make_wsgi_app()
 
 
 def map_routes(config):               # pragma: no cover
