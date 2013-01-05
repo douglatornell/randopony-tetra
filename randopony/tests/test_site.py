@@ -668,8 +668,37 @@ class TestPopulaireEntry(unittest.TestCase):
         rider = DBSession.query(PopulaireRider).first()
         self.assertEqual(rider.distance, 60)
 
-    def test_register_success_email_to_rider(self):
-        """successful entry sends email to rider
+    def test_register_success_sends_2_emails(self):
+        """successful entry sends emails to rider and organizer
+        """
+        from ..models import Populaire
+        populaire = Populaire(
+            event_name="New Year's Populaire",
+            short_name='NewYearsPop',
+            distance='60 km',
+            date_time=datetime(2013, 1, 1, 10, 0),
+            start_locn='Kelseys Family Restaurant, 325 Burnside Rd W, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2012, 12, 31, 17, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+            populaire_organizer_email = populaire.organizer_email
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'NewYearsPop'
+        mailer = get_mailer(request)
+        entry = self._make_one(request)
+        entry.register_success({
+            'email': 'fred@example.com',
+            'first_name': 'Fred',
+            'last_name': 'Dickson',
+            'comment': 'Sunshine Man',
+            })
+        self.assertEqual(len(mailer.queue), 2)
+
+    def test_rider_email_message(self):
+        """registration confirmation email to rider has expected content
         """
         from ..models import (
             EmailAddress,
@@ -686,22 +715,20 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
-            populaire_id = populaire.id
-            populaire_organizer_email = populaire.organizer_email
+        rider = PopulaireRider(
+            email='fred@example.com',
+            first_name='Fred',
+            last_name='Dickson',
+            distance=60,
+            comment='',
+            )
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
-        mailer = get_mailer(request)
         entry = self._make_one(request)
-        entry.register_success({
-            'email': 'fred@example.com',
-            'first_name': 'Fred',
-            'last_name': 'Dickson',
-            'comment': 'Sunshine Man',
-            'populaire': populaire_id,
-            })
-        msg = mailer.queue[0]
+        with transaction.manager:
+            DBSession.add(populaire)
+            populaire_organizer_email = populaire.organizer_email
+            msg = entry._rider_message(populaire, rider)
         self.assertEqual(
             msg.subject, 'Pre-registration Confirmation for NewYearsPop')
         from_randopony = (
