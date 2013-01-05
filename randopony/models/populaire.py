@@ -43,7 +43,8 @@ class Populaire(EventMixin, Base):
         )
 
     def __init__(self, event_name, short_name, distance, date_time,
-        start_locn, organizer_email, registration_end, entry_form_url=None):
+        start_locn, organizer_email, registration_end, entry_form_url=None,
+        google_doc_id=None):
         self.event_name = event_name
         self.short_name = short_name
         self.distance = distance
@@ -59,6 +60,7 @@ class Populaire(EventMixin, Base):
         self.start_map_url = (
             'https://maps.google.com/maps?q={}'
             .format('+'.join(self.start_locn.split())))
+        self.google_doc_id = google_doc_id
 
     def __str__(self):
         return '{.short_name}'.format(self)

@@ -193,6 +193,8 @@ class PopulaireEntry(FormView):
                 self.request.session.flash(rider.email)
                 message = self._rider_message(populaire, rider)
                 mailer.send_to_queue(message)
+                message = self._organizer_message(populaire, rider)
+                mailer.send_to_queue(message)
         return HTTPFound(self._redirect_url(pop_short_name))
 
     def failure(self, e):
@@ -217,7 +219,7 @@ class PopulaireEntry(FormView):
         pop_page_url = self._redirect_url(populaire.short_name)
         message = Message(
             subject='Pre-registration Confirmation for {0}'
-                .format(populaire),
+                    .format(populaire),
             sender=from_randopony,
             recipients=[rider.email],
             extra_headers={
@@ -229,5 +231,37 @@ class PopulaireEntry(FormView):
                 {
                     'populaire': populaire,
                     'pop_page_url': pop_page_url,
+                }))
+        return message
+
+    def _organizer_message(self, populaire, rider):
+        from_randopony = (
+            DBSession.query(EmailAddress)
+            .filter_by(key='from_randopony')
+            .first().email
+            )
+        pop_page_url = self._redirect_url(populaire.short_name)
+        rider_list_url = (
+            'https://spreadsheets.google.com/ccc?key={0}'
+            .format(populaire.google_doc_id.split(':')[1]))
+        admin_email = (
+            DBSession.query(EmailAddress)
+            .filter_by(key='admin_email')
+            .first().email
+            )
+        message = Message(
+            subject='{0} has Pre-registered for the {1}'
+                    .format(rider, populaire),
+            sender=from_randopony,
+            recipients=[
+                addr.strip() for addr in populaire.organizer_email.split(',')],
+            body=render(
+                'email/populaire_organizer_entry.mako',
+                {
+                    'rider': rider,
+                    'populaire': populaire,
+                    'pop_page_url': pop_page_url,
+                    'rider_list_url': rider_list_url,
+                    'admin_email': admin_email,
                 }))
         return message

@@ -452,8 +452,12 @@ class TestPopulaireEntry(unittest.TestCase):
             key='from_randopony',
             email='randopony@randonneurs.bc.ca',
             )
+        admin_email = EmailAddress(
+            key='admin_email',
+            email='djl@douglatornell.ca',
+            )
         with transaction.manager:
-            DBSession.add(from_randopony)
+            DBSession.add_all((from_randopony, admin_email))
 
     def tearDown(self):
         DBSession.remove()
@@ -610,6 +614,8 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
+            google_doc_id=
+                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         with transaction.manager:
             DBSession.add(populaire)
@@ -651,6 +657,8 @@ class TestPopulaireEntry(unittest.TestCase):
             organizer_email='mcroy@example.com',
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            google_doc_id=
+                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         with transaction.manager:
             DBSession.add(populaire)
@@ -681,6 +689,8 @@ class TestPopulaireEntry(unittest.TestCase):
             organizer_email='mcroy@example.com',
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            google_doc_id=
+                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         with transaction.manager:
             DBSession.add(populaire)
@@ -714,6 +724,8 @@ class TestPopulaireEntry(unittest.TestCase):
             organizer_email='mcroy@example.com',
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            google_doc_id=
+                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         rider = PopulaireRider(
             email='fred@example.com',
@@ -745,6 +757,136 @@ class TestPopulaireEntry(unittest.TestCase):
         self.assertIn(
             'web site <http://www.randonneurs.bc.ca/organize/eventform.pdf>, '
             'read it', msg.body)
+
+    def test_organizer_email_message_single_distance(self):
+        """reg notify email to org for single dist event has expected content
+        """
+        from ..models import (
+            EmailAddress,
+            Populaire,
+            PopulaireRider,
+            )
+        populaire = Populaire(
+            event_name="New Year's Populaire",
+            short_name='NewYearsPop',
+            distance='60 km',
+            date_time=datetime(2013, 1, 1, 10, 0),
+            start_locn='Kelseys Family Restaurant, 325 Burnside Rd W, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2012, 12, 31, 17, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            google_doc_id=
+                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            )
+        rider = PopulaireRider(
+            email='fred@example.com',
+            first_name='Fred',
+            last_name='Dickson',
+            distance=60,
+            comment='Sunshine Man',
+            )
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'NewYearsPop'
+        entry = self._make_one(request)
+        with transaction.manager:
+            DBSession.add(populaire)
+            populaire_organizer_email = populaire.organizer_email
+            msg = entry._organizer_message(populaire, rider)
+        self.assertEqual(
+            msg.subject, 'Fred Dickson has Pre-registered for the NewYearsPop')
+        from_randopony = (
+            DBSession.query(EmailAddress)
+            .filter_by(key='from_randopony').first().email)
+        self.assertEqual(msg.sender, from_randopony)
+        self.assertEqual(msg.recipients, [populaire_organizer_email])
+        self.assertIn(
+            'Fred "Sunshine Man" Dickson <fred@example.com> '
+            'has pre-registered for the NewYearsPop.',
+            msg.body)
+        self.assertIn(
+            'list at <http://example.com/populaires/NewYearsPop>', msg.body)
+        self.assertIn(
+            'spreadsheet at <https://spreadsheets.google.com/ccc?'
+            'key=0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc>.',
+            msg.body)
+        self.assertNotIn('Fred Dickson has indicated', msg.body)
+        self.assertIn('please send email to <djl@douglatornell.ca>.', msg.body)
+
+    def test_organizer_email_message_multi_distance(self):
+        """reg notify email to org for multi-dist event has expected content
+        """
+        from ..models import (
+            Populaire,
+            PopulaireRider,
+            )
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            google_doc_id=
+                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            )
+        rider = PopulaireRider(
+            email='fred@example.com',
+            first_name='Fred',
+            last_name='Dickson',
+            distance=100,
+            comment='Sunshine Man',
+            )
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'NewYearsPop'
+        entry = self._make_one(request)
+        with transaction.manager:
+            DBSession.add(populaire)
+            populaire_organizer_email = populaire.organizer_email
+            msg = entry._organizer_message(populaire, rider)
+        self.assertIn(
+            'Fred Dickson has indicated that zhe is planning to ride the 100 km',
+             msg.body)
+
+    def test_organizer_email_message_multi_organizer(self):
+        """reg notify email to orgs for multi-org event has expected content
+        """
+        from ..models import (
+            Populaire,
+            PopulaireRider,
+            )
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com, mcroy@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            google_doc_id=
+                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            )
+        rider = PopulaireRider(
+            email='fred@example.com',
+            first_name='Fred',
+            last_name='Dickson',
+            distance=100,
+            comment='Sunshine Man',
+            )
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'NewYearsPop'
+        entry = self._make_one(request)
+        with transaction.manager:
+            DBSession.add(populaire)
+            msg = entry._organizer_message(populaire, rider)
+        self.assertEqual(
+            msg.recipients, ['mjansson@example.com', 'mcroy@example.com'])
 
     def test_failure(self):
         """populaire entry form validation failure returns expected tmpl_vars
