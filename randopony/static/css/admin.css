@@ -1,5 +1,10 @@
 /* Styles for RandoPony admin interface pages */
 
+.navbar-inverse .navbar-inner {
+    background-color: rgb(174, 0, 0);
+    background-image: none;
+    border-color: rgb(174, 0, 0);
+}
 .container .admin-list {
     margin-left: 0;
     width: 320px;
