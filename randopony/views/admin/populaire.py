@@ -2,10 +2,16 @@
 """RandoPony populaire admin views.
 """
 from deform import Button
+from gdata.docs.client import DocsClient
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 import transaction
+from .core import (
+    google_docs_login,
+    get_rider_list_template,
+    share_rider_list_publicly,
+    )
 from ...models import (
     Populaire,
     PopulaireSchema,
@@ -32,6 +38,32 @@ def populaire_details(request):
         'logout_btn': True,
         'populaire': populaire,
         }
+
+
+@view_config(
+    route_name='admin.populaires.create_rider_list',
+    permission='admin',
+    )
+def create_rider_list(request):
+    short_name = request.matchdict['item']
+    populaire = get_populaire(short_name)
+    redirect_url = request.route_url('admin.populaires.view', item=short_name)
+    if populaire.google_doc_id:
+        request.session.flash('error')
+        request.session.flash('Rider list spreadsheet already created')
+        return HTTPFound(redirect_url)
+    username = request.registry.settings['google_docs.username']
+    password = request.registry.settings['google_docs.password']
+    client = google_docs_login(DocsClient, username, password)
+    template = get_rider_list_template('Populaire Rider List Template', client)
+    created_doc = client.copy_resource(template, str(populaire))
+    share_rider_list_publicly(created_doc, client)
+    with transaction.manager:
+        populaire = get_populaire(short_name)
+        populaire.google_doc_id = created_doc.resource_id.text
+        request.session.flash('success')
+        request.session.flash('Rider list spreadsheet created')
+    return HTTPFound(redirect_url)
 
 
 @view_config(

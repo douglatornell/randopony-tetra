@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """RandoPony admin views core components.
 """
+import gdata.acl.data
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.response import Response
@@ -105,3 +106,26 @@ class AdminViews(object):
                     .delete())
             return HTTPFound(list_view)
         return tmpl_vars
+
+
+def google_docs_login(service, username, password):
+    client = service()
+    client.ssl = True
+    client.ClientLogin(username, password, 'randopony')
+    return client
+
+
+def get_rider_list_template(template_name, client):
+    docs = client.get_resources()
+    for doc in docs.entry:
+        if doc.title.text == template_name:
+            template = doc
+            break
+    return template
+
+
+def share_rider_list_publicly(doc, client):
+    scope = gdata.acl.data.AclScope(type='default')
+    role = gdata.acl.data.AclRole(value='reader')
+    acl_entry = gdata.acl.data.AclEntry(scope=scope, role=role)
+    client.Post(acl_entry, doc.get_acl_feed_link().href)

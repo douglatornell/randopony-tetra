@@ -2,6 +2,10 @@
 
 <%block name="title">RandoPony::Admin::${populaire}</%block>
 
+%if request.session.peek_flash():
+${self.flash(request.session.pop_flash())}
+%endif
+
 <h4>Populaire</h4>
 <p>${populaire.event_name} (${populaire})</p>
 
@@ -55,9 +59,28 @@
     </a>
     <ul class="dropdown-menu">
       <li><a href="#" tabindex="-1">Setup 1-2-3</a></li>
-      <li><a href="#" tabindex="-1">Copy Google Template</a></li>
+      <li>
+        <a href="${request.route_url('admin.populaires.create_rider_list',
+                                     item=str(populaire))}"
+           tabindex="-1">
+           Copy Google Template
+         </a>
+       </li>
       <li><a href="#" tabindex="-1">Email Organizer(s)</a></li>
       <li><a href="#" tabindex="-1">Email Webmaster</a></li>
     </ul>
   </div>
 </div>
+
+
+<%def name="flash(data)">
+  <div class="row">
+    <div class="span4">
+      <div class="alert alert-${data[0]} alert-block fade in">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <h4 class="alert-heading">${data[0]}!</h4>
+        ${data[1]}
+      </div>
+    </div>
+  </div>
+</%def>

@@ -4,6 +4,13 @@ from pyramid.security import ALL_PERMISSIONS
 from pyramid.security import Allow
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm.exc import NoResultFound
+from .credentials import (
+    persona_secret,
+    google_docs_username,
+    google_docs_password,
+    email_host_username,
+    email_host_password,
+    )
 from .models import Administrator
 from .models.meta import (
     DBSession,
@@ -39,9 +46,13 @@ def groupfinder(userid, request):
 def main(global_config, **settings):  # pragma: no cover
     """ Configure RandoPony and return its Pyramid WSGI application.
     """
-    engine = engine_from_config(settings, 'sqlalchemy.')
-    DBSession.configure(bind=engine)
-    Base.metadata.bind = engine
+    settings.update({
+        'persona.secret': persona_secret,
+        'google_docs.username': google_docs_username,
+        'google_docs.password': google_docs_password,
+        'mail.username': email_host_username,
+        'mail.password': email_host_password,
+        })
     config = Configurator(
         settings=settings,
         root_factory=Root)
@@ -53,6 +64,9 @@ def main(global_config, **settings):  # pragma: no cover
     config.set_authentication_policy(authn_policy)
     map_routes(config)
     config.scan()
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    DBSession.configure(bind=engine)
+    Base.metadata.bind = engine
     return config.make_wsgi_app()
 
 
@@ -87,6 +101,9 @@ def map_routes(config):               # pragma: no cover
     config.add_route('admin.populaires.create', '/admin/populaire/new')
     config.add_route('admin.populaires.edit', '/admin/populaire/{item}/edit')
     config.add_route('admin.populaires.view', '/admin/populaire/{item}')
+    config.add_route(
+        'admin.populaires.create_rider_list',
+        'admin/populaire/{item}/create_rider_list')
     # administrators (aka pony wranglers) admin routes
     config.add_route('admin.wranglers.create', '/admin/wranglers/new')
     config.add_route('admin.wranglers.edit', '/admin/wranglers/{item}')
