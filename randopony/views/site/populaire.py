@@ -48,6 +48,10 @@ class PopulaireViews(SiteViews):
     def __init__(self, request):
         super(PopulaireViews, self).__init__(request)
         self.tz = pytz.timezone(request.registry.settings['timezone'])
+        try:
+            self.populaire = get_populaire(request.matchdict['short_name'])
+        except KeyError:
+            self.populaire = None
 
     @view_config(route_name='populaire.list', renderer='populaire-list.mako')
     def populaire_list(self):
@@ -62,16 +66,14 @@ class PopulaireViews(SiteViews):
 
     @view_config(route_name='populaire', renderer='populaire.mako')
     def populaire_page(self):
-        populaire = get_populaire(self.request.matchdict['short_name'])
-        if self._in_past(populaire.date_time):
-            body = self._moved_on_page(populaire)
+        if self._in_past():
+            body = self._moved_on_page()
             return Response(body, status='200 OK')
-        registration_closed = self._registration_closed(
-            populaire.registration_end)
-        event_started = self._event_started(populaire.date_time)
+        registration_closed = self._registration_closed()
+        event_started = self._event_started()
         self.tmpl_vars.update({
             'active_tab': 'populaires',
-            'populaire': populaire,
+            'populaire': self.populaire,
             'registration_closed': registration_closed,
             'event_started': event_started,
         })
@@ -81,44 +83,46 @@ class PopulaireViews(SiteViews):
     def rider_emails(self):
         populaire = get_populaire(self.request.matchdict['short_name'])
         uuid = self.request.matchdict['uuid']
-        if uuid != str(populaire.uuid) or self._in_past(populaire.date_time):
+        if uuid != str(populaire.uuid) or self._in_past():
             raise HTTPNotFound
         return (', '.join(rider.email for rider in populaire.riders)
                 or 'No riders have registered yet!')
 
-    def _registration_closed(self, registration_end):
+    def _registration_closed(self):
         utc_registration_end = (
-            self.tz.localize(registration_end).astimezone(pytz.utc))
+            self.tz.localize(self.populaire.registration_end)
+            .astimezone(pytz.utc))
         utc_now = pytz.utc.localize(datetime.utcnow())
         return utc_now > utc_registration_end
 
-    def _event_started(self, start_date_time):
+    def _event_started(self):
         utc_start_date_time = (
-            self.tz.localize(start_date_time).astimezone(pytz.utc))
+            self.tz.localize(self.populaire.date_time)
+            .astimezone(pytz.utc))
         utc_now = pytz.utc.localize(datetime.utcnow())
         return utc_now > utc_start_date_time
 
-    def _in_past(self, start_date_time, recent_days=7):
+    def _in_past(self, recent_days=7):
         today = datetime.today()
         today = today.replace(hour=0, minute=0, second=0, microsecond=0)
         days_ago = today - timedelta(days=recent_days)
-        return start_date_time < days_ago
+        return self.populaire.date_time < days_ago
 
-    def _moved_on_page(self, populaire):
+    def _moved_on_page(self):
         results_link = (
             DBSession.query(Link)
             .filter_by(key='results_link')
             .first().url
             )
         results_link = results_link.replace(
-            '{year}', str(populaire.date_time.year)[-2:])
+            '{year}', str(self.populaire.date_time.year)[-2:])
         body = render(
             'moved-on.mako',
             {
                 'active_tab': 'populaires',
                 'brevets': self.tmpl_vars['brevets'],
                 'populaires': self.tmpl_vars['populaires'],
-                'event': '{0} {0.date_time:%d-%b-%Y}'.format(populaire),
+                'event': '{0} {0.date_time:%d-%b-%Y}'.format(self.populaire),
                 'results_link': results_link,
             },
             request=self.request)

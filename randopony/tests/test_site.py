@@ -399,14 +399,14 @@ class TestPopulaireViews(unittest.TestCase):
             url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
             )
         with transaction.manager:
-            DBSession.add(results_link)
+            DBSession.add_all((populaire, results_link))
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
         with patch.object(pop_module, 'datetime') as mock_datetime, \
              patch.object(pop_module, 'render') as mock_render:
             mock_datetime.today.return_value = datetime(2011, 4, 7, 15, 52)
-            views._moved_on_page(populaire)
+            views._moved_on_page()
         tmpl_name = mock_render.call_args[0][0]
         tmpl_vars = mock_render.call_args[0][1]
         kwargs = mock_render.call_args[1]
