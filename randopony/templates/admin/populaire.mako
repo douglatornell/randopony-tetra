@@ -7,7 +7,12 @@ ${self.flash(request.session.pop_flash())}
 %endif
 
 <h4>Populaire</h4>
-<p>${populaire.event_name} (${populaire})</p>
+<p>
+  <a href="${request.route_url('populaire', short_name=populaire.short_name)}"
+     target="_blank">
+    ${populaire.event_name} (${populaire})
+  </a>
+</p>
 
 <h4>Date and Start Time</h4>
 <p>${"{:%a %d-%b-%Y %H:%M}".format(populaire.date_time)}</p>
@@ -33,11 +38,23 @@ ${self.flash(request.session.pop_flash())}
 
 %if populaire.google_doc_id:
 <h4>Google Rider List Id</h4>
-<p>${populaire.google_doc_id}</p>
+<p>
+  <a href="${'https://spreadsheets.google.com/ccc?key={0}'.format(populaire.google_doc_id.split(':')[1])}"
+     target="_blank">
+    ${populaire.google_doc_id}
+  </a>
+</p>
 %endif
 
-<h4>Riders Email Addresses</h4>
-<p></p>
+<h4>Riders Email Address List UUID</h4>
+<p>
+  <a href="${request.route_url('populaire.rider_emails',
+                               short_name=populaire.short_name,
+                               uuid=populaire.uuid)}"
+     target="_blank">
+    ${populaire.uuid}
+  </a>
+</p>
 
 <div class="btn-toolbar">
   <a href="${request.route_url('admin.populaires.edit', item=str(populaire))}"

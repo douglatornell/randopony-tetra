@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """RandoPony populaire data model.
 """
+import uuid
 import colander
 from deform.widget import (
     DateTimeInputWidget,
@@ -67,6 +68,12 @@ class Populaire(EventMixin, Base):
 
     def __repr__(self):
         return '<Populaire({})>'.format(self)
+
+    @property
+    def uuid(self):
+        return uuid.uuid5(
+            uuid.NAMESPACE_URL,
+            '/randopony/{0.short_name}/{0.date_time:%d%b%Y}'.format(self))
 
 
 class PopulaireSchema(CSRFSchema):

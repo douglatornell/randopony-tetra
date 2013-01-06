@@ -5,9 +5,13 @@ from datetime import (
     datetime,
     timedelta,
     )
+import logging
 from deform import Button
 from pyramid_deform import FormView
-from pyramid.httpexceptions import HTTPFound
+from pyramid.httpexceptions import (
+    HTTPFound,
+    HTTPNotFound,
+    )
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from pyramid.renderers import render
@@ -25,6 +29,9 @@ from ...models import (
     PopulaireRider,
     )
 from ...models.meta import DBSession
+
+
+log = logging.getLogger(__name__)
 
 
 def get_populaire(short_name):
@@ -69,6 +76,15 @@ class PopulaireViews(SiteViews):
             'event_started': event_started,
         })
         return self.tmpl_vars
+
+    @view_config(route_name='populaire.rider_emails', renderer='string')
+    def rider_emails(self):
+        populaire = get_populaire(self.request.matchdict['short_name'])
+        uuid = self.request.matchdict['uuid']
+        if uuid != str(populaire.uuid) or self._in_past(populaire.date_time):
+            raise HTTPNotFound
+        return (', '.join(rider.email for rider in populaire.riders)
+                or 'No riders have registered yet!')
 
     def _registration_closed(self, registration_end):
         utc_registration_end = (
