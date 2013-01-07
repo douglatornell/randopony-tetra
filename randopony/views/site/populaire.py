@@ -264,6 +264,10 @@ class PopulaireEntry(FormView):
         rider_list_url = (
             'https://spreadsheets.google.com/ccc?key={0}'
             .format(populaire.google_doc_id.split(':')[1]))
+        rider_emails = self.request.route_url(
+            'populaire.rider_emails',
+            short_name=populaire.short_name,
+            uuid=populaire.uuid)
         admin_email = (
             DBSession.query(EmailAddress)
             .filter_by(key='admin_email')
@@ -282,6 +286,7 @@ class PopulaireEntry(FormView):
                     'populaire': populaire,
                     'pop_page_url': pop_page_url,
                     'rider_list_url': rider_list_url,
+                    'rider_emails': rider_emails,
                     'admin_email': admin_email,
                 }))
         return message

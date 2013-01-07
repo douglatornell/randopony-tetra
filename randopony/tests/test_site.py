@@ -445,6 +445,9 @@ class TestPopulaireEntry(unittest.TestCase):
             })
         self.config.include('pyramid_mailer.testing')
         self.config.add_route('populaire', '/populaires/{short_name}')
+        self.config.add_route(
+            'populaire.rider_emails',
+            '/populaire/{short_name}/rider_emails/{uuid}')
         engine = create_engine('sqlite://')
         DBSession.configure(bind=engine)
         Base.metadata.create_all(engine)
@@ -614,8 +617,8 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            google_doc_id=
-                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         with transaction.manager:
             DBSession.add(populaire)
@@ -657,8 +660,8 @@ class TestPopulaireEntry(unittest.TestCase):
             organizer_email='mcroy@example.com',
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            google_doc_id=
-                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         with transaction.manager:
             DBSession.add(populaire)
@@ -689,8 +692,8 @@ class TestPopulaireEntry(unittest.TestCase):
             organizer_email='mcroy@example.com',
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            google_doc_id=
-                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         with transaction.manager:
             DBSession.add(populaire)
@@ -724,8 +727,8 @@ class TestPopulaireEntry(unittest.TestCase):
             organizer_email='mcroy@example.com',
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            google_doc_id=
-                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         rider = PopulaireRider(
             email='fred@example.com',
@@ -775,8 +778,8 @@ class TestPopulaireEntry(unittest.TestCase):
             organizer_email='mcroy@example.com',
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            google_doc_id=
-                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         rider = PopulaireRider(
             email='fred@example.com',
@@ -807,7 +810,11 @@ class TestPopulaireEntry(unittest.TestCase):
             'list at <http://example.com/populaires/NewYearsPop>', msg.body)
         self.assertIn(
             'spreadsheet at <https://spreadsheets.google.com/ccc?'
-            'key=0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc>.',
+            'key=0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc>,',
+            msg.body)
+        self.assertIn('email address list at '
+            '<http://example.com/populaire/NewYearsPop/rider_emails/'
+            '524abf1c-0f42-545e-974f-91fba9b34f8d>.',
             msg.body)
         self.assertNotIn('Fred Dickson has indicated', msg.body)
         self.assertIn('please send email to <djl@douglatornell.ca>.', msg.body)
