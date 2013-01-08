@@ -8,7 +8,7 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 import transaction
 from .core import (
-    google_docs_login,
+    google_drive_login,
     get_rider_list_template,
     share_rider_list_publicly,
     )
@@ -52,10 +52,10 @@ def create_rider_list(request):
         request.session.flash('error')
         request.session.flash('Rider list spreadsheet already created')
         return HTTPFound(redirect_url)
-    client = google_docs_login(
+    client = google_drive_login(
         DocsClient,
-        request.registry.settings['google_docs.username'],
-        request.registry.settings['google_docs.password'])
+        request.registry.settings['google_drive.username'],
+        request.registry.settings['google_drive.password'])
     template = get_rider_list_template('Populaire Rider List Template', client)
     created_doc = client.copy_resource(template, str(populaire))
     share_rider_list_publicly(created_doc, client)

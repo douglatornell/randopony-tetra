@@ -108,7 +108,7 @@ class AdminViews(object):
         return tmpl_vars
 
 
-def google_docs_login(service, username, password):
+def google_drive_login(service, username, password):
     client = service()
     client.ssl = True
     client.ClientLogin(username, password, 'randopony')

@@ -6,8 +6,8 @@ from sqlalchemy import engine_from_config
 from sqlalchemy.orm.exc import NoResultFound
 from .credentials import (
     persona_secret,
-    google_docs_username,
-    google_docs_password,
+    google_drive_username,
+    google_drive_password,
     email_host_username,
     email_host_password,
     )
@@ -48,8 +48,8 @@ def main(global_config, **settings):  # pragma: no cover
     """
     settings.update({
         'persona.secret': persona_secret,
-        'google_docs.username': google_docs_username,
-        'google_docs.password': google_docs_password,
+        'google_drive.username': google_drive_username,
+        'google_drive.password': google_drive_password,
         'mail.username': email_host_username,
         'mail.password': email_host_password,
         })

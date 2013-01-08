@@ -22,7 +22,7 @@ from pyramid.view import view_config
 import pytz
 import transaction
 from .core import SiteViews
-from ..admin.core import google_docs_login
+from ..admin.core import google_drive_login
 from ...models import (
     Brevet,
     EmailAddress,
@@ -215,8 +215,8 @@ class PopulaireEntry(FormView):
                 update_google_spreadsheet.delay(
                     [rider for rider in populaire.riders],
                     populaire.google_doc_id.split(':')[1],
-                    self.request.registry.settings['google_docs.username'],
-                    self.request.registry.settings['google_docs.password'])
+                    self.request.registry.settings['google_drive.username'],
+                    self.request.registry.settings['google_drive.password'])
                 message = self._rider_message(populaire, rider)
                 mailer.send_to_queue(message)
                 message = self._organizer_message(populaire, rider)
@@ -302,7 +302,7 @@ class PopulaireEntry(FormView):
 
 @task(ignore_result=True)
 def update_google_spreadsheet(riders, doc_key, username, password):
-    client = google_docs_login(SpreadsheetsService, username, password)
+    client = google_drive_login(SpreadsheetsService, username, password)
     spreadsheet_list = client.GetListFeed(doc_key)
     spreadsheet_rows = len(spreadsheet_list.entry)
     # Update the rows already in the spreadsheet

@@ -10,8 +10,8 @@ log = logging.getLogger(__name__)
 
 persona_secret = None
 
-google_docs_username = None
-google_docs_password = None
+google_drive_username = None
+google_drive_password = None
 
 email_host_username = None
 email_host_password = None
@@ -19,8 +19,8 @@ email_host_password = None
 try:
     from .private_credentials import (
         persona_secret,
-        google_docs_username,
-        google_docs_password,
+        google_drive_username,
+        google_drive_password,
         email_host_username,
         email_host_password,
         )

@@ -443,8 +443,8 @@ class TestPopulaireEntry(unittest.TestCase):
         self.config = testing.setUp(
             settings={
                 'mako.directories': 'randopony:templates',
-                'google_docs.username': 'randopony',
-                'google_docs.password': 'sEcReT',
+                'google_drive.username': 'randopony',
+                'google_drive.password': 'sEcReT',
             })
         self.config.include('pyramid_mailer.testing')
         self.config.add_route('populaire', '/populaires/{short_name}')
