@@ -6,7 +6,9 @@ from datetime import (
     timedelta,
     )
 import logging
+from celery.task import task
 from deform import Button
+from gdata.spreadsheet.service import SpreadsheetsService
 from pyramid_deform import FormView
 from pyramid.httpexceptions import (
     HTTPFound,
@@ -20,6 +22,7 @@ from pyramid.view import view_config
 import pytz
 import transaction
 from .core import SiteViews
+from ..admin.core import google_docs_login
 from ...models import (
     Brevet,
     EmailAddress,
@@ -209,12 +212,17 @@ class PopulaireEntry(FormView):
                     )
                 populaire.riders.append(rider)
                 DBSession.add(rider)
-                self.request.session.flash('success')
-                self.request.session.flash(rider.email)
+                update_google_spreadsheet.delay(
+                    [rider for rider in populaire.riders],
+                    populaire.google_doc_id.split(':')[1],
+                    self.request.registry.settings['google_docs.username'],
+                    self.request.registry.settings['google_docs.password'])
                 message = self._rider_message(populaire, rider)
                 mailer.send_to_queue(message)
                 message = self._organizer_message(populaire, rider)
                 mailer.send_to_queue(message)
+                self.request.session.flash('success')
+                self.request.session.flash(rider.email)
         return HTTPFound(self._redirect_url(pop_short_name))
 
     def failure(self, e):
@@ -290,3 +298,30 @@ class PopulaireEntry(FormView):
                     'admin_email': admin_email,
                 }))
         return message
+
+
+@task(ignore_result=True)
+def update_google_spreadsheet(riders, doc_key, username, password):
+    client = google_docs_login(SpreadsheetsService, username, password)
+    spreadsheet_list = client.GetListFeed(doc_key)
+    spreadsheet_rows = len(spreadsheet_list.entry)
+    # Update the rows already in the spreadsheet
+    for row, rider in enumerate(riders[:spreadsheet_rows]):
+        rider_number = row + 1
+        new_row_data = _make_spreadsheet_row_dict(rider_number, rider)
+        client.UpdateRow(spreadsheet_list.entry[row], new_row_data)
+    # Add remaining rows
+    for row, rider in enumerate(riders[spreadsheet_rows:]):
+        rider_number = spreadsheet_rows + row + 1
+        row_data = _make_spreadsheet_row_dict(rider_number, rider)
+        client.InsertRow(row_data, doc_key)
+
+
+def _make_spreadsheet_row_dict(rider_number, rider):
+        row_data = {
+            'ridernumber': str(rider_number),
+            'lastname': rider.last_name,
+            'firstname': rider.first_name,
+            'distance': str(rider.distance),
+        }
+        return row_data

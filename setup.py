@@ -11,6 +11,7 @@ requires = [
     'deform',
     'gdata',
     'pyramid',
+    'pyramid_celery',
     'pyramid_debugtoolbar',
     'pyramid_deform',
     'pyramid_mailer',

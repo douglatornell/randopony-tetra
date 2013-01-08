@@ -403,8 +403,9 @@ class TestPopulaireViews(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
-        with patch.object(pop_module, 'datetime') as mock_datetime, \
-             patch.object(pop_module, 'render') as mock_render:
+        datetime_patch = patch.object(pop_module, 'datetime')
+        render_patch = patch.object(pop_module, 'render')
+        with datetime_patch as mock_datetime, render_patch as mock_render:
             mock_datetime.today.return_value = datetime(2011, 4, 7, 15, 52)
             views._moved_on_page()
         tmpl_name = mock_render.call_args[0][0]
@@ -442,6 +443,8 @@ class TestPopulaireEntry(unittest.TestCase):
         self.config = testing.setUp(
             settings={
                 'mako.directories': 'randopony:templates',
+                'google_docs.username': 'randopony',
+                'google_docs.password': 'sEcReT',
             })
         self.config.include('pyramid_mailer.testing')
         self.config.add_route('populaire', '/populaires/{short_name}')
@@ -606,6 +609,7 @@ class TestPopulaireEntry(unittest.TestCase):
             Populaire,
             PopulaireRider,
             )
+        from ..views.site import populaire as pop_module
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -626,14 +630,15 @@ class TestPopulaireEntry(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         entry = self._make_one(request)
-        url = entry.register_success({
-            'email': 'fred@example.com',
-            'first_name': 'Fred',
-            'last_name': 'Dickson',
-            'comment': 'Sunshine Man',
-            'distance': 100,
-            'populaire': populaire_id,
-            })
+        with patch.object(pop_module, 'update_google_spreadsheet') as mock_task:
+            url = entry.register_success({
+                'email': 'fred@example.com',
+                'first_name': 'Fred',
+                'last_name': 'Dickson',
+                'comment': 'Sunshine Man',
+                'distance': 100,
+                'populaire': populaire_id,
+                })
         rider = DBSession.query(PopulaireRider).first()
         self.assertEqual(rider.email, 'fred@example.com')
         self.assertEqual(rider.full_name, 'Fred "Sunshine Man" Dickson')
@@ -651,6 +656,7 @@ class TestPopulaireEntry(unittest.TestCase):
             Populaire,
             PopulaireRider,
             )
+        from ..views.site import populaire as pop_module
         populaire = Populaire(
             event_name="New Year's Populaire",
             short_name='NewYearsPop',
@@ -669,13 +675,14 @@ class TestPopulaireEntry(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
-        entry.register_success({
-            'email': 'fred@example.com',
-            'first_name': 'Fred',
-            'last_name': 'Dickson',
-            'comment': 'Sunshine Man',
-            'populaire': populaire_id,
-            })
+        with patch.object(pop_module, 'update_google_spreadsheet') as mock_task:
+            entry.register_success({
+                'email': 'fred@example.com',
+                'first_name': 'Fred',
+                'last_name': 'Dickson',
+                'comment': 'Sunshine Man',
+                'populaire': populaire_id,
+                })
         rider = DBSession.query(PopulaireRider).first()
         self.assertEqual(rider.distance, 60)
 
@@ -683,6 +690,7 @@ class TestPopulaireEntry(unittest.TestCase):
         """successful entry sends emails to rider and organizer
         """
         from ..models import Populaire
+        from ..views.site import populaire as pop_module
         populaire = Populaire(
             event_name="New Year's Populaire",
             short_name='NewYearsPop',
@@ -702,12 +710,13 @@ class TestPopulaireEntry(unittest.TestCase):
         request.matchdict['short_name'] = 'NewYearsPop'
         mailer = get_mailer(request)
         entry = self._make_one(request)
-        entry.register_success({
-            'email': 'fred@example.com',
-            'first_name': 'Fred',
-            'last_name': 'Dickson',
-            'comment': 'Sunshine Man',
-            })
+        with patch.object(pop_module, 'update_google_spreadsheet') as mock_task:
+            entry.register_success({
+                'email': 'fred@example.com',
+                'first_name': 'Fred',
+                'last_name': 'Dickson',
+                'comment': 'Sunshine Man',
+                })
         self.assertEqual(len(mailer.queue), 2)
 
     def test_rider_email_message(self):
@@ -837,8 +846,8 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            google_doc_id=
-                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         rider = PopulaireRider(
             email='fred@example.com',
@@ -876,8 +885,8 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            google_doc_id=
-                'spreadsheet:0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
         rider = PopulaireRider(
             email='fred@example.com',
@@ -894,6 +903,39 @@ class TestPopulaireEntry(unittest.TestCase):
             msg = entry._organizer_message(populaire, rider)
         self.assertEqual(
             msg.recipients, ['mjansson@example.com', 'mcroy@example.com'])
+
+    def test_register_success_queues_update_google_spreadsheet_task(self):
+        """successful registration queues task to update rider list spreadsheet
+        """
+        from ..models import Populaire
+        from ..views.site import populaire as pop_module
+        populaire = Populaire(
+            event_name="New Year's Populaire",
+            short_name='NewYearsPop',
+            distance='60 km',
+            date_time=datetime(2013, 1, 1, 10, 0),
+            start_locn='Kelseys Family Restaurant, 325 Burnside Rd W, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2012, 12, 31, 17, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            )
+        with transaction.manager:
+            DBSession.add(populaire)
+            populaire_organizer_email = populaire.organizer_email
+        request = testing.DummyRequest()
+        request.matchdict['short_name'] = 'NewYearsPop'
+        mailer = get_mailer(request)
+        entry = self._make_one(request)
+        with patch.object(pop_module, 'update_google_spreadsheet') as mock_task:
+            entry.register_success({
+                'email': 'fred@example.com',
+                'first_name': 'Fred',
+                'last_name': 'Dickson',
+                'comment': 'Sunshine Man',
+                })
+        mock_task.delay.assert_called_once()
 
     def test_failure(self):
         """populaire entry form validation failure returns expected tmpl_vars

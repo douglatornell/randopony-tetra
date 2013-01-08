@@ -52,9 +52,10 @@ def create_rider_list(request):
         request.session.flash('error')
         request.session.flash('Rider list spreadsheet already created')
         return HTTPFound(redirect_url)
-    username = request.registry.settings['google_docs.username']
-    password = request.registry.settings['google_docs.password']
-    client = google_docs_login(DocsClient, username, password)
+    client = google_docs_login(
+        DocsClient,
+        request.registry.settings['google_docs.username'],
+        request.registry.settings['google_docs.password'])
     template = get_rider_list_template('Populaire Rider List Template', client)
     created_doc = client.copy_resource(template, str(populaire))
     share_rider_list_publicly(created_doc, client)
