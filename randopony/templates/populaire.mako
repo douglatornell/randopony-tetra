@@ -119,10 +119,11 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 
 <%def name="confirmation(notice_data)">
 <div class="row">
-  <div class="span6 notice">
+  <div class="span6 alert alert-success alert-block fade in">
+    <a href="#" class="close" data-dismiss="alert">&times;</a>
+    <h4 class="alert-heading">Yay!</h4>
     <p>
       You have pre-registered for this populaire.
-      Cool!
       Your name should be on the list below.
     </p>
     <p>
@@ -151,20 +152,21 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 
 <%def name="duplicate(notice_data)">
 <div class="row">
-  <div class="span6 notice">
-  <p>
-    Hmm...
-    Someone using the name ${notice_data[1]} and the email address
-    ${notice_data[2]} has already pre-registered for this populaire.
-    Are you sure that you are registering for the event you intended to?
-  </p>
-  <p>
-    If you are trying to change your email address by re-registering,
-    please contact the event organizer.
-    If you are trying to change the comment you embedded in your name,
-    sorry,
-    you can't do that.
-  </p>
+  <div class="span6 alert alert-danger alert-block fade in">
+    <a href="#" class="close" data-dismiss="alert">&times;</a>
+    <h4 class="alert-heading">Hmm...</h4>
+    <p>
+      Someone using the name ${notice_data[1]} and the email address
+      ${notice_data[2]} has already pre-registered for this populaire.
+      Are you sure that you are registering for the event you intended to?
+    </p>
+    <p>
+      If you are trying to change your email address by re-registering,
+      please contact the event organizer.
+      If you are trying to change the comment you embedded in your name,
+      sorry,
+      you can't do that.
+    </p>
   </div>
 </div>
 </%def>
