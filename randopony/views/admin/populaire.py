@@ -57,7 +57,8 @@ def create_rider_list(request):
         request.registry.settings['google_drive.username'],
         request.registry.settings['google_drive.password'])
     template = get_rider_list_template('Populaire Rider List Template', client)
-    created_doc = client.copy_resource(template, str(populaire))
+    created_doc = client.copy_resource(
+        template, '{0} {0.date_time:%d-%b-%Y}'.format(populaire))
     share_rider_list_publicly(created_doc, client)
     with transaction.manager:
         populaire = get_populaire(short_name)
