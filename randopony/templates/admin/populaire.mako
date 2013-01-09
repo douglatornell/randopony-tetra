@@ -36,14 +36,16 @@ ${self.flash(request.session.pop_flash())}
 <h4>Entry Form URL</h4>
 <p>${populaire.entry_form_url}</p>
 
-%if populaire.google_doc_id:
 <h4>Google Rider List Id</h4>
+%if populaire.google_doc_id:
 <p>
   <a href="${'https://spreadsheets.google.com/ccc?key={0}'.format(populaire.google_doc_id.split(':')[1])}"
      target="_blank">
     ${populaire.google_doc_id}
   </a>
 </p>
+%else:
+<p class="text-warning">Not created yet!</p>
 %endif
 
 <h4>Riders Email Address List UUID</h4>
