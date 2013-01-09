@@ -1,9 +1,11 @@
+from celery import current_app as celery
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.config import Configurator
 from pyramid.security import ALL_PERMISSIONS
 from pyramid.security import Allow
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm.exc import NoResultFound
+import celery_config
 from .credentials import (
     persona_secret,
     google_drive_username,
@@ -50,9 +52,11 @@ def main(global_config, **settings):  # pragma: no cover
         'persona.secret': persona_secret,
         'google_drive.username': google_drive_username,
         'google_drive.password': google_drive_password,
-        'mail.username': email_host_username,
-        'mail.password': email_host_password,
         })
+    if email_host_username:
+        settings.update({'mail.username': email_host_username})
+    if email_host_password:
+        settings.update({'mail.password': email_host_password})
     config = Configurator(
         settings=settings,
         root_factory=Root)
@@ -67,6 +71,7 @@ def main(global_config, **settings):  # pragma: no cover
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
+    celery.config_from_object(celery_config)
     return config.make_wsgi_app()
 
 

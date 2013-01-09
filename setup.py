@@ -7,11 +7,11 @@ README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
+    'celery',
     'colander',
     'deform',
     'gdata',
     'pyramid',
-    'pyramid_celery',
     'pyramid_debugtoolbar',
     'pyramid_deform',
     'pyramid_mailer',
