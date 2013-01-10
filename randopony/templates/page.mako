@@ -18,10 +18,10 @@
   <div class="navbar">
     <div class="navbar-inner">
       <div class="container navbar-wrapper">
-        <a href="#" class="brand">
+        <span class="brand">
           <h1>bc randonneurs</h1>
           <h3><%block name="subtitle"></%block></h3>
-        </a>
+        </span>
         <a class="btn btn-navbar visible-phone"
            data-toggle="collapse" data-target=".nav-collapse">
           <span class="icon-bar"></span>

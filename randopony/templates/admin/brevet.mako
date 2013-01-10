@@ -51,10 +51,10 @@
   </a>
 
   <div class="btn-group dropup">
-    <a href="#" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
       Admin Actions
       <span class="caret"></span>
-    </a>
+    </button>
     <ul class="dropdown-menu">
       <li><a href="#" tabindex="-1">Setup 1-2-3</a></li>
       <li><a href="#" tabindex="-1">Copy Google Template</a></li>
