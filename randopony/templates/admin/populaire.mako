@@ -96,7 +96,7 @@ ${self.flash(request.session.pop_flash())}
   <div class="row">
     <div class="span4">
       <div class="alert alert-${data[0]} alert-block fade in">
-        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <span class="close" data-dismiss="alert">&times;</span>
         <h4 class="alert-heading">${data[0]}!</h4>
         ${data[1]}
       </div>

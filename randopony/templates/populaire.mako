@@ -120,7 +120,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 <%def name="confirmation(notice_data)">
 <div class="row">
   <div class="span6 alert alert-success alert-block fade in">
-    <a href="#" class="close" data-dismiss="alert">&times;</a>
+    <span class="close" data-dismiss="alert">&times;</span>
     <h4 class="alert-heading">Yay!</h4>
     <p>
       You have pre-registered for this populaire.
@@ -153,7 +153,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 <%def name="duplicate(notice_data)">
 <div class="row">
   <div class="span6 alert alert-danger alert-block fade in">
-    <a href="#" class="close" data-dismiss="alert">&times;</a>
+    <span class="close" data-dismiss="alert">&times;</span>
     <h4 class="alert-heading">Hmm...</h4>
     <p>
       Someone using the name ${notice_data[1]} and the email address
