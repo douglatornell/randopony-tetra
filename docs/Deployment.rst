@@ -1,9 +1,10 @@
-.. Deployment-section:
+.. DeploymentAndManagement-section:
 
-Deployment
-==========
+Deployment and Management
+=========================
 
-This section describes deployment of RandoPony-tetra on Webfaction.
+This section describes deployment and management of RandoPony-tetra on the
+:kbd:`randonneurs.bc.ca` domain hosted on Webfaction.
 
 .. note::
 
@@ -12,6 +13,14 @@ This section describes deployment of RandoPony-tetra on Webfaction.
    While it should be possible to build such an environment,
    this document describes deployment in a Python 2.7, Pyramid 1.4 environment
    created from the control panel.
+
+Most of the deployment and management activities described in this section
+have been implemented as Fabric_ tasks,
+so,
+Fabric_ needs to be installed in the local virtualenv from which ou are working,
+and you ned to have ssh key authentication working on Webfaction.
+
+.. _Fabric: http://docs.fabfile.org/
 
 
 Environment
