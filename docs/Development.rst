@@ -47,13 +47,6 @@ Install RandoPony as a development package:
 
    (randopony-tetra) tom:randopony-tetra$ python setup.py develop
 
-.. note::
-
-   As of early December 2012 RandoPony was using features of the :obj:`deform`
-   library that had not yet been included in a release.
-   Cloning :obj:`deform` from Github and doing a development install from
-   revision :kbd:`@8bec7ecb88` is known to work.
-
 Run the development server:
 
 .. code-block:: sh
