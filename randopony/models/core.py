@@ -11,7 +11,6 @@ from sqlalchemy import (
     Integer,
     Text,
     )
-from sqlalchemy.ext.declarative import declared_attr
 from .meta import (
     Base,
     DBSession,
