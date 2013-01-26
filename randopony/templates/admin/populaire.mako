@@ -78,6 +78,7 @@ ${self.flash(request.session.pop_flash())}
     </button>
     <ul class="dropdown-menu">
       <li><a href="#" tabindex="-1">Setup 1-2-3</a></li>
+
       <li>
         <a href="${request.route_url('admin.populaires.create_rider_list',
                                      item=str(populaire))}"
@@ -85,7 +86,15 @@ ${self.flash(request.session.pop_flash())}
            Create Rider List
          </a>
        </li>
-      <li><a href="#" tabindex="-1">Email Organizer(s)</a></li>
+
+      <li>
+        <a href="${request.route_url('admin.populaires.email_to_organizer',
+                                     item=str(populaire))}"
+           tabindex="-1">
+           Email Organizer(s)
+         </a>
+      </li>
+
       <li><a href="#" tabindex="-1">Email Webmaster</a></li>
     </ul>
   </div>
