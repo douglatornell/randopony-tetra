@@ -9,7 +9,6 @@ from deform import Button
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
-import transaction
 from ...models import (
     Brevet,
     BrevetSchema,
@@ -70,19 +69,17 @@ class BrevetCreate(FormView):
         return tmpl_vars
 
     def add_success(self, appstruct):
-        with transaction.manager:
-            brevet = Brevet(
-                region=appstruct['region'],
-                distance=appstruct['distance'],
-                date_time=appstruct['date_time'],
-                route_name=appstruct['route_name'],
-                start_locn=appstruct['start_locn'],
-                organizer_email=appstruct['organizer_email'],
-                )
-            brevet_id = str(brevet)
-            DBSession.add(brevet)
+        brevet = Brevet(
+            region=appstruct['region'],
+            distance=appstruct['distance'],
+            date_time=appstruct['date_time'],
+            route_name=appstruct['route_name'],
+            start_locn=appstruct['start_locn'],
+            organizer_email=appstruct['organizer_email'],
+            )
+        DBSession.add(brevet)
         return HTTPFound(
-            self.request.route_url('admin.brevets.view', item=brevet_id))
+            self.request.route_url('admin.brevets.view', item=brevet))
 
     def failure(self, e):
         tmpl_vars = super(BrevetCreate, self).failure(e)
@@ -133,21 +130,19 @@ class BrevetEdit(FormView):
         return tmpl_vars
 
     def save_success(self, appstruct):
-        with transaction.manager:
-            brevet = (DBSession.query(Brevet)
-                .filter_by(id=appstruct['id'])
-                .one())
-            brevet.region = appstruct['region']
-            brevet.distance = appstruct['distance']
-            brevet.date_time = appstruct['date_time']
-            brevet.route_name = appstruct['route_name']
-            brevet.start_locn = appstruct['start_locn']
-            brevet.start_map_url = appstruct['start_map_url']
-            brevet.organizer_email = appstruct['organizer_email']
-            brevet.registration_end = appstruct['registration_end']
-            brevet_id = str(brevet)
+        brevet = (DBSession.query(Brevet)
+            .filter_by(id=appstruct['id'])
+            .one())
+        brevet.region = appstruct['region']
+        brevet.distance = appstruct['distance']
+        brevet.date_time = appstruct['date_time']
+        brevet.route_name = appstruct['route_name']
+        brevet.start_locn = appstruct['start_locn']
+        brevet.start_map_url = appstruct['start_map_url']
+        brevet.organizer_email = appstruct['organizer_email']
+        brevet.registration_end = appstruct['registration_end']
         return HTTPFound(
-            self.request.route_url('admin.brevets.view', item=brevet_id))
+            self.request.route_url('admin.brevets.view', item=brevet))
 
     def failure(self, e):
         tmpl_vars = super(BrevetEdit, self).failure(e)

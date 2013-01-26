@@ -16,7 +16,6 @@ except ImportError:                  # pragma: no cover
 from pyramid import testing
 from pyramid_mailer import get_mailer
 from sqlalchemy import create_engine
-import transaction
 from ..models.meta import (
     Base,
     DBSession,
@@ -65,8 +64,7 @@ class TestSiteViews(unittest.TestCase):
         """
         from ..models import EmailAddress
         email = EmailAddress(key='admin_email', email='tom@example.com')
-        with transaction.manager:
-            DBSession.add(email)
+        DBSession.add(email)
         request = testing.DummyRequest()
         views = self._make_one(request)
         tmpl_vars = views.organizer_info()
@@ -98,8 +96,7 @@ class TestSiteViews(unittest.TestCase):
             EmailAddress,
             )
         email = EmailAddress(key='admin_email', email='tom@example.com')
-        with transaction.manager:
-            DBSession.add(email)
+        DBSession.add(email)
         request = testing.DummyRequest()
         views = self._make_one(request)
         tmpl_vars = views.region_list()
@@ -127,9 +124,7 @@ class TestSiteViews(unittest.TestCase):
             )
         brevet_id = str(brevet)
         email = EmailAddress(key='admin_email', email='tom@example.com')
-        with transaction.manager:
-            DBSession.add(brevet)
-            DBSession.add(email)
+        DBSession.add_all((brevet, email))
         request = testing.DummyRequest()
         with patch.object(core, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 1, 12, 55, 42)
@@ -156,9 +151,7 @@ class TestSiteViews(unittest.TestCase):
             )
         brevet_id = str(brevet)
         email = EmailAddress(key='admin_email', email='tom@example.com')
-        with transaction.manager:
-            DBSession.add(brevet)
-            DBSession.add(email)
+        DBSession.add_all((brevet, email))
         request = testing.DummyRequest()
         request.matchdict['region'] = 'LM'
         with patch.object(core, 'datetime') as mock_datetime:
@@ -209,8 +202,7 @@ class TestPopulaireViews(unittest.TestCase):
         from ..models import EmailAddress
         self.config.registry.settings['timezone'] = 'Canada/Pacific'
         email = EmailAddress(key='admin_email', email='tom@example.com')
-        with transaction.manager:
-            DBSession.add(email)
+        DBSession.add(email)
         request = testing.DummyRequest()
         views = self._make_one(request)
         tmpl_vars = views.populaire_list()
@@ -236,8 +228,7 @@ class TestPopulaireViews(unittest.TestCase):
                            'VicPop11_registration.pdf',
             )
         populare_id = str(populaire)
-        with transaction.manager:
-            DBSession.add(populaire)
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
@@ -267,8 +258,7 @@ class TestPopulaireViews(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
@@ -296,8 +286,7 @@ class TestPopulaireViews(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
@@ -325,8 +314,7 @@ class TestPopulaireViews(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
@@ -361,9 +349,7 @@ class TestPopulaireViews(unittest.TestCase):
             key='results_link',
             url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
-            DBSession.add(results_link)
+        DBSession.add_all((populaire, results_link))
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
@@ -398,8 +384,7 @@ class TestPopulaireViews(unittest.TestCase):
             key='results_link',
             url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
             )
-        with transaction.manager:
-            DBSession.add_all((populaire, results_link))
+        DBSession.add_all((populaire, results_link))
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
@@ -462,8 +447,7 @@ class TestPopulaireEntry(unittest.TestCase):
             key='admin_email',
             email='djl@douglatornell.ca',
             )
-        with transaction.manager:
-            DBSession.add_all((from_randopony, admin_email))
+        DBSession.add_all((from_randopony, admin_email))
 
     def tearDown(self):
         DBSession.remove()
@@ -493,8 +477,7 @@ class TestPopulaireEntry(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         entry = self._make_one(request)
@@ -516,8 +499,7 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
@@ -542,8 +524,7 @@ class TestPopulaireEntry(unittest.TestCase):
                            'VicPop11_registration.pdf',
             )
         populare_id = str(populaire)
-        with transaction.manager:
-            DBSession.add(populaire)
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         entry = self._make_one(request)
@@ -559,7 +540,6 @@ class TestPopulaireEntry(unittest.TestCase):
         """valid entry w/ duplicate rider name & email sets expected flash msgs
         """
         from ..models import (
-            EmailAddress,
             Populaire,
             PopulaireRider,
             )
@@ -583,10 +563,8 @@ class TestPopulaireEntry(unittest.TestCase):
             comment='',
             )
         populaire.riders.append(rider)
-        with transaction.manager:
-            DBSession.add(populaire)
-            populaire_id = populaire.id
-            DBSession.add(rider)
+        DBSession.add(populaire)
+        DBSession.add(rider)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         entry = self._make_one(request)
@@ -594,7 +572,7 @@ class TestPopulaireEntry(unittest.TestCase):
             'email': 'tom@example.com',
             'first_name': 'Tom',
             'last_name': 'Dickson',
-            'populaire': populaire_id,
+            'populaire': populaire.id,
             })
         self.assertEqual(url.location, 'http://example.com/populaires/VicPop')
         self.assertEqual(
@@ -605,7 +583,6 @@ class TestPopulaireEntry(unittest.TestCase):
         """valid entry for new rider adds rider to db & sets exp flash msgs
         """
         from ..models import (
-            EmailAddress,
             Populaire,
             PopulaireRider,
             )
@@ -624,20 +601,18 @@ class TestPopulaireEntry(unittest.TestCase):
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
-            populaire_id = populaire.id
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         entry = self._make_one(request)
-        with patch.object(pop_module, 'update_google_spreadsheet') as mock_task:
+        with patch.object(pop_module, 'update_google_spreadsheet'):
             url = entry.register_success({
                 'email': 'fred@example.com',
                 'first_name': 'Fred',
                 'last_name': 'Dickson',
                 'comment': 'Sunshine Man',
                 'distance': 100,
-                'populaire': populaire_id,
+                'populaire': populaire.id,
                 })
         rider = DBSession.query(PopulaireRider).first()
         self.assertEqual(rider.email, 'fred@example.com')
@@ -652,7 +627,6 @@ class TestPopulaireEntry(unittest.TestCase):
         """valid entry for single dstance populaire sets distance correctly
         """
         from ..models import (
-            EmailAddress,
             Populaire,
             PopulaireRider,
             )
@@ -669,22 +643,20 @@ class TestPopulaireEntry(unittest.TestCase):
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
-            populaire_id = populaire.id
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
-        with patch.object(pop_module, 'update_google_spreadsheet') as mock_task:
+        with patch.object(pop_module, 'update_google_spreadsheet'):
             entry.register_success({
                 'email': 'fred@example.com',
                 'first_name': 'Fred',
                 'last_name': 'Dickson',
                 'comment': 'Sunshine Man',
-                'populaire': populaire_id,
+                'populaire': populaire.id,
                 })
         rider = DBSession.query(PopulaireRider).first()
-        self.assertEqual(rider.distance, 60)
+        self.assertEqual(rider.distance, '60')
 
     def test_register_success_sends_2_emails(self):
         """successful entry sends emails to rider and organizer
@@ -703,14 +675,12 @@ class TestPopulaireEntry(unittest.TestCase):
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
-            populaire_organizer_email = populaire.organizer_email
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         mailer = get_mailer(request)
         entry = self._make_one(request)
-        with patch.object(pop_module, 'update_google_spreadsheet') as mock_task:
+        with patch.object(pop_module, 'update_google_spreadsheet'):
             entry.register_success({
                 'email': 'fred@example.com',
                 'first_name': 'Fred',
@@ -749,10 +719,8 @@ class TestPopulaireEntry(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
-        with transaction.manager:
-            DBSession.add(populaire)
-            populaire_organizer_email = populaire.organizer_email
-            msg = entry._rider_message(populaire, rider)
+        DBSession.add(populaire)
+        msg = entry._rider_message(populaire, rider)
         self.assertEqual(
             msg.subject, 'Pre-registration Confirmation for NewYearsPop')
         from_randopony = (
@@ -762,7 +730,7 @@ class TestPopulaireEntry(unittest.TestCase):
         self.assertEqual(msg.recipients, ['fred@example.com'])
         self.assertEqual(msg.extra_headers['Sender'], from_randopony)
         self.assertEqual(
-            msg.extra_headers['Reply-To'], populaire_organizer_email)
+            msg.extra_headers['Reply-To'], populaire.organizer_email)
         self.assertIn('NewYearsPop on Tue 01-Jan-2013', msg.body)
         self.assertIn(
             'list at <http://example.com/populaires/NewYearsPop>', msg.body)
@@ -800,17 +768,15 @@ class TestPopulaireEntry(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
-        with transaction.manager:
-            DBSession.add(populaire)
-            populaire_organizer_email = populaire.organizer_email
-            msg = entry._organizer_message(populaire, rider)
+        DBSession.add(populaire)
+        msg = entry._organizer_message(populaire, rider)
         self.assertEqual(
             msg.subject, 'Fred Dickson has Pre-registered for the NewYearsPop')
         from_randopony = (
             DBSession.query(EmailAddress)
             .filter_by(key='from_randopony').first().email)
         self.assertEqual(msg.sender, from_randopony)
-        self.assertEqual(msg.recipients, [populaire_organizer_email])
+        self.assertEqual(msg.recipients, [populaire.organizer_email])
         self.assertIn(
             'Fred "Sunshine Man" Dickson <fred@example.com> '
             'has pre-registered for the NewYearsPop.',
@@ -859,10 +825,8 @@ class TestPopulaireEntry(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
-        with transaction.manager:
-            DBSession.add(populaire)
-            populaire_organizer_email = populaire.organizer_email
-            msg = entry._organizer_message(populaire, rider)
+        DBSession.add(populaire)
+        msg = entry._organizer_message(populaire, rider)
         self.assertIn(
             'Fred Dickson has indicated that zhe is planning to ride the 100 km',
              msg.body)
@@ -898,9 +862,8 @@ class TestPopulaireEntry(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
-        with transaction.manager:
-            DBSession.add(populaire)
-            msg = entry._organizer_message(populaire, rider)
+        DBSession.add(populaire)
+        msg = entry._organizer_message(populaire, rider)
         self.assertEqual(
             msg.recipients, ['mjansson@example.com', 'mcroy@example.com'])
 
@@ -921,12 +884,10 @@ class TestPopulaireEntry(unittest.TestCase):
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
             )
-        with transaction.manager:
-            DBSession.add(populaire)
-            populaire_organizer_email = populaire.organizer_email
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
-        mailer = get_mailer(request)
+        get_mailer(request)
         entry = self._make_one(request)
         with patch.object(pop_module, 'update_google_spreadsheet') as mock_task:
             entry.register_success({
@@ -956,8 +917,7 @@ class TestPopulaireEntry(unittest.TestCase):
                            'VicPop11_registration.pdf',
             )
         populare_id = str(populaire)
-        with transaction.manager:
-            DBSession.add(populaire)
+        DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         entry = self._make_one(request)

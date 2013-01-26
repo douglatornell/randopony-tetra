@@ -9,8 +9,6 @@ except ImportError:                  # pragma: no cover
     from mock import patch
 from pyramid import testing
 from sqlalchemy import create_engine
-import transaction
-from ..models import Link
 from ..models.meta import (
     Base,
     DBSession,
@@ -169,8 +167,7 @@ class TestBrevet(unittest.TestCase):
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
             )
-        with transaction.manager:
-            DBSession.add(brevet)
+        DBSession.add(brevet)
         Brev = self._get_target_class()
         with patch.object(core, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 1, 7, 36, 42)
@@ -190,8 +187,7 @@ class TestBrevet(unittest.TestCase):
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
             )
-        with transaction.manager:
-            DBSession.add(brevet)
+        DBSession.add(brevet)
         Brev = self._get_target_class()
         with patch.object(core, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 12, 8, 33, 42)
@@ -211,8 +207,7 @@ class TestBrevet(unittest.TestCase):
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
             )
-        with transaction.manager:
-            DBSession.add(brevet)
+        DBSession.add(brevet)
         Brev = self._get_target_class()
         with patch.object(core, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 19, 8, 45, 42)
@@ -296,12 +291,12 @@ class TestPopulaire(unittest.TestCase):
     def test_default_entry_form_url(self):
         """Populaire entry form URL defaults to standard club form
         """
+        from ..models import Link
         entry_form_link = Link(
             key='entry_form',
             url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
             )
-        with transaction.manager:
-            DBSession.add(entry_form_link)
+        DBSession.add(entry_form_link)
         populaire = self._make_one(
             event_name='Victoria Populaire',
             short_name='VicPop',

@@ -20,7 +20,6 @@ from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.view import view_config
 import pytz
-import transaction
 from .core import SiteViews
 from ..admin.google_drive import google_drive_login
 from ...models import (
@@ -197,32 +196,31 @@ class PopulaireEntry(FormView):
         else:
             # New rider registration
             mailer = get_mailer(self.request)
-            with transaction.manager:
-                populaire = get_populaire(pop_short_name)
-                try:
-                    distance = appstruct['distance']
-                except KeyError:
-                    distance = populaire.distance.split()[0]
-                rider = PopulaireRider(
-                    email=appstruct['email'],
-                    first_name=appstruct['first_name'],
-                    last_name=appstruct['last_name'],
-                    distance=distance,
-                    comment=appstruct['comment'],
-                    )
-                populaire.riders.append(rider)
-                DBSession.add(rider)
-                update_google_spreadsheet.delay(
-                    [rider for rider in populaire.riders],
-                    populaire.google_doc_id.split(':')[1],
-                    self.request.registry.settings['google_drive.username'],
-                    self.request.registry.settings['google_drive.password'])
-                message = self._rider_message(populaire, rider)
-                mailer.send_to_queue(message)
-                message = self._organizer_message(populaire, rider)
-                mailer.send_to_queue(message)
-                self.request.session.flash('success')
-                self.request.session.flash(rider.email)
+            populaire = get_populaire(pop_short_name)
+            try:
+                distance = appstruct['distance']
+            except KeyError:
+                distance = populaire.distance.split()[0]
+            rider = PopulaireRider(
+                email=appstruct['email'],
+                first_name=appstruct['first_name'],
+                last_name=appstruct['last_name'],
+                distance=distance,
+                comment=appstruct['comment'],
+                )
+            populaire.riders.append(rider)
+            DBSession.add(rider)
+            update_google_spreadsheet.delay(
+                [rider for rider in populaire.riders],
+                populaire.google_doc_id.split(':')[1],
+                self.request.registry.settings['google_drive.username'],
+                self.request.registry.settings['google_drive.password'])
+            message = self._rider_message(populaire, rider)
+            mailer.send_to_queue(message)
+            message = self._organizer_message(populaire, rider)
+            mailer.send_to_queue(message)
+            self.request.session.flash('success')
+            self.request.session.flash(rider.email)
         return HTTPFound(self._redirect_url(pop_short_name))
 
     def failure(self, e):

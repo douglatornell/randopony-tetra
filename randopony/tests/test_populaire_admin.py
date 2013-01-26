@@ -15,7 +15,6 @@ except ImportError:                      # pragma: no cover
         )
 from pyramid import testing
 from sqlalchemy import create_engine
-import transaction
 from ..models.meta import (
     Base,
     DBSession,
@@ -40,26 +39,24 @@ class TestPopulaireDetails(unittest.TestCase):
         """
         from ..models import Populaire
         from ..views.admin.populaire import populaire_details
-        with transaction.manager:
-            populaire = Populaire(
-                event_name='Victoria Populaire',
-                short_name='VicPop',
-                distance='50 km, 100 km',
-                date_time=datetime(2011, 3, 27, 10, 0),
-                start_locn='University of Victoria, Parking Lot #2 '
-                           'Gabriola Road, near McKinnon Gym)',
-                organizer_email='mjansson@example.com',
-                registration_end=datetime(2011, 3, 24, 12, 0),
-                entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
-                               'VicPop11_registration.pdf',
-                )
-            populaire_id = str(populaire)
-            DBSession.add(populaire)
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       'Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        DBSession.add(populaire)
         request = testing.DummyRequest()
-        request.matchdict['item'] = populaire_id
+        request.matchdict['item'] = str(populaire)
         tmpl_vars = populaire_details(request)
         self.assertTrue(tmpl_vars['logout_btn'])
-        self.assertEqual(str(tmpl_vars['populaire']), populaire_id)
+        self.assertEqual(tmpl_vars['populaire'], populaire)
 
 
 class TestPopulaireCreate(unittest.TestCase):
@@ -174,20 +171,19 @@ class TestPopulaireEdit(unittest.TestCase):
         """admin populaire edit appstruct returns dict to populate form
         """
         from ..models import Populaire
-        with transaction.manager:
-            populaire = Populaire(
-                event_name='Victoria Populaire',
-                short_name='VicPop',
-                distance='50 km, 100 km',
-                date_time=datetime(2011, 3, 27, 10, 0),
-                start_locn='University of Victoria, Parking Lot #2 '
-                           '(Gabriola Road, near McKinnon Gym)',
-                organizer_email='mjansson@example.com',
-                registration_end=datetime(2011, 3, 24, 12, 0),
-                entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
-                               'VicPop11_registration.pdf',
-                )
-            DBSession.add(populaire)
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        DBSession.add(populaire)
         self.config.add_route(
             'admin.populaires.view', '/admin/populaires/{item}')
         request = testing.DummyRequest()
@@ -217,20 +213,19 @@ class TestPopulaireEdit(unittest.TestCase):
         """admin populaire edit show returns expected template variables
         """
         from ..models import Populaire
-        with transaction.manager:
-            populaire = Populaire(
-                event_name='Victoria Populaire',
-                short_name='VicPop',
-                distance='50 km, 100 km',
-                date_time=datetime(2011, 3, 27, 10, 0),
-                start_locn='University of Victoria, Parking Lot #2 '
-                           '(Gabriola Road, near McKinnon Gym)',
-                organizer_email='mjansson@example.com',
-                registration_end=datetime(2011, 3, 24, 12, 0),
-                entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
-                               'VicPop11_registration.pdf',
-                )
-            DBSession.add(populaire)
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        DBSession.add(populaire)
         self.config.add_route(
             'admin.populaires.view', '/admin/populaires/{item}')
         request = testing.DummyRequest()
@@ -246,20 +241,19 @@ class TestPopulaireEdit(unittest.TestCase):
         """admin edit populaire save success updates populaire in database
         """
         from ..models import Populaire
-        with transaction.manager:
-            populaire = Populaire(
-                event_name='Victoria Populaire',
-                short_name='VicPop',
-                distance='50 km, 100 km',
-                date_time=datetime(2011, 3, 27, 10, 0),
-                start_locn='University of Victoria, Parking Lot #2 '
-                           '(Gabriola Road, near McKinnon Gym)',
-                organizer_email='mjansson@example.com',
-                registration_end=datetime(2011, 3, 24, 12, 0),
-                entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
-                               'VicPop11_registration.pdf',
-                )
-            DBSession.add(populaire)
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        DBSession.add(populaire)
         self.config.add_route(
             'admin.populaires.view', '/admin/populaires/{item}')
         request = testing.DummyRequest()

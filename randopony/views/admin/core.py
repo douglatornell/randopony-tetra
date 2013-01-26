@@ -10,7 +10,6 @@ from pyramid.view import (
     view_defaults,
     )
 from sqlalchemy import desc
-import transaction
 from .brevet import get_brevet
 from .populaire import get_populaire
 from ...models import (
@@ -102,9 +101,8 @@ class AdminViews(object):
                 criterion = Populaire.id == get_populaire(item).id
             elif list_name == 'wranglers':
                 criterion = Administrator.persona_email == item
-            with transaction.manager:
-                (DBSession.query(params['model'])
-                    .filter(criterion)
-                    .delete())
+            (DBSession.query(params['model'])
+                .filter(criterion)
+                .delete())
             return HTTPFound(list_view)
         return tmpl_vars

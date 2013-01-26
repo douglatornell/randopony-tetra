@@ -9,7 +9,6 @@ except ImportError:                      # pragma: no cover
     from mock import MagicMock
 from pyramid import testing
 from sqlalchemy import create_engine
-import transaction
 from ..models.meta import (
     Base,
     DBSession,
@@ -34,23 +33,21 @@ class TestBrevetDetails(unittest.TestCase):
         """
         from ..models import Brevet
         from ..views.admin.brevet import brevet_details
-        with transaction.manager:
-            brevet = Brevet(
-                region='LM',
-                distance=200,
-                date_time=datetime(2012, 11, 11, 7, 0, 0),
-                route_name='11th Hour',
-                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
-                           '123 Carrie Cates Ct, North Vancouver',
-                organizer_email='tracy@example.com',
-                )
-            brevet_id = str(brevet)
-            DBSession.add(brevet)
+        brevet = Brevet(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            )
+        DBSession.add(brevet)
         request = testing.DummyRequest()
-        request.matchdict['item'] = brevet_id
+        request.matchdict['item'] = str(brevet)
         tmpl_vars = brevet_details(request)
         self.assertTrue(tmpl_vars['logout_btn'])
-        self.assertEqual(str(tmpl_vars['brevet']), brevet_id)
+        self.assertEqual(tmpl_vars['brevet'], brevet)
 
 
 class TestBrevetCreate(unittest.TestCase):
@@ -162,17 +159,16 @@ class TestBrevetEdit(unittest.TestCase):
         """admin brevet edit appstruct returns dict to populate form
         """
         from ..models import Brevet
-        with transaction.manager:
-            brevet = Brevet(
-                region='LM',
-                distance=200,
-                date_time=datetime(2012, 11, 11, 7, 0, 0),
-                route_name='11th Hour',
-                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
-                           '123 Carrie Cates Ct, North Vancouver',
-                organizer_email='tracy@example.com',
-                )
-            DBSession.add(brevet)
+        brevet = Brevet(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            )
+        DBSession.add(brevet)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'LM200 11Nov2012'
         edit = self._make_one(request)
@@ -197,17 +193,16 @@ class TestBrevetEdit(unittest.TestCase):
         """admin brevet edit show returns expected template variables
         """
         from ..models import Brevet
-        with transaction.manager:
-            brevet = Brevet(
-                region='LM',
-                distance=200,
-                date_time=datetime(2012, 11, 11, 7, 0, 0),
-                route_name='11th Hour',
-                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
-                           '123 Carrie Cates Ct, North Vancouver',
-                organizer_email='tracy@example.com',
-                )
-            DBSession.add(brevet)
+        brevet = Brevet(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            )
+        DBSession.add(brevet)
         self.config.add_route('admin.brevets.view', '/admin/brevets/{item}')
         request = testing.DummyRequest()
         request.matchdict['item'] = 'LM200 11Nov2012'
@@ -222,17 +217,16 @@ class TestBrevetEdit(unittest.TestCase):
         """admin edit brevet save success updates brevet in database
         """
         from ..models import Brevet
-        with transaction.manager:
-            brevet = Brevet(
-                region='LM',
-                distance=200,
-                date_time=datetime(2012, 11, 11, 7, 0, 0),
-                route_name='11th Hour',
-                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
-                           '123 Carrie Cates Ct, North Vancouver',
-                organizer_email='tracy@example.com',
-                )
-            DBSession.add(brevet)
+        brevet = Brevet(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            )
+        DBSession.add(brevet)
         self.config.add_route('admin.brevets.view', '/admin/brevets/{item}')
         request = testing.DummyRequest()
         request.matchdict['item'] = 'LM200 11Nov2012'
