@@ -41,34 +41,6 @@ def populaire_details(request):
 
 
 @view_config(
-    route_name='admin.populaires.create_rider_list',
-    permission='admin',
-    )
-def create_rider_list(request):
-    short_name = request.matchdict['item']
-    populaire = get_populaire(short_name)
-    redirect_url = request.route_url('admin.populaires.view', item=short_name)
-    if populaire.google_doc_id:
-        request.session.flash('error')
-        request.session.flash('Rider list spreadsheet already created')
-        return HTTPFound(redirect_url)
-    client = google_drive_login(
-        DocsClient,
-        request.registry.settings['google_drive.username'],
-        request.registry.settings['google_drive.password'])
-    template = get_rider_list_template('Populaire Rider List Template', client)
-    created_doc = client.copy_resource(
-        template, '{0} {0.date_time:%d-%b-%Y}'.format(populaire))
-    share_rider_list_publicly(created_doc, client)
-    with transaction.manager:
-        populaire = get_populaire(short_name)
-        populaire.google_doc_id = created_doc.resource_id.text
-        request.session.flash('success')
-        request.session.flash('Rider list spreadsheet created')
-    return HTTPFound(redirect_url)
-
-
-@view_config(
     route_name='admin.populaires.create',
     renderer='admin/populaire_edit.mako',
     permission='admin',
@@ -182,3 +154,40 @@ class PopulaireEdit(FormView):
             'cancel_url': self._redirect_url(self.request.matchdict['item']),
             })
         return tmpl_vars
+
+
+@view_config(
+    route_name='admin.populaires.create_rider_list',
+    permission='admin',
+    )
+def create_rider_list(request):
+    short_name = request.matchdict['item']
+    populaire = get_populaire(short_name)
+    redirect_url = request.route_url('admin.populaires.view', item=short_name)
+    if populaire.google_doc_id:
+        request.session.flash('error')
+        request.session.flash('Rider list spreadsheet already created')
+        return HTTPFound(redirect_url)
+    google_doc_id = _create_google_drive_list(populaire, request)
+    populaire.google_doc_id = google_doc_id
+    request.session.flash('success')
+    request.session.flash('Rider list spreadsheet created')
+    return HTTPFound(redirect_url)
+
+
+def _create_google_drive_list(populaire, request):      # pragma: no cover
+    """Execute Google Drive operations to create rider list from template,
+    and share it publicly.
+
+    Returns the id of the created document that is used to construct its
+    URL.
+    """
+    client = google_drive_login(
+        DocsClient,
+        request.registry.settings['google_drive.username'],
+        request.registry.settings['google_drive.password'])
+    template = get_rider_list_template('Populaire Rider List Template', client)
+    created_doc = client.copy_resource(
+        template, '{0} {0.date_time:%d-%b-%Y}'.format(populaire))
+    share_rider_list_publicly(created_doc, client)
+    return created_doc.resource_id.text

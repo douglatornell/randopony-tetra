@@ -4,9 +4,15 @@
 from datetime import datetime
 import unittest
 try:
-    from unittest.mock import MagicMock
+    from unittest.mock import (
+        MagicMock,
+        patch,
+        )
 except ImportError:                      # pragma: no cover
-    from mock import MagicMock
+    from mock import (
+        MagicMock,
+        patch,
+        )
 from pyramid import testing
 from sqlalchemy import create_engine
 import transaction
@@ -293,3 +299,142 @@ class TestPopulaireEdit(unittest.TestCase):
         self.assertEqual(
             tmpl_vars['cancel_url'],
             'http://example.com/admin/populaires/VicPop')
+
+
+class TestCreateRiderList(unittest.TestCase):
+    """Unit tests for create rider list spreadsheet view.
+    """
+    def _call_fut(self, *args, **kwargs):
+        from ..views.admin.populaire import create_rider_list
+        return create_rider_list(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp(
+            settings={
+                'google_drive.username': 'randopony',
+                'google_drive.password': 'sEcReT',
+            })
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_create_rider_list_already_done(self):
+        """create_rider_list sets expected flash msgs when rider list exists
+        """
+        from ..models import Populaire
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            google_doc_id='spreadsheet:1234',
+            )
+        DBSession.add(populaire)
+        self.config.add_route(
+            'admin.populaires.view', '/admin/populaires/{item}')
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VicPop'
+        resp = self._call_fut(request)
+        flash = request.session.pop_flash()
+        self.assertEqual(
+            flash,
+            ['error', 'Rider list spreadsheet already created'])
+        self.assertEqual(
+            resp.location, 'http://example.com/admin/populaires/VicPop')
+
+    def test_create_rider_list_calls_create_google_drive_list(self):
+        """create_rider_list calls _create_google_drive_list w/ expected args
+        """
+        from ..models import Populaire
+        from ..views.admin import populaire as pop_module
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        DBSession.add(populaire)
+        self.config.add_route(
+            'admin.populaires.view', '/admin/populaires/{item}')
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VicPop'
+        cgdl_patch = patch.object(pop_module, '_create_google_drive_list')
+        with cgdl_patch as mock_cgdl:
+            self._call_fut(request)
+        mock_cgdl.assert_called_once_with(populaire, request)
+
+    def test_create_rider_list_sets_google_doc_id(self):
+        """create_rider_list sets google_doc_id attr on populaire instance
+        """
+        from ..models import Populaire
+        from ..views.admin import populaire as pop_module
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        DBSession.add(populaire)
+        self.config.add_route(
+            'admin.populaires.view', '/admin/populaires/{item}')
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VicPop'
+        cgdl_patch = patch.object(pop_module, '_create_google_drive_list')
+        with cgdl_patch as mock_cgdl:
+            mock_cgdl.return_value = 'spreadsheet:1234'
+            self._call_fut(request)
+        self.assertEqual(populaire.google_doc_id, 'spreadsheet:1234')
+
+    def test_create_rider_list_rider_list_created(self):
+        """create_rider_list sets exp flash msgs when rider list create_rider_list"""
+        from ..models import Populaire
+        from ..views.admin import populaire as pop_module
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        DBSession.add(populaire)
+        self.config.add_route(
+            'admin.populaires.view', '/admin/populaires/{item}')
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VicPop'
+        cgdl_patch = patch.object(pop_module, '_create_google_drive_list')
+        with cgdl_patch as mock_cgdl:
+            mock_cgdl.return_value = 'spreadsheet:1234'
+            resp = self._call_fut(request)
+        flash = request.session.pop_flash()
+        self.assertEqual(
+            flash,
+            ['success', 'Rider list spreadsheet created'])
+        self.assertEqual(
+            resp.location, 'http://example.com/admin/populaires/VicPop')
