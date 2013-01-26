@@ -106,7 +106,7 @@ class PopulaireSchema(CSRFSchema):
         'minuteGrid': 15,
     }
     date_time = colander.SchemaNode(
-        colander.DateTime(),
+        colander.DateTime(default_tzinfo=None),
         title='Date and Start Time',
         widget=DateTimeInputWidget(options=datetimeinputwidget_options),
         )
@@ -137,7 +137,7 @@ class PopulaireSchema(CSRFSchema):
         validator=colander.Email(),
         )
     registration_end = colander.SchemaNode(
-        colander.DateTime(),
+        colander.DateTime(default_tzinfo=None),
         title='Registration Closes',
         widget=DateTimeInputWidget(options=datetimeinputwidget_options),
         )
