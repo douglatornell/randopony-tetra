@@ -112,6 +112,9 @@ def map_routes(config):               # pragma: no cover
     config.add_route(
         'admin.populaires.create_rider_list',
         'admin/populaire/{item}/create_rider_list')
+    config.add_route(
+        'admin.populaires.email_to_organizer',
+        'admin.populaire/{item}/email_to_organizer')
     # administrators (aka pony wranglers) admin routes
     config.add_route('admin.wranglers.create', '/admin/wranglers/new')
     config.add_route('admin.wranglers.edit', '/admin/wranglers/{item}')

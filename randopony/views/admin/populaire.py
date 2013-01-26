@@ -4,7 +4,10 @@
 from deform import Button
 from gdata.docs.client import DocsClient
 from pyramid_deform import FormView
+from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message
 from pyramid.httpexceptions import HTTPFound
+from pyramid.renderers import render
 from pyramid.view import view_config
 from .google_drive import (
     google_drive_login,
@@ -12,6 +15,7 @@ from .google_drive import (
     share_rider_list_publicly,
     )
 from ...models import (
+    EmailAddress,
     Populaire,
     PopulaireSchema,
     )
@@ -186,3 +190,57 @@ def _create_google_drive_list(populaire, request):      # pragma: no cover
         template, '{0} {0.date_time:%d-%b-%Y}'.format(populaire))
     share_rider_list_publicly(created_doc, client)
     return created_doc.resource_id.text
+
+
+@view_config(
+    route_name='admin.populaires.email_to_organizer',
+    permission='admin',
+    )
+def email_to_organizer(request):
+    short_name = request.matchdict['item']
+    populaire = get_populaire(short_name)
+    redirect_url = request.route_url('admin.populaires.view', item=short_name)
+    if not populaire.google_doc_id:
+        request.session.flash('error')
+        request.session.flash(
+            'Google Drive rider list must be created before email to '
+            'organizer(s) can be sent')
+        return HTTPFound(redirect_url)
+    from_randopony = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='from_randopony')
+        .first().email
+        )
+    pop_page_url = request.route_url('populaire', short_name=short_name)
+    rider_list_url = (
+        'https://spreadsheets.google.com/ccc?key={0}'
+        .format(populaire.google_doc_id.split(':')[1]))
+    rider_emails_url = request.route_url(
+        'populaire.rider_emails',
+        short_name=populaire.short_name,
+        uuid=populaire.uuid)
+    admin_email = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='admin_email')
+        .first().email
+        )
+    message = Message(
+        subject='RandoPony URLs for {.event_name}'.format(populaire),
+        sender=from_randopony,
+        recipients=[
+            addr.strip() for addr in populaire.organizer_email.split(',')],
+        body=render(
+            'email/populaire_URLs_to_organizer.mako',
+            {
+                'populaire': populaire.event_name,
+                'pop_page_url': pop_page_url,
+                'rider_list_url': rider_list_url,
+                'rider_emails_url': rider_emails_url,
+                'admin_email': admin_email,
+            }))
+    mailer = get_mailer(request)
+    mailer.send(message)
+    request.session.flash('success')
+    request.session.flash(
+        'Email sent to {} organizer(s)'.format(populaire.short_name))
+    return HTTPFound(redirect_url)
