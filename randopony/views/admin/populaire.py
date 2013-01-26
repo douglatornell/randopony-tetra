@@ -6,8 +6,7 @@ from gdata.docs.client import DocsClient
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
-import transaction
-from .core import (
+from .google_drive import (
     google_drive_login,
     get_rider_list_template,
     share_rider_list_publicly,
@@ -76,11 +75,9 @@ class PopulaireCreate(FormView):
             registration_end=appstruct['registration_end'],
             entry_form_url=appstruct['entry_form_url'],
             )
-        populaire_id = str(populaire)
-        with transaction.manager:
-            DBSession.add(populaire)
+        DBSession.add(populaire)
         return HTTPFound(
-            self.request.route_url('admin.populaires.view', item=populaire_id))
+            self.request.route_url('admin.populaires.view', item=populaire))
 
     def failure(self, e):
         tmpl_vars = super(PopulaireCreate, self).failure(e)
@@ -131,21 +128,19 @@ class PopulaireEdit(FormView):
         return tmpl_vars
 
     def save_success(self, appstruct):
-        with transaction.manager:
-            populaire = (DBSession.query(Populaire)
-                .filter_by(id=appstruct['id'])
-                .one())
-            populaire.event_name = appstruct['event_name']
-            populaire.short_name = appstruct['short_name']
-            populaire.distance = appstruct['distance']
-            populaire.date_time = appstruct['date_time']
-            populaire.start_locn = appstruct['start_locn']
-            populaire.start_map_url = appstruct['start_map_url']
-            populaire.organizer_email = appstruct['organizer_email']
-            populaire.registration_end = appstruct['registration_end']
-            populaire.entry_form_url = appstruct['entry_form_url']
-            populaire_id = str(populaire)
-        return HTTPFound(self._redirect_url(populaire_id))
+        populaire = (DBSession.query(Populaire)
+            .filter_by(id=appstruct['id'])
+            .one())
+        populaire.event_name = appstruct['event_name']
+        populaire.short_name = appstruct['short_name']
+        populaire.distance = appstruct['distance']
+        populaire.date_time = appstruct['date_time']
+        populaire.start_locn = appstruct['start_locn']
+        populaire.start_map_url = appstruct['start_map_url']
+        populaire.organizer_email = appstruct['organizer_email']
+        populaire.registration_end = appstruct['registration_end']
+        populaire.entry_form_url = appstruct['entry_form_url']
+        return HTTPFound(self._redirect_url(populaire))
 
     def failure(self, e):
         tmpl_vars = super(PopulaireEdit, self).failure(e)

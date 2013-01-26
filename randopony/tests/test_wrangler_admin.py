@@ -9,7 +9,6 @@ except ImportError:                      # pragma: no cover
     from mock import MagicMock
 from pyramid import testing
 from sqlalchemy import create_engine
-import transaction
 from ..models.meta import (
     Base,
     DBSession,
@@ -117,9 +116,8 @@ class TestWranglerEdit(unittest.TestCase):
         """admin edit wrangler appstruct method returns dict to populate form
         """
         from ..models import Administrator
-        with transaction.manager:
-            admin = Administrator(persona_email='tom@example.com')
-            DBSession.add(admin)
+        admin = Administrator(persona_email='tom@example.com')
+        DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         request.matchdict['item'] = 'tom@example.com'
@@ -135,9 +133,8 @@ class TestWranglerEdit(unittest.TestCase):
         """admin edit wrangler show returns expected template variables
         """
         from ..models import Administrator
-        with transaction.manager:
-            admin = Administrator(persona_email='tom@example.com')
-            DBSession.add(admin)
+        admin = Administrator(persona_email='tom@example.com')
+        DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         request.matchdict['item'] = 'tom@example.com'
@@ -151,9 +148,8 @@ class TestWranglerEdit(unittest.TestCase):
         """admin edit wrangler success updates persona email in database
         """
         from ..models import Administrator
-        with transaction.manager:
-            admin = Administrator(persona_email='tom@example.com')
-            DBSession.add(admin)
+        admin = Administrator(persona_email='tom@example.com')
+        DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         edit = self._make_one(request)

@@ -9,7 +9,6 @@ except ImportError:                  # pragma: no cover
     from mock import patch
 from pyramid import testing
 from sqlalchemy import create_engine
-import transaction
 from ..models.meta import (
     Base,
     DBSession,
@@ -59,11 +58,9 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_wranglers_list_order(self):
         """admin wranglers list is alpha ordered by persona email"""
         from ..models import Administrator
-        with transaction.manager:
-            admin = Administrator(persona_email='tom@example.com')
-            DBSession.add(admin)
-            admin = Administrator(persona_email='harry@example.com')
-            DBSession.add(admin)
+        admin1 = Administrator(persona_email='tom@example.com')
+        admin2 = Administrator(persona_email='harry@example.com')
+        DBSession.add_all((admin1, admin2))
         request = testing.DummyRequest()
         request.matchdict['list'] = 'wranglers'
         admin = self._make_one(request)
@@ -76,9 +73,8 @@ class TestCoreAdminViews(unittest.TestCase):
         """admin delete cancel leaves item in database
         """
         from ..models import Administrator
-        with transaction.manager:
-            admin = Administrator(persona_email='tom@example.com')
-            DBSession.add(admin)
+        admin = Administrator(persona_email='tom@example.com')
+        DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest(post={'cancel': 'cancel'})
         request.matchdict['list'] = 'wranglers'
@@ -111,9 +107,8 @@ class TestCoreAdminViews(unittest.TestCase):
         """
         from sqlalchemy.orm.exc import NoResultFound
         from ..models import Administrator
-        with transaction.manager:
-            admin = Administrator(persona_email='tom@example.com')
-            DBSession.add(admin)
+        admin = Administrator(persona_email='tom@example.com')
+        DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest(post={'delete': 'delete'})
         request.matchdict['list'] = 'wranglers'
@@ -130,22 +125,20 @@ class TestCoreAdminViews(unittest.TestCase):
         from sqlalchemy.orm.exc import NoResultFound
         from ..models import core
         from ..models import Brevet
-        with transaction.manager:
-            brevet = Brevet(
-                region='LM',
-                distance=200,
-                date_time=datetime(2012, 11, 11, 7, 0, 0),
-                route_name='11th Hour',
-                start_locn='Bean Around the World Coffee, Lonsdale Quay, '
-                           '123 Carrie Cates Ct, North Vancouver',
-                organizer_email='tracy@example.com',
-                )
-            brevet_id = str(brevet)
-            DBSession.add(brevet)
+        brevet = Brevet(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+            )
+        DBSession.add(brevet)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest(post={'delete': 'delete'})
         request.matchdict['list'] = 'brevets'
-        request.matchdict['item'] = brevet_id
+        request.matchdict['item'] = str(brevet)
         with patch.object(core, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2012, 11, 1, 12, 55, 42)
             admin = self._make_one(request)

@@ -4,7 +4,6 @@
 import unittest
 from pyramid import testing
 from sqlalchemy import create_engine
-import transaction
 from ..models.meta import (
     Base,
     DBSession,
@@ -38,9 +37,8 @@ class TestAuthConfig(unittest.TestCase):
         """groupfinder returns admin group for known user"""
         from .. import groupfinder
         from ..models import Administrator
-        with transaction.manager:
-            admin = Administrator(persona_email='tom@example.com')
-            DBSession.add(admin)
+        admin = Administrator(persona_email='tom@example.com')
+        DBSession.add(admin)
         request = testing.DummyRequest()
         groups = groupfinder('tom@example.com', request)
         self.assertEqual(groups, ['g:admin'])

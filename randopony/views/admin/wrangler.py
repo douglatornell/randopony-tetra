@@ -5,7 +5,6 @@ from deform import Button
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
-import transaction
 from ...models import (
     Administrator,
     AdministratorSchema,
@@ -38,9 +37,8 @@ class WranglerCreate(FormView):
         return tmpl_vars
 
     def add_success(self, appstruct):
-        with transaction.manager:
-            admin = Administrator(appstruct['persona_email'])
-            DBSession.add(admin)
+        admin = Administrator(appstruct['persona_email'])
+        DBSession.add(admin)
         return HTTPFound(self.list_url())
 
     def failure(self, e):
@@ -85,11 +83,10 @@ class WranglerEdit(FormView):
         return tmpl_vars
 
     def save_success(self, appstruct):
-        with transaction.manager:
-            admin = (DBSession.query(Administrator)
-                .filter_by(id=appstruct['id'])
-                .one())
-            admin.persona_email = appstruct['persona_email']
+        admin = (DBSession.query(Administrator)
+            .filter_by(id=appstruct['id'])
+            .one())
+        admin.persona_email = appstruct['persona_email']
         return HTTPFound(self.list_url())
 
     def failure(self, e):
