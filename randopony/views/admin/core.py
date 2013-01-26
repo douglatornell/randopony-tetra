@@ -13,6 +13,7 @@ from pyramid.view import (
 from sqlalchemy import desc
 import transaction
 from .brevet import get_brevet
+from .populaire import get_populaire
 from ...models import (
     Administrator,
     Brevet,
@@ -98,6 +99,8 @@ class AdminViews(object):
         if 'delete' in self.request.POST:
             if list_name == 'brevets':
                 criterion = Brevet.id == get_brevet(*item.split()).id
+            elif list_name == 'populaires':
+                criterion = Populaire.id == get_populaire(item).id
             elif list_name == 'wranglers':
                 criterion = Administrator.persona_email == item
             with transaction.manager:
@@ -106,26 +109,3 @@ class AdminViews(object):
                     .delete())
             return HTTPFound(list_view)
         return tmpl_vars
-
-
-def google_drive_login(service, username, password):
-    client = service()
-    client.ssl = True
-    client.ClientLogin(username, password, 'randopony')
-    return client
-
-
-def get_rider_list_template(template_name, client):
-    docs = client.get_resources()
-    for doc in docs.entry:
-        if doc.title.text == template_name:
-            template = doc
-            break
-    return template
-
-
-def share_rider_list_publicly(doc, client):
-    scope = gdata.acl.data.AclScope(type='default')
-    role = gdata.acl.data.AclRole(value='reader')
-    acl_entry = gdata.acl.data.AclEntry(scope=scope, role=role)
-    client.Post(acl_entry, doc.get_acl_feed_link().href)

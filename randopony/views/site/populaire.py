@@ -22,7 +22,7 @@ from pyramid.view import view_config
 import pytz
 import transaction
 from .core import SiteViews
-from ..admin.core import google_drive_login
+from ..admin.google_drive import google_drive_login
 from ...models import (
     Brevet,
     EmailAddress,
