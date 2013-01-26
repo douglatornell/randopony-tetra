@@ -36,7 +36,7 @@ ${self.flash(request.session.pop_flash())}
 <h4>Entry Form URL</h4>
 <p>${populaire.entry_form_url}</p>
 
-<h4>Google Rider List Id</h4>
+<h4>Google Drive Rider List Id</h4>
 %if populaire.google_doc_id:
 <p>
   <a href="${'https://spreadsheets.google.com/ccc?key={0}'.format(populaire.google_doc_id.split(':')[1])}"
@@ -82,7 +82,7 @@ ${self.flash(request.session.pop_flash())}
         <a href="${request.route_url('admin.populaires.create_rider_list',
                                      item=str(populaire))}"
            tabindex="-1">
-           Copy Google Template
+           Create Rider List
          </a>
        </li>
       <li><a href="#" tabindex="-1">Email Organizer(s)</a></li>
