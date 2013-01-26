@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """RandoPony admin views core components.
 """
-import gdata.acl.data
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.response import Response
