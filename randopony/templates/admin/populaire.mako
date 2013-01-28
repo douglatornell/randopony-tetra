@@ -95,7 +95,13 @@ ${self.flash(request.session.pop_flash())}
          </a>
       </li>
 
-      <li><a href="#" tabindex="-1">Email Webmaster</a></li>
+      <li>
+        <a href="${request.route_url('admin.populaires.email_to_webmaster',
+                                     item=str(populaire))}"
+           tabindex="-1">
+           Email Webmaster
+        </a>
+      </li>
     </ul>
   </div>
 </div>

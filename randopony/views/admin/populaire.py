@@ -244,3 +244,46 @@ def email_to_organizer(request):
     request.session.flash(
         'Email sent to {} organizer(s)'.format(populaire.short_name))
     return HTTPFound(redirect_url)
+
+
+@view_config(
+    route_name='admin.populaires.email_to_webmaster',
+    permission='admin',
+    )
+def email_to_webmaster(request):
+    short_name = request.matchdict['item']
+    populaire = get_populaire(short_name)
+    redirect_url = request.route_url('admin.populaires.view', item=short_name)
+    from_randopony = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='from_randopony')
+        .first().email
+        )
+    club_webmaster = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='club_webmaster').first().email)
+    pop_page_url = request.route_url('populaire', short_name=short_name)
+    admin_email = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='admin_email')
+        .first().email
+        )
+    message = Message(
+        subject='RandoPony Pre-registration page for {.event_name}'
+                .format(populaire),
+        sender=from_randopony,
+        recipients=[club_webmaster],
+        body=render(
+            'email/event_URL_to_webmaster.mako',
+            {
+                'event': populaire.event_name,
+                'event_page_url': pop_page_url,
+                'admin_email': admin_email,
+            }))
+    mailer = get_mailer(request)
+    mailer.send(message)
+    request.session.flash('success')
+    request.session.flash(
+        'Email with {} page URL sent to webmaster'
+        .format(populaire.short_name))
+    return HTTPFound(redirect_url)
