@@ -77,7 +77,13 @@ ${self.flash(request.session.pop_flash())}
       <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
-      <li><a href="#" tabindex="-1">Setup 1-2-3</a></li>
+      <li>
+        <a href="${request.route_url('admin.populaires.setup_123',
+                                     item=str(populaire))}"
+           tabindex="-1">
+           Setup 1-2-3
+        </a>
+      </li>
 
       <li>
         <a href="${request.route_url('admin.populaires.create_rider_list',
@@ -113,7 +119,9 @@ ${self.flash(request.session.pop_flash())}
       <div class="alert alert-${data[0]} alert-block fade in">
         <span class="close" data-dismiss="alert">&times;</span>
         <h4 class="alert-heading">${data[0]}!</h4>
-        ${data[1]}
+        %for line in data[1:]:
+        ${line}<br>
+        %endfor
       </div>
     </div>
   </div>
