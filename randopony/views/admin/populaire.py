@@ -162,16 +162,21 @@ class PopulaireEdit(FormView):
 def create_rider_list(request):
     short_name = request.matchdict['item']
     populaire = get_populaire(short_name)
+    _create_rider_list(request, populaire)
     redirect_url = request.route_url('admin.populaires.view', item=short_name)
+    return HTTPFound(redirect_url)
+
+
+def _create_rider_list(request, populaire):
     if populaire.google_doc_id:
         request.session.flash('error')
         request.session.flash('Rider list spreadsheet already created')
-        return HTTPFound(redirect_url)
+        return 'error'
     google_doc_id = _create_google_drive_list(populaire, request)
     populaire.google_doc_id = google_doc_id
     request.session.flash('success')
     request.session.flash('Rider list spreadsheet created')
-    return HTTPFound(redirect_url)
+    return 'success'
 
 
 def _create_google_drive_list(populaire, request):      # pragma: no cover
@@ -199,19 +204,25 @@ def _create_google_drive_list(populaire, request):      # pragma: no cover
 def email_to_organizer(request):
     short_name = request.matchdict['item']
     populaire = get_populaire(short_name)
+    _email_to_organizer(request, populaire)
     redirect_url = request.route_url('admin.populaires.view', item=short_name)
+    return HTTPFound(redirect_url)
+
+
+def _email_to_organizer(request, populaire):
     if not populaire.google_doc_id:
         request.session.flash('error')
         request.session.flash(
             'Google Drive rider list must be created before email to '
             'organizer(s) can be sent')
-        return HTTPFound(redirect_url)
+        return
     from_randopony = (
         DBSession.query(EmailAddress)
         .filter_by(key='from_randopony')
         .first().email
         )
-    pop_page_url = request.route_url('populaire', short_name=short_name)
+    pop_page_url = request.route_url(
+        'populaire', short_name=populaire.short_name)
     rider_list_url = (
         'https://spreadsheets.google.com/ccc?key={0}'
         .format(populaire.google_doc_id.split(':')[1]))
@@ -243,7 +254,6 @@ def email_to_organizer(request):
     request.session.flash('success')
     request.session.flash(
         'Email sent to {} organizer(s)'.format(populaire.short_name))
-    return HTTPFound(redirect_url)
 
 
 @view_config(
@@ -253,7 +263,12 @@ def email_to_organizer(request):
 def email_to_webmaster(request):
     short_name = request.matchdict['item']
     populaire = get_populaire(short_name)
+    _email_to_webmaster(request, populaire)
     redirect_url = request.route_url('admin.populaires.view', item=short_name)
+    return HTTPFound(redirect_url)
+
+
+def _email_to_webmaster(request, populaire):
     from_randopony = (
         DBSession.query(EmailAddress)
         .filter_by(key='from_randopony')
@@ -262,7 +277,8 @@ def email_to_webmaster(request):
     club_webmaster = (
         DBSession.query(EmailAddress)
         .filter_by(key='club_webmaster').first().email)
-    pop_page_url = request.route_url('populaire', short_name=short_name)
+    pop_page_url = request.route_url(
+        'populaire', short_name=populaire.short_name)
     admin_email = (
         DBSession.query(EmailAddress)
         .filter_by(key='admin_email')
@@ -286,4 +302,24 @@ def email_to_webmaster(request):
     request.session.flash(
         'Email with {} page URL sent to webmaster'
         .format(populaire.short_name))
+
+
+@view_config(
+    route_name='admin.populaires.setup_123',
+    permission='admin',
+    )
+def setup_123(request):
+    short_name = request.matchdict['item']
+    populaire = get_populaire(short_name)
+    result = _create_rider_list(request, populaire)
+    if result == 'success':
+        _email_to_organizer(request, populaire)
+        _email_to_webmaster(request, populaire)
+        # Rewrite flash message list with only 1 success element
+        flash = request.session.pop_flash()
+        request.session.flash('success')
+        for msg in flash:
+            if msg != 'success':
+                request.session.flash(msg)
+    redirect_url = request.route_url('admin.populaires.view', item=short_name)
     return HTTPFound(redirect_url)

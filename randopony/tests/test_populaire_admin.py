@@ -706,3 +706,146 @@ class TestEmailToWebmaster(unittest.TestCase):
         self.assertIn(
             'The URL is <http://example.com/populaires/VicPop>.', msg.body)
         self.assertIn('send email to <djl@douglatornell.ca>.', msg.body)
+
+
+class TestSetup123(unittest.TestCase):
+    """Unit tests for combined 3-step setup admin function view.
+    """
+    def _call_fut(self, *args, **kwargs):
+        from ..views.admin.populaire import setup_123
+        return setup_123(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp(
+            settings={
+                'mako.directories': 'randopony:templates',
+            })
+        self.config.include('pyramid_mailer.testing')
+        self.config.add_route(
+            'admin.populaires.view', '/admin/populaire/{item}')
+        self.config.add_route(
+            'populaire', '/populaires/{short_name}')
+        self.config.add_route(
+            'populaire.rider_emails',
+            '/populaires/{short_name}/rider_emails/{uuid}')
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_setup_123(self):
+        """setup_123 calls expected 3 setup steps
+        """
+        from ..models import Populaire
+        from ..views.admin import populaire as pop_module
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VicPop'
+        patch_crl = patch.object(pop_module, '_create_rider_list')
+        patch_eto = patch.object(pop_module, '_email_to_organizer')
+        patch_etw = patch.object(pop_module, '_email_to_webmaster')
+        with patch_crl as mock_crl, patch_eto as mock_eto, patch_etw as mock_etw:
+            mock_crl.return_value = 'success'
+            resp = self._call_fut(request)
+        mock_crl.assert_called_once_with(request, populaire)
+        mock_eto.assert_called_once_with(request, populaire)
+        mock_etw.assert_called_once_with(request, populaire)
+        self.assertEqual(
+            resp.location, 'http://example.com/admin/populaire/VicPop')
+
+    def test_setup_123_error_create_rider_list_already_done(self):
+        """setup_123 stops w/ exp flash msg if rider list doc id is setup
+        """
+        from ..models import Populaire
+        from ..views.admin import populaire as pop_module
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            )
+        DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VicPop'
+        patch_eto = patch.object(pop_module, '_email_to_organizer')
+        patch_etw = patch.object(pop_module, '_email_to_webmaster')
+        with patch_eto as mock_eto, patch_etw as mock_etw:
+            self._call_fut(request)
+        self.assertFalse(mock_eto.called)
+        self.assertFalse(mock_etw.called)
+        flash = request.session.pop_flash()
+        self.assertEqual(
+            flash,
+            ['error', 'Rider list spreadsheet already created'])
+
+    def test_setup_123_success_flash(self):
+        """setup_123 sets expected flash message on success
+        """
+        from ..models import (
+            EmailAddress,
+            Populaire,
+            )
+        from ..views.admin import populaire as pop_module
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            )
+        from_randopony = EmailAddress(
+            key='from_randopony',
+            email='randopony@randonneurs.bc.ca',
+            )
+        admin_email = EmailAddress(
+            key='admin_email',
+            email='djl@douglatornell.ca',
+            )
+        club_webmaster = EmailAddress(
+            key='club_webmaster',
+            email='webmaster@randonneurs.bc.ca',
+            )
+        DBSession.add_all(
+            (populaire, from_randopony, admin_email, club_webmaster))
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VicPop'
+        cgdl_patch = patch.object(pop_module, '_create_google_drive_list')
+        with cgdl_patch as mock_cgdl:
+            mock_cgdl.return_value = 'spreadsheet:1234'
+            self._call_fut(request)
+        flash = request.session.pop_flash()
+        self.assertEqual(
+            flash,
+            ['success',
+             'Rider list spreadsheet created',
+             'Email sent to VicPop organizer(s)',
+             'Email with VicPop page URL sent to webmaster',
+            ])
