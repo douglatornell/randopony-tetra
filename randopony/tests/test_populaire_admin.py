@@ -299,7 +299,7 @@ class TestPopulaireEdit(unittest.TestCase):
 class TestCreateRiderList(unittest.TestCase):
     """Unit tests for create rider list spreadsheet view.
     """
-    def _call_fut(self, *args, **kwargs):
+    def _call_create_rider_list(self, *args, **kwargs):
         from ..views.admin.populaire import create_rider_list
         return create_rider_list(*args, **kwargs)
 
@@ -339,7 +339,7 @@ class TestCreateRiderList(unittest.TestCase):
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
-        resp = self._call_fut(request)
+        resp = self._call_create_rider_list(request)
         flash = request.session.pop_flash()
         self.assertEqual(
             flash,
@@ -369,7 +369,7 @@ class TestCreateRiderList(unittest.TestCase):
         request.matchdict['item'] = 'VicPop'
         cgdl_patch = patch.object(pop_module, '_create_google_drive_list')
         with cgdl_patch as mock_cgdl:
-            self._call_fut(request)
+            self._call_create_rider_list(request)
         mock_cgdl.assert_called_once_with(populaire, request)
 
     def test_create_rider_list_sets_google_doc_id(self):
@@ -395,7 +395,7 @@ class TestCreateRiderList(unittest.TestCase):
         cgdl_patch = patch.object(pop_module, '_create_google_drive_list')
         with cgdl_patch as mock_cgdl:
             mock_cgdl.return_value = 'spreadsheet:1234'
-            self._call_fut(request)
+            self._call_create_rider_list(request)
         self.assertEqual(populaire.google_doc_id, 'spreadsheet:1234')
 
     def test_create_rider_list_rider_list_created(self):
@@ -420,7 +420,7 @@ class TestCreateRiderList(unittest.TestCase):
         cgdl_patch = patch.object(pop_module, '_create_google_drive_list')
         with cgdl_patch as mock_cgdl:
             mock_cgdl.return_value = 'spreadsheet:1234'
-            resp = self._call_fut(request)
+            resp = self._call_create_rider_list(request)
         flash = request.session.pop_flash()
         self.assertEqual(
             flash,
@@ -432,7 +432,7 @@ class TestCreateRiderList(unittest.TestCase):
 class TestEmailToOrganizer(unittest.TestCase):
     """Unit tests for email re: event URLs to organizer admin function view.
     """
-    def _call_fut(self, *args, **kwargs):
+    def _call_email_to_organizer(self, *args, **kwargs):
         from ..views.admin.populaire import email_to_organizer
         return email_to_organizer(*args, **kwargs)
 
@@ -487,7 +487,7 @@ class TestEmailToOrganizer(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
         mailer = get_mailer(request)
-        resp = self._call_fut(request)
+        resp = self._call_email_to_organizer(request)
         self.assertEqual(len(mailer.outbox), 0)
         flash = request.session.pop_flash()
         self.assertEqual(
@@ -520,7 +520,7 @@ class TestEmailToOrganizer(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
         mailer = get_mailer(request)
-        resp = self._call_fut(request)
+        resp = self._call_email_to_organizer(request)
         self.assertEqual(len(mailer.outbox), 1)
         flash = request.session.pop_flash()
         self.assertEqual(
@@ -554,7 +554,7 @@ class TestEmailToOrganizer(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
         mailer = get_mailer(request)
-        self._call_fut(request)
+        self._call_email_to_organizer(request)
         msg = mailer.outbox[0]
         self.assertEqual(msg.subject, 'RandoPony URLs for Victoria Populaire')
         from_randopony = (
@@ -596,7 +596,7 @@ class TestEmailToOrganizer(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
         mailer = get_mailer(request)
-        self._call_fut(request)
+        self._call_email_to_organizer(request)
         msg = mailer.outbox[0]
         self.assertEqual(
             msg.recipients, ['mjansson@example.com', 'mcroy@example.com'])
@@ -605,7 +605,7 @@ class TestEmailToOrganizer(unittest.TestCase):
 class TestEmailToWebmaster(unittest.TestCase):
     """Unit tests for email to club master re: populaire page URL admin func.
     """
-    def _call_fut(self, *args, **kwargs):
+    def _call_email_to_webmaster(self, *args, **kwargs):
         from ..views.admin.populaire import email_to_webmaster
         return email_to_webmaster(*args, **kwargs)
 
@@ -663,7 +663,7 @@ class TestEmailToWebmaster(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
         mailer = get_mailer(request)
-        resp = self._call_fut(request)
+        resp = self._call_email_to_webmaster(request)
         self.assertEqual(len(mailer.outbox), 1)
         flash = request.session.pop_flash()
         self.assertEqual(
@@ -694,7 +694,7 @@ class TestEmailToWebmaster(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
         mailer = get_mailer(request)
-        self._call_fut(request)
+        self._call_email_to_webmaster(request)
         msg = mailer.outbox[0]
         self.assertEqual(
             msg.subject,
@@ -711,7 +711,7 @@ class TestEmailToWebmaster(unittest.TestCase):
 class TestSetup123(unittest.TestCase):
     """Unit tests for combined 3-step setup admin function view.
     """
-    def _call_fut(self, *args, **kwargs):
+    def _call_setup_123(self, *args, **kwargs):
         from ..views.admin.populaire import setup_123
         return setup_123(*args, **kwargs)
 
@@ -761,7 +761,7 @@ class TestSetup123(unittest.TestCase):
         patch_etw = patch.object(pop_module, '_email_to_webmaster')
         with patch_crl as mock_crl, patch_eto as mock_eto, patch_etw as mock_etw:
             mock_crl.return_value = 'success'
-            resp = self._call_fut(request)
+            resp = self._call_setup_123(request)
         mock_crl.assert_called_once_with(request, populaire)
         mock_eto.assert_called_once_with(request, populaire)
         mock_etw.assert_called_once_with(request, populaire)
@@ -793,7 +793,7 @@ class TestSetup123(unittest.TestCase):
         patch_eto = patch.object(pop_module, '_email_to_organizer')
         patch_etw = patch.object(pop_module, '_email_to_webmaster')
         with patch_eto as mock_eto, patch_etw as mock_etw:
-            self._call_fut(request)
+            self._call_setup_123(request)
         self.assertFalse(mock_eto.called)
         self.assertFalse(mock_etw.called)
         flash = request.session.pop_flash()
@@ -840,7 +840,7 @@ class TestSetup123(unittest.TestCase):
         cgdl_patch = patch.object(pop_module, '_create_google_drive_list')
         with cgdl_patch as mock_cgdl:
             mock_cgdl.return_value = 'spreadsheet:1234'
-            self._call_fut(request)
+            self._call_setup_123(request)
         flash = request.session.pop_flash()
         self.assertEqual(
             flash,
