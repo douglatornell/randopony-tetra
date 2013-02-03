@@ -63,7 +63,7 @@ def main(global_config, **settings):  # pragma: no cover
     config.add_static_view('static', 'static', cache_max_age=3600)
     authn_policy = AuthTktAuthenticationPolicy(
         settings['persona.secret'],
-        # hashalg='sha512',  # required for pyramid>=1.4
+        hashalg='sha512',
         callback=groupfinder)
     config.set_authentication_policy(authn_policy)
     map_routes(config)
