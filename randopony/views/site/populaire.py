@@ -216,9 +216,9 @@ class PopulaireEntry(FormView):
                 self.request.registry.settings['google_drive.username'],
                 self.request.registry.settings['google_drive.password'])
             message = self._rider_message(populaire, rider)
-            mailer.send_to_queue(message)
+            mailer.send(message)
             message = self._organizer_message(populaire, rider)
-            mailer.send_to_queue(message)
+            mailer.send(message)
             self.request.session.flash('success')
             self.request.session.flash(rider.email)
         return HTTPFound(self._redirect_url(pop_short_name))
