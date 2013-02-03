@@ -687,7 +687,7 @@ class TestPopulaireEntry(unittest.TestCase):
                 'last_name': 'Dickson',
                 'comment': 'Sunshine Man',
                 })
-        self.assertEqual(len(mailer.queue), 2)
+        self.assertEqual(len(mailer.outbox), 2)
 
     def test_rider_email_message(self):
         """registration confirmation email to rider has expected content
