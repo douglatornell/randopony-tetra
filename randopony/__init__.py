@@ -1,8 +1,11 @@
 from celery import current_app as celery
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.config import Configurator
-from pyramid.security import ALL_PERMISSIONS
-from pyramid.security import Allow
+from pyramid.security import (
+    ALL_PERMISSIONS,
+    Allow,
+    )
+from pyramid.settings import asbool
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm.exc import NoResultFound
 import celery_config
@@ -53,9 +56,8 @@ def main(global_config, **settings):  # pragma: no cover
         'google_drive.username': google_drive_username,
         'google_drive.password': google_drive_password,
         })
-    if email_host_username:
+    if asbool(settings.get('production_deployment', 'false')):
         settings.update({'mail.username': email_host_username})
-    if email_host_password:
         settings.update({'mail.password': email_host_password})
     config = Configurator(
         settings=settings,
