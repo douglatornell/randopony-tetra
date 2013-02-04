@@ -14,6 +14,7 @@ from ...models import (
     BrevetSchema,
     )
 from ...models.meta import DBSession
+from ... import __version__ as version
 
 
 def get_brevet(code, date):
@@ -38,6 +39,7 @@ def brevet_details(request):
     code, date = request.matchdict['item'].split()
     brevet = get_brevet(code, date)
     return {
+        'version': version.number + version.release,
         'logout_btn': True,
         'brevet': brevet,
         }
@@ -63,6 +65,7 @@ class BrevetCreate(FormView):
     def show(self, form):
         tmpl_vars = super(BrevetCreate, self).show(form)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.list_url()
             })
@@ -84,6 +87,7 @@ class BrevetCreate(FormView):
     def failure(self, e):
         tmpl_vars = super(BrevetCreate, self).failure(e)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.list_url()
             })
@@ -124,6 +128,7 @@ class BrevetEdit(FormView):
     def show(self, form):
         tmpl_vars = super(BrevetEdit, self).show(form)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.view_url()
             })
@@ -147,6 +152,7 @@ class BrevetEdit(FormView):
     def failure(self, e):
         tmpl_vars = super(BrevetEdit, self).failure(e)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.view_url()
             })

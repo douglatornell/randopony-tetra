@@ -18,11 +18,18 @@ from ...models import (
     Populaire,
     )
 from ...models.meta import DBSession
+from ... import __version__ as version
 
 
 @forbidden_view_config()
 def login(request):
-    body = render('admin/login.mako', {'logout_btn': False}, request=request)
+    body = render(
+        'admin/login.mako',
+        {
+            'version': version.number + version.release,
+            'logout_btn': False
+        },
+        request=request)
     return Response(body, status='403 Forbidden')
 
 
@@ -56,24 +63,29 @@ class AdminViews(object):
 
     def __init__(self, request):
         self.request = request
+        self.tmpl_vars = {
+            'version': version.number + version.release,
+            'logout_btn': True,
+        }
 
     @view_config(route_name='admin.home', renderer='admin/home.mako')
     def home(self):
-        return {'logout_btn': True}
+        return self.tmpl_vars
 
     @view_config(route_name='admin.list', renderer='admin/list.mako')
     def items_list(self):
         list_name = self.request.matchdict['list']
         params = self.lists[list_name]
-        tmpl_vars = {
+        self.tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'items': (DBSession.query(params['model'])
                 .order_by(params['order_by'])),
             'action': params['action'],
             'list': list_name,
             'list_title': params['list_title'],
-        }
-        return tmpl_vars
+        })
+        return self.tmpl_vars
 
     @view_config(route_name='admin.delete',
         renderer='admin/confirm_delete.mako')
@@ -84,12 +96,13 @@ class AdminViews(object):
         item = self.request.matchdict['item']
         # Render confirmation form
         params = self.lists[list_name]
-        tmpl_vars = {
+        self.tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'list': list_name,
             'item': item,
             'item_type': params['item_type'],
-        }
+        })
         # Handle form submission
         list_view = self.request.route_url('admin.list', list=list_name)
         if 'cancel' in self.request.POST:
@@ -105,4 +118,4 @@ class AdminViews(object):
                 .filter(criterion)
                 .delete())
             return HTTPFound(list_view)
-        return tmpl_vars
+        return self.tmpl_vars

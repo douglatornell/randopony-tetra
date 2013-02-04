@@ -35,21 +35,30 @@ class TestCoreAdminViews(unittest.TestCase):
         DBSession.remove()
         testing.tearDown()
 
-    def test_home_logout_button(self):
-        """admin home view has logout button
+    def test_home(self):
+        """admin home view has expected template variables
         """
+        from .. import __version__ as version
         request = testing.DummyRequest()
         admin = self._make_one(request)
         tmpl_vars = admin.home()
-        self.assertEqual(tmpl_vars, {'logout_btn': True})
+        self.assertEqual(
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+            })
 
     def test_wranglers_list(self):
         """admin wranglers view has expected template variables
         """
+        from .. import __version__ as version
         request = testing.DummyRequest()
         request.matchdict['list'] = 'wranglers'
         admin = self._make_one(request)
         tmpl_vars = admin.items_list()
+        self.assertEqual(
+            tmpl_vars['version'], version.number + version.release)
         self.assertTrue(tmpl_vars['logout_btn'])
         self.assertEqual(tmpl_vars['list'], 'wranglers')
         self.assertEqual(tmpl_vars['list_title'], 'Pony Wranglers')
@@ -87,6 +96,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_delete_wrangler_confirmation(self):
         """admin delete confirmation view for wrangler has exp template vars
         """
+        from .. import __version__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         request.matchdict['list'] = 'wranglers'
@@ -96,6 +106,7 @@ class TestCoreAdminViews(unittest.TestCase):
         self.assertEqual(
             tmpl_vars,
             {
+                'version': version.number + version.release,
                 'logout_btn': True,
                 'list': 'wranglers',
                 'item': 'tom@example.com',

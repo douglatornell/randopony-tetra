@@ -20,6 +20,7 @@ from ...models import (
     PopulaireSchema,
     )
 from ...models.meta import DBSession
+from ... import __version__ as version
 
 
 def get_populaire(short_name):
@@ -38,6 +39,7 @@ def populaire_details(request):
     short_name = request.matchdict['item']
     populaire = get_populaire(short_name)
     return {
+        'version': version.number + version.release,
         'logout_btn': True,
         'populaire': populaire,
         }
@@ -63,6 +65,7 @@ class PopulaireCreate(FormView):
     def show(self, form):
         tmpl_vars = super(PopulaireCreate, self).show(form)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.list_url()
             })
@@ -86,6 +89,7 @@ class PopulaireCreate(FormView):
     def failure(self, e):
         tmpl_vars = super(PopulaireCreate, self).failure(e)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.list_url()
             })
@@ -126,6 +130,7 @@ class PopulaireEdit(FormView):
     def show(self, form):
         tmpl_vars = super(PopulaireEdit, self).show(form)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self._redirect_url(self.request.matchdict['item']),
             })
@@ -149,6 +154,7 @@ class PopulaireEdit(FormView):
     def failure(self, e):
         tmpl_vars = super(PopulaireEdit, self).failure(e)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self._redirect_url(self.request.matchdict['item']),
             })
