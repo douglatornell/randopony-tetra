@@ -60,6 +60,8 @@ Use the Webfaction control panel to:
    at :kbd:`/`
 
 
+.. _InitialStagingDeployment-section:
+
 Initial Staging Deployment
 --------------------------
 
@@ -94,19 +96,40 @@ newly created Webfaction application directory:
       staging_dir = (
           '/home/{0}/webapps/{1}{2}'.format(env.user, app_name, staging_release))
 
+#. Edit :file:`randopony/scripts/initializedb.py` to set the email addresses
+   and link URLs that will be initialized into the database to values
+   appropriate for staging testing.
+
 #. Prepare the staging environment with:
 
-   .. code-block:: python
+   .. code-block:: sh
 
       (randopony-tetra)randopony-tetra$ fab init_staging
 
    That launchs a squence of Fabric tasks to:
 
    * Upload the code via :program:`rsync`
-     (:kbd:`rsuync_code` task)
+     (:kbd:`rsync_code` task)
 
    * Install the RandoPony app and its dependencies in the Webfaction
-     ::kbd:`staging_dir` and its associated :program:`virtualenv` directories
+     :kbd:`staging_dir` and its associated :program:`virtualenv` directories,
+     and:
+
+     * Delete the template app code directory and config files that were
+       created when the Pyramid app was created from the Webfaction control
+       panel
+
+     * Tighten permissions to owner read-only (400) on the
+       :file:`randopony/private_credentials.py` file in the install directory
+
+     * Create symlinks to :file:`staging.ini` and the
+       :file:`randopony-tetra/randopony` directory in :kbd:`staging_dir`
+       so that Webfaction will serve the app,
+       and :program:`supervisor` and :program:`celery` will work properly
+
+     * Change the :file:`bin/start` file to use :file:`staging.ini` to
+       configure the app
+
      (:kbd:`install_app` task)
 
    * Create the :file:`RandoPony-staging.sqlite` database,
@@ -114,39 +137,60 @@ newly created Webfaction application directory:
      requires
      (:kbd:`init_staging_db` task)
 
-#. :program:`ssh` into Webfaction and do the following:
+#. Start the app with:
 
-   * Create,
-     adjust permissions of,
-     and populate the :file:`randopony-tetra/randppony/private_credentials.py`
-     file:
+   .. code-block:: sh
 
-     .. code-block:: sh
+      (randopony-tetra)randopony-tetra$ fab start_app
 
-        [bcrandonneur@web246 randopony]$ cd $HOME/webapps/randopony2013r1
-        [bcrandonneur@web246 randopony]$ cd randopony-tetra/randopony
-        [bcrandonneur@web246 randopony]$ touch private_credentials.py
-        [bcrandonneur@web246 randopony]$ chmod 600 private_credentials.py
+   and test things out.
 
-     The contents of :file:`private_credentials.py` should be:
+   Before testing event pre-registrations,
+   start :program:`supervisor` and thence :program:`celery` with:
 
-     .. code-block:: python
+   .. code-block:: sh
 
-        """RandoPony app credentials.
-        """
+      (randopony-tetra)randopony-tetra$ fab start_staging_supervisor
 
-        persona_secret = ''
 
-        google_drive_username = ''
-        google_drive_password = ''
 
-        email_host_username = ''
-        email_host_password = ''
+.. _WorkingWithTheStagingDeployment-section:
 
-     :kbd:`uuid.uuid4()` is a convenient way to generate a random string
-     for :kbd:`persona_secret`.
-     The Google drive credentials are those of the account where the rider
-     list spreadsheet templates are stored and the event rider lists
-     will be maintained.
-     The email host credentials are those of the Webfaction account that
-     will be used to send email from the RandoPony app.
+Working With the Staging Deployment
+-----------------------------------
+
+Once the :ref:`InitialStagingDeployment-section` has been completed
+updates can be pushed from the local development environment to the
+staging environment with:
+
+.. code-block:: sh
+
+   (randopony-tetra)randopony-tetra$ fab deploy_staging
+
+or just:
+
+.. code-block:: sh
+
+   (randopony-tetra)randopony-tetra$ fab
+
+since :kbd:`deploy_staging` is set as the default task in :file:`fabfile.py`.
+
+:kbd:`deploy_staging` launches the following tasks:
+
+* :kbd:`rsync_code`
+* :kbd:`install_app`
+* :kbd:`restart_app`
+* :kbd:`restart_staging_supervisor`
+
+Other useful Fabric tasks:
+
+* :kbd:`start_app`
+* :kbd:`stop_app`
+* :kbd:`tail_staging_app_log`
+* :kbd:`start_staging_supervisor`
+* :kbd:`stop_staging_supervisor`
+* :kbd:`tail_staging_supervisor_log`
+* :kbd:`tail_staging_celery_log`
+
+See :command:`fab -l` for the complete list of defined tasks.
+
