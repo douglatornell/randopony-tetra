@@ -10,6 +10,7 @@ from ...models import (
     AdministratorSchema,
     )
 from ...models.meta import DBSession
+from ... import __version__ as version
 
 
 @view_config(
@@ -31,6 +32,7 @@ class WranglerCreate(FormView):
     def show(self, form):
         tmpl_vars = super(WranglerCreate, self).show(form)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'list_url': self.list_url()
             })
@@ -44,6 +46,7 @@ class WranglerCreate(FormView):
     def failure(self, e):
         tmpl_vars = super(WranglerCreate, self).failure(e)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'list_url': self.list_url()
             })
@@ -77,6 +80,7 @@ class WranglerEdit(FormView):
     def show(self, form):
         tmpl_vars = super(WranglerEdit, self).show(form)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'list_url': self.list_url()
             })
@@ -92,6 +96,7 @@ class WranglerEdit(FormView):
     def failure(self, e):
         tmpl_vars = super(WranglerEdit, self).failure(e)
         tmpl_vars.update({
+            'version': version.number + version.release,
             'logout_btn': True,
             'list_url': self.list_url()
             })

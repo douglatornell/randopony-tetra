@@ -31,6 +31,7 @@ class TestBrevetDetails(unittest.TestCase):
     def test_brevet_details(self):
         """brevet_details view has expected template vsriables
         """
+        from .. import __version__ as version
         from ..models import Brevet
         from ..views.admin.brevet import brevet_details
         brevet = Brevet(
@@ -46,8 +47,13 @@ class TestBrevetDetails(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = str(brevet)
         tmpl_vars = brevet_details(request)
-        self.assertTrue(tmpl_vars['logout_btn'])
-        self.assertEqual(tmpl_vars['brevet'], brevet)
+        self.assertEqual(
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'brevet': brevet,
+            })
 
 
 class TestBrevetCreate(unittest.TestCase):
@@ -88,13 +94,20 @@ class TestBrevetCreate(unittest.TestCase):
     def test_show(self):
         """show returns expected template variables
         """
+        from .. import __version__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
-        tmpl_vars = create.show(MagicMock(name='form'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_form = MagicMock(name='form')
+        tmpl_vars = create.show(mock_form)
         self.assertEqual(
-            tmpl_vars['cancel_url'], 'http://example.com/admin/brevets/')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_form.render(),
+                'cancel_url': 'http://example.com/admin/brevets/'
+            })
 
     def test_add_success(self):
         """admin create brevet success adds brevet to database
@@ -121,13 +134,20 @@ class TestBrevetCreate(unittest.TestCase):
     def test_failure(self):
         """create brevet failure returns expected template variables
         """
+        from .. import __version__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
-        tmpl_vars = create.failure(MagicMock(name='ValidationError'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_val_err = MagicMock(name='ValidationError')
+        tmpl_vars = create.failure(mock_val_err)
         self.assertEqual(
-            tmpl_vars['cancel_url'], 'http://example.com/admin/brevets/')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_val_err.render(),
+                'cancel_url': 'http://example.com/admin/brevets/'
+            })
 
 
 class TestBrevetEdit(unittest.TestCase):
@@ -192,6 +212,7 @@ class TestBrevetEdit(unittest.TestCase):
     def test_show(self):
         """admin brevet edit show returns expected template variables
         """
+        from .. import __version__ as version
         from ..models import Brevet
         brevet = Brevet(
             region='LM',
@@ -207,11 +228,17 @@ class TestBrevetEdit(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = 'LM200 11Nov2012'
         edit = self._make_one(request)
-        tmpl_vars = edit.show(MagicMock(name='form'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_form = MagicMock(name='form')
+        tmpl_vars = edit.show(mock_form)
         self.assertEqual(
-            tmpl_vars['cancel_url'],
-            'http://example.com/admin/brevets/LM200%2011Nov2012')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_form.render(),
+                'cancel_url':
+                    'http://example.com/admin/brevets/LM200%2011Nov2012'
+            })
 
     def test_save_success(self):
         """admin edit brevet save success updates brevet in database
@@ -253,12 +280,19 @@ class TestBrevetEdit(unittest.TestCase):
     def test_failure(self):
         """edit brevet failure returns expected template variables
         """
+        from .. import __version__ as version
         self.config.add_route('admin.brevets.view', '/admin/brevets/{item}')
         request = testing.DummyRequest()
         request.matchdict['item'] = 'LM200 11Nov2012'
-        create = self._make_one(request)
-        tmpl_vars = create.failure(MagicMock(name='ValidationError'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        edit = self._make_one(request)
+        mock_val_err = MagicMock(name='ValidationError')
+        tmpl_vars = edit.failure(mock_val_err)
         self.assertEqual(
-            tmpl_vars['cancel_url'],
-            'http://example.com/admin/brevets/LM200%2011Nov2012')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_val_err.render(),
+                'cancel_url':
+                    'http://example.com/admin/brevets/LM200%2011Nov2012'
+            })

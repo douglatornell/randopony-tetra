@@ -54,13 +54,20 @@ class TestWranglerCreate(unittest.TestCase):
     def test_show(self):
         """show returns expected template variables
         """
+        from .. import __version__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
-        tmpl_vars = create.show(MagicMock(name='form'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_form = MagicMock(name='form')
+        tmpl_vars = create.show(mock_form)
         self.assertEqual(
-            tmpl_vars['list_url'], 'http://example.com/admin/wranglers/')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_form.render(),
+                'list_url': 'http://example.com/admin/wranglers/',
+            })
 
     def test_add_success(self):
         """create wrangler success adds persona email to database
@@ -77,13 +84,20 @@ class TestWranglerCreate(unittest.TestCase):
     def test_failure(self):
         """create wrangler failure returns expected template variables
         """
+        from .. import __version__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
-        tmpl_vars = create.failure(MagicMock(name='ValidationError'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_val_err = MagicMock(name='ValidationError')
+        tmpl_vars = create.failure(mock_val_err)
         self.assertEqual(
-            tmpl_vars['list_url'], 'http://example.com/admin/wranglers/')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_val_err.render(),
+                'list_url': 'http://example.com/admin/wranglers/',
+            })
 
 
 class TestWranglerEdit(unittest.TestCase):
@@ -132,6 +146,7 @@ class TestWranglerEdit(unittest.TestCase):
     def test_show(self):
         """admin edit wrangler show returns expected template variables
         """
+        from .. import __version__ as version
         from ..models import Administrator
         admin = Administrator(persona_email='tom@example.com')
         DBSession.add(admin)
@@ -139,10 +154,16 @@ class TestWranglerEdit(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = 'tom@example.com'
         edit = self._make_one(request)
-        tmpl_vars = edit.show(MagicMock(name='form'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_form = MagicMock(name='form')
+        tmpl_vars = edit.show(mock_form)
         self.assertEqual(
-            tmpl_vars['list_url'], 'http://example.com/admin/wranglers/')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_form.render(),
+                'list_url': 'http://example.com/admin/wranglers/',
+            })
 
     def test_save_success(self):
         """admin edit wrangler success updates persona email in database
@@ -165,10 +186,17 @@ class TestWranglerEdit(unittest.TestCase):
     def test_failure(self):
         """admin edit wrangler failure returns expected template variables
         """
+        from .. import __version__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         edit = self._make_one(request)
-        tmpl_vars = edit.failure(MagicMock(name='ValidationError'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_val_err = MagicMock(name='ValidationError')
+        tmpl_vars = edit.failure(mock_val_err)
         self.assertEqual(
-            tmpl_vars['list_url'], 'http://example.com/admin/wranglers/')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_val_err.render(),
+                'list_url': 'http://example.com/admin/wranglers/',
+            })

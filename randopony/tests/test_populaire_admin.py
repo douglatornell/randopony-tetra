@@ -38,6 +38,7 @@ class TestPopulaireDetails(unittest.TestCase):
     def test_populaire_details(self):
         """populaire_details view has expected template vsriables
         """
+        from .. import __version__ as version
         from ..models import Populaire
         from ..views.admin.populaire import populaire_details
         populaire = Populaire(
@@ -56,8 +57,13 @@ class TestPopulaireDetails(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = str(populaire)
         tmpl_vars = populaire_details(request)
-        self.assertTrue(tmpl_vars['logout_btn'])
-        self.assertEqual(tmpl_vars['populaire'], populaire)
+        self.assertEqual(
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'populaire': populaire,
+            })
 
 
 class TestPopulaireCreate(unittest.TestCase):
@@ -98,13 +104,20 @@ class TestPopulaireCreate(unittest.TestCase):
     def test_show(self):
         """show returns expected template variables
         """
+        from .. import __version__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
-        tmpl_vars = create.show(MagicMock(name='form'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_form = MagicMock(name='form')
+        tmpl_vars = create.show(mock_form)
         self.assertEqual(
-            tmpl_vars['cancel_url'], 'http://example.com/admin/populaires/')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_form.render(),
+                'cancel_url': 'http://example.com/admin/populaires/',
+            })
 
     def test_add_success(self):
         """admin create populaire success adds populaire to database
@@ -134,13 +147,20 @@ class TestPopulaireCreate(unittest.TestCase):
     def test_failure(self):
         """create populaire failure returns expected template variables
         """
+        from .. import __version__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
-        tmpl_vars = create.failure(MagicMock(name='ValidationError'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_val_error = MagicMock(name='ValidationError')
+        tmpl_vars = create.failure(mock_val_error)
         self.assertEqual(
-            tmpl_vars['cancel_url'], 'http://example.com/admin/populaires/')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_val_error.render(),
+                'cancel_url': 'http://example.com/admin/populaires/',
+            })
 
 
 class TestPopulaireEdit(unittest.TestCase):
@@ -213,6 +233,7 @@ class TestPopulaireEdit(unittest.TestCase):
     def test_show(self):
         """admin populaire edit show returns expected template variables
         """
+        from .. import __version__ as version
         from ..models import Populaire
         populaire = Populaire(
             event_name='Victoria Populaire',
@@ -232,11 +253,16 @@ class TestPopulaireEdit(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
         edit = self._make_one(request)
-        tmpl_vars = edit.show(MagicMock(name='form'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_form = MagicMock(name='form')
+        tmpl_vars = edit.show(mock_form)
         self.assertEqual(
-            tmpl_vars['cancel_url'],
-            'http://example.com/admin/populaires/VicPop')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_form.render(),
+                'cancel_url': 'http://example.com/admin/populaires/VicPop',
+            })
 
     def test_save_success(self):
         """admin edit populaire save success updates populaire in database
@@ -284,16 +310,22 @@ class TestPopulaireEdit(unittest.TestCase):
     def test_failure(self):
         """edit populaire failure returns expected template variables
         """
+        from .. import __version__ as version
         self.config.add_route(
             'admin.populaires.view', '/admin/populaires/{item}')
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
         create = self._make_one(request)
-        tmpl_vars = create.failure(MagicMock(name='ValidationError'))
-        self.assertTrue(tmpl_vars['logout_btn'])
+        mock_val_error = MagicMock(name='ValidationError')
+        tmpl_vars = create.failure(mock_val_error)
         self.assertEqual(
-            tmpl_vars['cancel_url'],
-            'http://example.com/admin/populaires/VicPop')
+            tmpl_vars,
+            {
+                'version': version.number + version.release,
+                'logout_btn': True,
+                'form': mock_val_error.render(),
+                'cancel_url': 'http://example.com/admin/populaires/VicPop',
+            })
 
 
 class TestCreateRiderList(unittest.TestCase):
