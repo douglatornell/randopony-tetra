@@ -1,6 +1,8 @@
 """Fabric tasks for RandoPony-tetra web app.
 """
+from getpass import getpass
 from time import sleep
+import xmlrpclib
 from fabric.api import (
     cd,
     env,
@@ -11,6 +13,7 @@ from fabric.contrib.files import (
     exists,
     sed,
     )
+from fabric.contrib.console import confirm
 from fabric.contrib.project import rsync_project
 
 
@@ -21,6 +24,14 @@ app_name = 'randopony'
 staging_release = '2013r1'
 staging_dir = (
     '/home/{0}/webapps/{1}{2}'.format(env.user, app_name, staging_release))
+production_release = None
+production_dir = (
+    '/home/{0}/webapps/{1}{2}'.format(env.user, app_name, production_release))
+release_dirs = {
+    'staging': staging_dir,
+    'production': production_dir,
+}
+production_domain = 'randopony.randonneurs.bc.ca'
 
 
 @task(default=True)
@@ -29,8 +40,67 @@ def deploy_staging():
     """
     rsync_code()
     install_app()
-    restart_app()
+    restart_app(release='staging')
     restart_staging_supervisor()
+
+
+@task
+def promote_staging_to_production():
+    """Promote staging deployment to production
+    """
+    if production_release is None:
+        confirmation = confirm(
+            'Create a new production deployment from {}'
+            .format(staging_release))
+    else:
+        confirmation = confirm(
+            'Promote {0} deployment to production with data from {1}'
+            .format(staging_release, production_release))
+    if not confirmation:
+        return
+    stop_app(release='staging')
+    stop_staging_supervisor()
+    password = getpass('Webfaction password for API calls: ')
+    server = xmlrpclib.ServerProxy('https://api.webfaction.com/')
+    session_id, account = server.login(env.user, password)
+    sites = server.list_websites(session_id)
+    files_to_delete = (
+        'RandoPony-staging.sqlite '
+        'celery.sqlite '
+        'supervisord.log '
+        'celery.log '
+        'pyramid.log '
+        'staging.ini '
+        .split())
+    with cd(staging_dir):
+        for delete_file in files_to_delete:
+            run('rm -f {}'.format(delete_file))
+        run('ln -sf {}/production.ini'.format(project_name))
+        sed('bin/start', 'staging.ini', 'production.ini')
+        if production_release is None:
+            run('bin/initialize_RandoPony_db production.ini')
+        else:
+            stop_app(app_dir=production_dir)
+            stop_production_supervisor()
+            site = [
+                site for site in sites
+                if site['name'] == app_name + production_release][0]
+            server.update_website(
+                session_id, site['name'], site['ip'], site['https'],
+                [], *site['website_apps'])
+            run('cp {0}/RandoPony-production.sqlite {0}/celery.sqlite {1}'
+                .format(production_dir, staging_dir))
+    site = [
+        site for site in sites
+        if site['name'] == app_name + staging_release][0]
+    server.update_website(
+        session_id, site['name'], site['ip'], site['https'],
+        [production_domain], *site['website_apps'])
+    # Staging is now production
+    production_release = staging_release
+    production_dir = staging_dir
+    start_app(release='production')
+    start_production_supervisor()
 
 
 @task
@@ -101,40 +171,43 @@ def init_staging_db():
 
 
 @task
-def restart_app():
+def restart_app(release):
     """Restart app on webfaction
     """
-    with cd(staging_dir):
+    with cd(release_dirs[release]):
         run('bin/restart')
 
 
 @task
-def start_app():
+def start_app(release):
     """Start app on webfaction
     """
-    with cd(staging_dir):
+    with cd(release_dirs[release]):
         run('bin/start')
 
 
 @task
-def stop_app():
+def stop_app(release):
     """Stop app on webfaction
     """
-    with cd(staging_dir):
-        run('bin/stop')
+    with cd(release_dirs[release]):
+        if exists('pyramid.pid'):
+            run('bin/stop')
+            sleep(3)
+            run('rm pyramid.pid')
 
 
 @task
-def tail_staging_app_log():
-    """Tail the staging app log file
+def tail_app_log(release):
+    """Tail the app log file
     """
-    with cd(staging_dir):
+    with cd(release_dirs[release]):
         run('tail pyramid.log')
 
 
 @task
 def restart_staging_supervisor():
-    """Restart supervisord daemon
+    """Restart staging supervisord daemon
     """
     with cd(staging_dir):
         stop_staging_supervisor()
@@ -146,7 +219,7 @@ def restart_staging_supervisor():
 
 @task
 def start_staging_supervisor():
-    """Start supervisord daemon
+    """Start staging supervisord daemon
     """
     with cd(staging_dir):
         run('bin/supervisord -c staging.ini')
@@ -154,10 +227,11 @@ def start_staging_supervisor():
 
 @task
 def stop_staging_supervisor():
-    """Stop supervisord daemon
+    """Stop staging supervisord daemon
     """
     with cd(staging_dir):
-        run('kill $(cat supervisord.pid)')
+        if exists('supervisord.pid'):
+            run('kill $(cat supervisord.pid)')
 
 
 @task
@@ -174,3 +248,49 @@ def tail_staging_celery_log():
     """
     with cd(staging_dir):
         run('tail celery.log')
+
+
+@task
+def restart_production_supervisor():
+    """Restart production supervisord daemon
+    """
+    with cd(production_dir):
+        stop_production_supervisor()
+        while exists('supervisord.pid'):
+            sleep(1)
+        sleep(3)
+        start_production_supervisor()
+
+
+@task
+def start_production_supervisor():
+    """Start production supervisord daemon
+    """
+    with cd(production_dir):
+        run('bin/supervisord -c production.ini')
+
+
+@task
+def stop_production_supervisor():
+    """Stop production supervisord daemon
+    """
+    with cd(production_dir):
+        while exists('supervisord.pid'):
+            run('kill $(cat supervisord.pid)')
+            sleep(1)
+
+
+@task
+def tail_production_supervisor_log():
+    """Tail the production supervisord log file
+    """
+    with cd(production_dir):
+        run('tail $HOME/logs/user/randopony_supervisord.log')
+
+
+@task
+def tail_production_celery_log():
+    """Tail the production celery log file
+    """
+    with cd(production_dir):
+        run('tail $HOME/logs/user/randopony_celery.log')
