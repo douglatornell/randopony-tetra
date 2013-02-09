@@ -106,7 +106,7 @@ newly created Webfaction application directory:
 
       (randopony-tetra)randopony-tetra$ fab init_staging
 
-   That launchs a squence of Fabric tasks to:
+   That launches a sequence of Fabric tasks to:
 
    * Upload the code via :program:`rsync`
      (:kbd:`rsync_code` task)
@@ -141,7 +141,7 @@ newly created Webfaction application directory:
 
    .. code-block:: sh
 
-      (randopony-tetra)randopony-tetra$ fab start_app
+      (randopony-tetra)randopony-tetra$ fab start_app:release=staging
 
    and test things out.
 
@@ -151,7 +151,6 @@ newly created Webfaction application directory:
    .. code-block:: sh
 
       (randopony-tetra)randopony-tetra$ fab start_staging_supervisor
-
 
 
 .. _WorkingWithTheStagingDeployment-section:
@@ -179,18 +178,144 @@ since :kbd:`deploy_staging` is set as the default task in :file:`fabfile.py`.
 
 * :kbd:`rsync_code`
 * :kbd:`install_app`
-* :kbd:`restart_app`
+* :kbd:`restart_app:release=staging`
 * :kbd:`restart_staging_supervisor`
 
 Other useful Fabric tasks:
 
-* :kbd:`start_app`
-* :kbd:`stop_app`
-* :kbd:`tail_staging_app_log`
+* :kbd:`start_app:release=staging`
+* :kbd:`stop_app:release=staging`
+* :kbd:`restart_app:release=staging`
+* :kbd:`tail_app_log:release=staging`
 * :kbd:`start_staging_supervisor`
 * :kbd:`stop_staging_supervisor`
+* :kbd:`restart_staging_supervisor`
 * :kbd:`tail_staging_supervisor_log`
 * :kbd:`tail_staging_celery_log`
 
 See :command:`fab -l` for the complete list of defined tasks.
+
+
+.. _PromotingStagingDeploymentToProduction-section:
+
+Promoting Staging Deployment to Production
+------------------------------------------
+
+.. warning::
+
+   When a staging deployment is promoted to production all of the data
+   generated during the staging deployment period is deleted.
+   Specifically,
+   the RandoPony and :program:`celery` databases,
+   and the :file:`supervisord.log`,
+   :file:`celery.log`,
+   :file:`pyramid.log` files are deleted.
+
+#. Ensure that the module variables :data:`staging_release` and
+   :data:`production_release` in :file:`fabfile.py` are set to
+   appropriate values.
+   If there is no production release,
+   or the data from an existing production release
+   (perhaps from the previous year)
+   is to be preserved,
+   set the value of :data:`production_release` to :kbd:`None`.
+
+#. Promote the staging environment to production with:
+
+   .. code-block:: sh
+
+      (randopony-tetra)randopony-tetra$ fab promote_staging_to_production
+
+   That task does the following:
+
+   * Confirm the release identifiers of the staging deployment that is to
+     be promoted (:data:`staging_release`),
+     and the production release
+     (if any)
+     that data are to be migrated from (:data:`production_release`)
+
+   * Stop the staging app (if it is running),
+     via the :kbd:`stop_app:release=staging` task
+
+   * Stop the staging instances of :program:`supervisor` and thence
+     :program:`celery`,
+     via the :kbd:`stop_staging_supervisor` task
+
+   * Ask for the Webfaction account password and use the Webfaction API
+     to get the list of configured websites
+
+   * Delete the RandoPony and :program:`celery` staging databases
+
+   * Delete the :file:`supervisord.log`,
+     :file:`celery.log`,
+     and :file:`pyramid.log` files
+
+   * Delete the :file:`staging.ini` symlink
+
+   * Create a symlink to :file:`production.ini` in the :kbd:`staging_dir`
+
+   * Change the :file:`bin/start` file to use :file:`production.ini` to
+     configure the app
+
+   * If :data:`production_release` is :kbd:`None`:
+
+     * Create the :file:`RandoPony-production.sqlite` database,
+       and initialize it with link and email address records that the app
+       requires via the :program:`initialize_RandoPony_db` srcript,
+
+     Otherwise:
+
+     * Stop the production app (if it is running),
+       via the :kbd:`stop_app:release=production` task
+
+     * Stop the production instances of :program:`supervisor` and thence
+       :program:`celery`,
+       via the :kbd:`stop_production_supervisor` task
+
+     * Detach the :kbd:`production_domain` from the old production app
+       via the Webfaction :kbd:`update_website` API call
+
+     * Copy the :file:`RandoPony-production.sqlite` and :file:`celery.sqlite`
+       databases from the old :kbd:`production_dir` to the :kbd:`staging_dir`
+
+   * Attach the :kbd:`production_domain` to the staging app
+     via the Webfaction :kbd:`update_website` API call
+
+   * Update :data:`production_release` and :data:`production_dir` to point
+     to :data:`staging_release` and :data:`staging_dir`
+
+   * Start the app,
+     via the :kbd:`start_app:release=production` task
+
+   * Start the production instances of :program:`supervisor` and thence
+     :program:`celery`,
+     via the :kbd:`start_production_supervisor` task
+
+
+.. _WorkingWithTheProductionDeployment-section:
+
+Working With the Production Deployment
+--------------------------------------
+
+The Fabric tasks available for working with the production deployment are:
+
+* :kbd:`restart_app:release=production`
+* :kbd:`start_app:release=production`
+* :kbd:`stop_app:release=production`
+* :kbd:`tail_app_log:release=production`
+* :kbd:`restart_production_supervisor`
+* :kbd:`start_production_supervisor`
+* :kbd:`stop_production_supervisor`
+* :kbd:`tail_production_supervisor_log`
+* :kbd:`tail_production_celery_log`
+
+See :command:`fab -l` for the complete list of defined tasks.
+
+To apply code changes,
+create a new release and
+:ref:`deploy it to staging <InitialStagingDeployment-section>`,
+test the changes,
+and
+:Ref:`promote the tested staging deployment to production
+<PromotingStagingDeploymentToProduction-section>`.
 
