@@ -1,6 +1,23 @@
+2013r1
+------
+
+- Pre-registration for populaire events
+
+- Add deployment automation via Fabric
+
+- Add docs at https://randopony.readthedocs.org/
+
+- Drop back to Python 2.7 because:
+
+  * gdata library to interface to Google Drive doesn't support Python 3
+  * supervisor tool to manage celery async task framework doesn't support
+    Python 3
+  * Webfaction control panel installers don't support Python 3 for Pyramid
+
+
 2013dev
 -------
 
 - Use Mozilla Persona for authentication
 
-- Start Python 3, Pyramid, SQLAlchemy implementation.
+- Start Python 3, Pyramid, SQLAlchemy implementation
