@@ -21,10 +21,10 @@ env.user = 'bcrandonneur'
 env.hosts = ['bcrandonneur.webfactional.com']
 project_name = 'randopony-tetra'
 app_name = 'randopony'
-staging_release = '2013r1'
+staging_release = '2013r2'
 staging_dir = (
     '/home/{0}/webapps/{1}{2}'.format(env.user, app_name, staging_release))
-production_release = None
+production_release = '2013r1'
 production_dir = (
     '/home/{0}/webapps/{1}{2}'.format(env.user, app_name, production_release))
 release_dirs = {
