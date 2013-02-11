@@ -1,3 +1,5 @@
 syntax: glob
+*.log
+*.pid
 *.sqlite
 private_credentials.py
