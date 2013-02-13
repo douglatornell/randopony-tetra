@@ -46,6 +46,9 @@ h3 {
 .nav-collapse .nav > li > a {
     color: rgb(255, 255, 255);
 }
+.register-btn {
+    padding-top: 20px;
+}
 .img-container {
     margin-bottom: 20px;
 }
