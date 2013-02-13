@@ -52,7 +52,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     %endif
   %else:
     %if not registration_closed:
-    <p>
+    <p class="register-btn">
       <a class="btn btn-success"
          href="${request.route_url('populaire.entry',
                                    short_name=populaire.short_name)}">
