@@ -54,16 +54,14 @@ class PopulaireViews(SiteViews):
             self.populaire = get_populaire(request.matchdict['short_name'])
         except KeyError:
             self.populaire = None
+        self.tmpl_vars.update({'active_tab': 'populaires'})
 
     @view_config(route_name='populaire.list', renderer='populaire-list.mako')
     def populaire_list(self):
         admin_email = (DBSession.query(EmailAddress)
             .filter_by(key='admin_email')
             .one())
-        self.tmpl_vars.update({
-            'active_tab': 'populaires',
-            'admin_email': admin_email.email,
-        })
+        self.tmpl_vars.update({'admin_email': admin_email.email})
         return self.tmpl_vars
 
     @view_config(route_name='populaire', renderer='populaire.mako')
@@ -71,13 +69,10 @@ class PopulaireViews(SiteViews):
         if self._in_past():
             body = self._moved_on_page()
             return Response(body, status='200 OK')
-        registration_closed = self._registration_closed()
-        event_started = self._event_started()
         self.tmpl_vars.update({
-            'active_tab': 'populaires',
             'populaire': self.populaire,
-            'registration_closed': registration_closed,
-            'event_started': event_started,
+            'registration_closed': self._registration_closed,
+            'event_started': self._event_started,
         })
         return self.tmpl_vars
 
@@ -90,6 +85,7 @@ class PopulaireViews(SiteViews):
         return (', '.join(rider.email for rider in populaire.riders)
                 or 'No riders have registered yet!')
 
+    @property
     def _registration_closed(self):
         utc_registration_end = (
             self.tz.localize(self.populaire.registration_end)
@@ -97,6 +93,7 @@ class PopulaireViews(SiteViews):
         utc_now = pytz.utc.localize(datetime.utcnow())
         return utc_now > utc_registration_end
 
+    @property
     def _event_started(self):
         utc_start_date_time = (
             self.tz.localize(self.populaire.date_time)
