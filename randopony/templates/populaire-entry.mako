@@ -25,7 +25,7 @@ ${form | n}
 <script>
   $(document).ready(function(){
     $("#deformcancel").click(function(event){
-      // Redirect to brevets list on Cancel buton click.
+      // Redirect to populaire event page on Cancel button click.
       window.location = "${cancel_url}";
       event.preventDefault();
     });
