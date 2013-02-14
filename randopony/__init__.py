@@ -88,6 +88,9 @@ def map_routes(config):               # pragma: no cover
     config.add_route('region.list', '/brevets/')
     config.add_route('brevet.list', '/brevets/{region}/')
     config.add_route('brevet', '/brevets/{region}/{distance}/{date}')
+    config.add_route(
+        'brevet.entry',
+        '/brevets/{region}/{distance}/{date}/entry')
     # legacy routes to cover when /brevets/ was /register/
     config.add_route('register', '/register/')
     config.add_route('register.region', '/register/{region}-events/')
