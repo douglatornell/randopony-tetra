@@ -78,7 +78,6 @@ class TestPopulaireViews(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
             )
-        populare_id = str(populaire)
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -88,7 +87,7 @@ class TestPopulaireViews(unittest.TestCase):
             mock_datetime.today.return_value = datetime(2011, 3, 22, 23, 18)
             tmpl_vars = views.populaire_page()
         self.assertEqual(tmpl_vars['active_tab'], 'populaires')
-        self.assertEqual(str(tmpl_vars['populaire']), populare_id)
+        self.assertEqual(tmpl_vars['populaire'], populaire)
         self.assertFalse(tmpl_vars['registration_closed'])
 
     def test_populaire_page_registration_closed(self):
@@ -239,10 +238,8 @@ class TestPopulaireViews(unittest.TestCase):
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
         views = self._make_one(request)
-        datetime_patch = patch.object(pop_module, 'datetime')
         render_patch = patch.object(pop_module, 'render')
-        with datetime_patch as mock_datetime, render_patch as mock_render:
-            mock_datetime.today.return_value = datetime(2011, 4, 7, 15, 52)
+        with render_patch as mock_render:
             views._moved_on_page()
         tmpl_name = mock_render.call_args[0][0]
         tmpl_vars = mock_render.call_args[0][1]
