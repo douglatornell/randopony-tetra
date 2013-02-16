@@ -85,6 +85,11 @@
       randonneurs.bc.ca
     </a>
   </li>
+  <li id="membership">
+    <a href="http://www.2mevents.com/index.php/event/bc-randonneurs-membership" class="nav-tab">
+      Join BC Randonneurs Club
+    </a>
+  </li>
   <li id="organizer-info">
     <a href="${request.route_url('organizer-info')}" class="nav-tab">
       Info for Event Organizers
