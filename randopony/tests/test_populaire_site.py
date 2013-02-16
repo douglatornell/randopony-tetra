@@ -371,7 +371,6 @@ class TestPopulaireEntry(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
             )
-        populare_id = str(populaire)
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -380,7 +379,7 @@ class TestPopulaireEntry(unittest.TestCase):
         self.assertEqual(tmpl_vars['active_tab'], 'populaires')
         self.assertIn('brevets', tmpl_vars)
         self.assertIn('populaires', tmpl_vars)
-        self.assertEqual(str(tmpl_vars['populaire']), populare_id)
+        self.assertEqual(tmpl_vars['populaire'], populaire)
         self.assertEqual(
             tmpl_vars['cancel_url'], 'http://example.com/populaires/VicPop')
 
