@@ -109,12 +109,12 @@ class PopulaireViews(SiteViews):
 
     def _moved_on_page(self):
         results_link = (
-            DBSession.query(Link)
+            DBSession.query(Link.url)
             .filter_by(key='results_link')
-            .first().url
+            .one()[0]
             )
-        results_link = results_link.replace(
-            '{year}', str(self.populaire.date_time.year)[-2:])
+        results_link = results_link.format(
+            year=str(self.populaire.date_time.year)[-2:])
         body = render(
             'moved-on.mako',
             {
@@ -185,15 +185,14 @@ class PopulaireEntry(FormView):
                 )
             .first())
         if rider is not None:
-            # Rider with same name and email already registered
+            # Rider with same name and email is already registered
             self.request.session.flash('duplicate')
             self.request.session.flash(
-                ' '.join((appstruct['first_name'], appstruct['last_name'])))
-            self.request.session.flash(appstruct['email'])
+                ' '.join((rider.first_name, rider.last_name)))
+            self.request.session.flash(rider.email)
         else:
             # New rider registration
             mailer = get_mailer(self.request)
-            populaire = get_populaire(pop_short_name)
             try:
                 distance = appstruct['distance']
             except KeyError:
