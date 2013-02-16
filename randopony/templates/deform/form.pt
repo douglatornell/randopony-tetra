@@ -63,6 +63,9 @@
             <i tal:condition="button.name == 'save'"
                class="icon-ok icon-white">
             </i>
+            <i tal:condition="button.name == 'register'"
+               class="icon-ok icon-white">
+            </i>
             <span class="hidden-phone">${button.title}</span>
           </button>
         </tal:block>
