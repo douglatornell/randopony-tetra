@@ -13,11 +13,14 @@ from deform.widget import (
     )
 from pyramid_deform import CSRFSchema
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
+    ForeignKey,
     Integer,
     Text,
     )
+from sqlalchemy.orm import relationship
 from .core import EventMixin
 from .meta import Base
 
@@ -48,6 +51,10 @@ class Brevet(EventMixin, Base):
     start_locn = Column(Text)
     start_map_url = Column(Text)
     info_question = Column(Text)
+    riders = relationship(
+        'BrevetRider',
+        order_by='BrevetRider.lowercase_last_name',
+        )
 
     def __init__(self, region, distance, date_time, route_name, start_locn,
         organizer_email, info_question=None, alt_date_time=None,
@@ -147,4 +154,97 @@ class BrevetSchema(CSRFSchema):
         colander.DateTime(default_tzinfo=None),
         title='Registration Closes',
         widget=DateTimeInputWidget(options=datetimeinputwidget_options),
+        )
+
+
+class BrevetRider(Base):
+    """Brevet rider.
+    """
+    BIKE_TYPES = (
+        ('Fixie', 'Fixie'),
+        ('Quad', 'Quad'),
+        ('Recumbent', 'Recumbent'),
+        ('Recumbent Tandem', 'Recumbent Tandem'),
+        ('Single', 'Single'),
+        ('Single-Speed', 'Single-Speed'),
+        ('Tandem', 'Tandem'),
+        ('Triplet', 'Triplet'),
+        ('Velomobile', 'Velomobile'),
+        ('Other', 'Other... Seriously?!'),
+        )
+
+    __tablename__ = 'brevet_riders'
+
+    id = Column(Integer, primary_key=True)
+    email = Column(Text)
+    first_name = Column(Text)
+    last_name = Column(Text)
+    lowercase_last_name = Column(Text, index=True)
+    comment = Column(Text)
+    club_member = Column(Boolean, nullable=True)
+    bike_type = Column(Text)
+    info_answer = Column(Text)
+    brevet = Column(Integer, ForeignKey('brevets.id'))
+
+    def __init__(self, first_name, last_name, email, comment,
+                 bike_type='single', club_member=None, info_answer=None):
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+        self.lowercase_last_name = self.last_name.lower()
+        self.comment = comment
+        self.bike_type = bike_type
+        self.club_member = club_member
+        self.info_answer = info_answer
+
+    def __str__(self):
+        return ' '.join((self.first_name, self.last_name))
+
+    def __repr__(self):
+        return '<Rider({})>'.format(self)
+
+    @property
+    def full_name(self):
+        return (
+            '{0.first_name} "{0.comment}" {0.last_name}'.format(self)
+            if self.comment
+            else str(self))
+
+
+class BrevetEntrySchema(CSRFSchema):
+    """Form schema for brevet rider pre-registration.
+    """
+    email = colander.SchemaNode(
+        colander.String(),
+        title='Email Address',
+        widget=TextInputWidget(
+            template='emailinput',
+            autofocus=True,
+            placeholder='you@example.com',
+            ),
+        validator=colander.Email(),
+        )
+    first_name = colander.SchemaNode(
+        colander.String(),
+        )
+    last_name = colander.SchemaNode(
+        colander.String(),
+        )
+    comment = colander.SchemaNode(
+        colander.String(),
+        widget=TextInputWidget(
+            template='textinput',
+            placeholder='wit, wisdom, ...',
+            help_block=(
+                'Your comment will appear with your name like: '
+                'Tom "fueled by coffee" Dickson. It is optional. '
+                'Please be sensible and respectful. This is the Internet. '
+                'What is written once can never be unwritten.'),
+            ),
+        missing=None,
+        )
+    bike_type = colander.SchemaNode(
+        colander.String(),
+        default='Single',
+        widget=SelectWidget(values=BrevetRider.BIKE_TYPES),
         )

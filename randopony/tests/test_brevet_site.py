@@ -427,3 +427,87 @@ class TestBrevetViews(unittest.TestCase):
             tmpl_vars['results_link'],
             'http://randonneurs.bc.ca/results/13_times/13_times.html')
         self.assertEqual(kwargs['request'], request)
+
+
+class TestBrevetEntry(unittest.TestCase):
+    """Unit tests for brevet pre-registration form handler & views.
+
+    *TODO*: Add integrations tests:
+
+      * Valid pre-registration renders confirmation message
+      * Duplicate pre-registration renders error message
+    """
+    def _get_target_class(self):
+        from ..views.site.brevet import BrevetEntry
+        return BrevetEntry
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        from ..models import EmailAddress
+        self.config = testing.setUp(
+            settings={
+                'mako.directories': 'randopony:templates',
+                'google_drive.username': 'randopony',
+                'google_drive.password': 'sEcReT',
+            })
+        self.config.include('pyramid_mailer.testing')
+        self.config.add_route('brevet', '/brevets/{region}/{distance}/{date}')
+        self.config.add_route(
+            'brevet.rider_emails',
+            '/brevet/{region}/{distance}/{date}/rider_emails/{uuid}')
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+        from_randopony = EmailAddress(
+            key='from_randopony',
+            email='randopony@randonneurs.bc.ca',
+            )
+        admin_email = EmailAddress(
+            key='admin_email',
+            email='djl@douglatornell.ca',
+            )
+        DBSession.add_all((from_randopony, admin_email))
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_redirect_url(self):
+        """_redirect_url returns expected brevet page URL
+        """
+        request = testing.DummyRequest()
+        entry = self._make_one(request)
+        url = entry._redirect_url('VI', 200, '03Mar2013')
+        self.assertEqual(url, 'http://example.com/brevets/VI/200/03Mar2013')
+
+    def test_show(self):
+        """show returns expected template variables
+        """
+        from ..models import Brevet
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+            )
+        DBSession.add(brevet)
+        request = testing.DummyRequest()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+            })
+        entry = self._make_one(request)
+        tmpl_vars = entry.show(MagicMock(name='form'))
+        self.assertEqual(tmpl_vars['active_tab'], 'brevets')
+        self.assertIn('brevets', tmpl_vars)
+        self.assertIn('populaires', tmpl_vars)
+        self.assertEqual(tmpl_vars['brevet'], brevet)
+        self.assertEqual(
+            tmpl_vars['cancel_url'],
+            'http://example.com/brevets/VI/200/03Mar2013')

@@ -215,6 +215,75 @@ class TestBrevet(unittest.TestCase):
         self.assertEqual(brevets.all(), [])
 
 
+class TestBrevetRider(unittest.TestCase):
+    """Unit tests for BrevetRider data model.
+    """
+    def _get_target_class(self):
+        from ..models import BrevetRider
+        return BrevetRider
+
+    def _make_one(self, *args, **kwargs):
+        return self._get_target_class()(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp()
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_str(self):
+        """BrevetRider model string rep is first_name last_name
+        """
+        rider = self._make_one(
+            email='tom@example.com',
+            first_name='Tom',
+            last_name='Dickson',
+            distance='60',
+            comment='',
+            )
+        self.assertEqual(str(rider), 'Tom Dickson')
+
+    def test_repr(self):
+        """BrevetRider model repr is <Rider(first_name last_name)>
+        """
+        rider = self._make_one(
+            email='tom@example.com',
+            first_name='Tom',
+            last_name='Dickson',
+            distance='60',
+            comment='',
+            )
+        self.assertEqual(repr(rider), '<Rider(Tom Dickson)>')
+
+    def test_full_name_wo_comment(self):
+        """BrevetRider full_name w/o comment is first_name last_name
+        """
+        rider = self._make_one(
+            email='tom@example.com',
+            first_name='Tom',
+            last_name='Dickson',
+            distance='60',
+            comment='',
+            )
+        self.assertEqual(rider.full_name, 'Tom Dickson')
+
+    def test_full_name_w_comment(self):
+        """BrevetRider full_name w comment is first_name "comment" last_name
+        """
+        rider = self._make_one(
+            email='tom@example.com',
+            first_name='Tom',
+            last_name='Dickson',
+            distance='60',
+            comment='hoping for sun',
+            )
+        self.assertEqual(rider.full_name, 'Tom "hoping for sun" Dickson')
+
+
 class TestPopulaire(unittest.TestCase):
     """Unit tests for Populaire data model.
     """
