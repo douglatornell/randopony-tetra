@@ -12,6 +12,8 @@ from .admin import (
 from .brevet import (
     Brevet,
     BrevetSchema,
+    BrevetEntrySchema,
+    BrevetRider,
     )
 from .populaire import (
     Populaire,

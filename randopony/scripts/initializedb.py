@@ -58,6 +58,11 @@ def main(argv=sys.argv):
         key='results_url',
         url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
         )
+    is_club_member_api = Link(
+        key='is_club_member_api',
+        url='https://database.randonneurs.bc.ca/api/member/'
+            '{last_name}/{first_name}/status/',
+        )
     with transaction.manager:
         DBSession.add_all((
             admin,
@@ -66,4 +71,5 @@ def main(argv=sys.argv):
             club_webmaster,
             entry_form_url,
             results_url,
+            is_club_member_api,
             ))
