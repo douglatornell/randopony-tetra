@@ -37,6 +37,22 @@ ${brevet}
     %endif
   %endif
 
+  %if len(brevet.riders) == 0:
+    <p>
+      Nobody has pre-registered
+    </p>
+    %if not registration_closed:
+    <p class="register-btn">
+      <a class="btn btn-success"
+         href="${request.route_url('brevet.entry',
+                                   region=brevet.region,
+                                   distance=brevet.distance,
+                                   date=brevet.date_time.strftime('%d%b%Y'))}">
+        Be the first!
+      </a>
+    </p>
+    %endif
+  %else:
     %if not registration_closed:
     <p class="register-btn">
       <a class="btn btn-success"
@@ -49,6 +65,34 @@ ${brevet}
     </p>
     %endif
 
+    <table class="table table-striped">
+      <thead>
+        <tr>
+        <th colspan="2">
+          ${len(brevet.riders)} Pre-registered
+          %if len(brevet.riders) > 1:
+          Riders
+          %else:
+          Rider
+          %endif
+        </th>
+        </tr>
+      </thead>
+    <tbody>
+      %for rider in brevet.riders:
+      <tr>
+        %if rider.bike_type == 'other':
+        <td>${rider.full_name} riding something indescribable</td>
+        %else:
+        <td>${rider.full_name} riding a ${rider.bike_type}</td>
+        %endif
+      </tr>
+      %endfor
+    </tbody>
+    </table>
+  %endif
+
+  %if len(brevet.riders) < 15:
   <div class="img-container hidden-phone">
     <img src="${request.static_url('randopony:static/img/BrevetPeloton.jpg')}"
          alt="Brevet peloton rolling out"
@@ -57,6 +101,7 @@ ${brevet}
       <em><small>Susan Allen</small></em>
     </div>
   </div>
+  %endif
 </div>
 
 
@@ -81,6 +126,11 @@ ${brevet}
 
 
 <%def name="confirmation(notice_data)">
+<%
+  email = notice_data[1]
+  member_status = notice_data[2]
+  membership_link = notice_data[3]
+%>
 <div class="row">
   <div class="span6 alert alert-success alert-block fade in">
     <span class="close" data-dismiss="alert">&times;</span>
@@ -91,9 +141,28 @@ ${brevet}
     </p>
     <p>
       A confirmation email has been sent to you at
-      <kbd>${notice_data[1]}</kbd>
+      <kbd>${email}</kbd>
       and to the brevet organizer(s).
     </p>
+    %if member_status is None:
+    <p>
+      Your name couldn't be found in the club database.
+      You need to be a member of the BC Randonneurs Club to ride this brevet.
+      Please join at
+      <a href="${membership_link}" title="Club Membership Page">
+        ${membership_link}
+      </a>
+    </p>
+    %endif
+    %if not member_status:
+    <p>
+      Your BC Randonneurs club membership has expired.
+      Please renew it at
+      <a href="${membership_link}" title="Club Membership Page">
+        ${membership_link}
+      </a>
+    </p>
+    %endif
     <p>
       You can print out the
       <a href="${entry_form_url}" title="Event Waiver Form">
@@ -114,13 +183,17 @@ ${brevet}
 
 
 <%def name="duplicate(notice_data)">
+<%
+  name = notice_data[1]
+  email = notice_data[2]
+%>
 <div class="row">
   <div class="span6 alert alert-danger alert-block fade in">
     <span class="close" data-dismiss="alert">&times;</span>
     <h4 class="alert-heading">Hmm...</h4>
     <p>
-      Someone using the name ${notice_data[1]} and the email address
-      ${notice_data[2]} has already pre-registered for this brevet.
+      Someone using the name ${name} and the email address
+      <kbd>${email}</kbd> has already pre-registered for this brevet.
       Are you sure that you are registering for the event you intended to?
     </p>
     <p>

@@ -253,21 +253,26 @@ class BrevetEntry(FormView):
             mailer = get_mailer(self.request)
             first_name = appstruct['first_name']
             last_name = appstruct['last_name']
-            is_club_member = _get_member_status_by_name(first_name, last_name)
+            member_status = _get_member_status_by_name(first_name, last_name)
             rider = BrevetRider(
                 email=appstruct['email'],
                 first_name=first_name,
                 last_name=last_name,
                 comment=appstruct['comment'],
-                club_member=is_club_member,
+                member_status=member_status,
                 bike_type=appstruct['bike_type'],
                 )
             brevet.riders.append(rider)
             DBSession.add(rider)
 
+            membership_link = (DBSession.query(Link.url)
+                .filter_by(key='membership_link')
+                .one()[0]
+                )
             self.request.session.flash('success')
             self.request.session.flash(rider.email)
-            self.request.session.flash(rider.club_member)
+            self.request.session.flash(rider.member_status)
+            self.request.session.flash(membership_link)
         return HTTPFound(self._redirect_url(region, distance, date))
 
     def failure(self, e):

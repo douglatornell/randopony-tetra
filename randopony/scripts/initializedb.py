@@ -63,6 +63,10 @@ def main(argv=sys.argv):
         url='https://database.randonneurs.bc.ca/api/member/'
             '{last_name}/{first_name}/status/',
         )
+    membership_link = Link(
+        key='membership_link',
+        url='http://www.2mevents.com/index.php/event/bc-randonneurs-membership',
+        )
     with transaction.manager:
         DBSession.add_all((
             admin,
@@ -72,4 +76,5 @@ def main(argv=sys.argv):
             entry_form_url,
             results_url,
             is_club_member_api,
+            membership_link,
             ))

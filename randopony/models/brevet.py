@@ -161,16 +161,16 @@ class BrevetRider(Base):
     """Brevet rider.
     """
     BIKE_TYPES = (
-        ('Fixie', 'Fixie'),
-        ('Quad', 'Quad'),
-        ('Recumbent', 'Recumbent'),
-        ('Recumbent Tandem', 'Recumbent Tandem'),
-        ('Single', 'Single'),
-        ('Single-Speed', 'Single-Speed'),
-        ('Tandem', 'Tandem'),
-        ('Triplet', 'Triplet'),
-        ('Velomobile', 'Velomobile'),
-        ('Other', 'Other... Seriously?!'),
+        ('fixie', 'Fixie'),
+        ('quad', 'Quad'),
+        ('recumbent', 'Recumbent'),
+        ('recumbent tandem', 'Recumbent Tandem'),
+        ('single', 'Single'),
+        ('single-speed', 'Single-Speed'),
+        ('tandem', 'Tandem'),
+        ('triplet', 'Triplet'),
+        ('velomobile', 'Velomobile'),
+        ('other', 'Other... Seriously?!'),
         )
 
     __tablename__ = 'brevet_riders'
@@ -181,20 +181,20 @@ class BrevetRider(Base):
     last_name = Column(Text)
     lowercase_last_name = Column(Text, index=True)
     comment = Column(Text)
-    club_member = Column(Boolean, nullable=True)
+    member_status = Column(Boolean, nullable=True)
     bike_type = Column(Text)
     info_answer = Column(Text)
     brevet = Column(Integer, ForeignKey('brevets.id'))
 
     def __init__(self, first_name, last_name, email, comment,
-                 bike_type='single', club_member=None, info_answer=None):
+                 bike_type='single', member_status=None, info_answer=None):
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
         self.lowercase_last_name = self.last_name.lower()
         self.comment = comment
         self.bike_type = bike_type
-        self.club_member = club_member
+        self.member_status = member_status
         self.info_answer = info_answer
 
     def __str__(self):
@@ -245,6 +245,6 @@ class BrevetEntrySchema(CSRFSchema):
         )
     bike_type = colander.SchemaNode(
         colander.String(),
-        default='Single',
+        default='single',
         widget=SelectWidget(values=BrevetRider.BIKE_TYPES),
         )
