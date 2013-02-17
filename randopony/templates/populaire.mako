@@ -118,6 +118,9 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 
 
 <%def name="confirmation(notice_data)">
+<%
+  email = notice_data[1]
+%>
 <div class="row">
   <div class="span6 alert alert-success alert-block fade in">
     <span class="close" data-dismiss="alert">&times;</span>
@@ -128,8 +131,7 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
     </p>
     <p>
       A confirmation email has been sent to you at
-      <kbd>${notice_data[1]}</kbd>
-      and to the populaire organizer(s).
+      <kbd>${email}</kbd> and to the populaire organizer(s).
     </p>
     <p>
       You can print out the
@@ -151,13 +153,17 @@ ${populaire} ${"{:%d-%b-%Y}".format(populaire.date_time)}
 
 
 <%def name="duplicate(notice_data)">
+<%
+  name = notice_data[1]
+  email = notice_data[2]
+%>
 <div class="row">
   <div class="span6 alert alert-danger alert-block fade in">
     <span class="close" data-dismiss="alert">&times;</span>
     <h4 class="alert-heading">Hmm...</h4>
     <p>
-      Someone using the name ${notice_data[1]} and the email address
-      ${notice_data[2]} has already pre-registered for this populaire.
+      Someone using the name ${name} and the email address
+      <kbd>${email}</kbd> has already pre-registered for this populaire.
       Are you sure that you are registering for the event you intended to?
     </p>
     <p>
