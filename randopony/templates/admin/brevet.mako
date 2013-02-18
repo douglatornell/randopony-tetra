@@ -1,4 +1,5 @@
 <%inherit file="page.mako"/>
+<%namespace name="admin_btns" file="admin_buttons.mako"/>
 
 <%block name="title">RandoPony::Admin::${brevet}</%block>
 
@@ -29,37 +30,42 @@
 <p>${brevet.info_question}</p>
 %endif
 
+<h4>Google Drive Rider List Id</h4>
 %if brevet.google_doc_id:
-<h4>Google Rider List Id</h4>
-<p>${brevet.google_doc_id}</p>
+<p>
+  <a href="${'https://spreadsheets.google.com/ccc?key={0}'.format(brevet.google_doc_id.split(':')[1])}"
+     target="_blank">
+    ${brevet.google_doc_id}
+  </a>
+</p>
+%else:
+<p class="text-warning">Not created yet!</p>
 %endif
 
-<h4>Riders Email Addresses</h4>
-<p></p>
+<h4>Riders Email Address List UUID</h4>
+<p>
+  <a href="${request.route_url('brevet.entry',
+                               region=brevet.region,
+                               distance=brevet.distance,
+                               date=brevet.date_time.strftime('%d%b%Y'))}
+                               uuid=brevet.uuid)}"
+     target="_blank">
+    ${brevet.uuid}
+  </a>
+</p>
 
 <div class="btn-toolbar">
-  <a href="${request.route_url('admin.brevets.edit', item=str(brevet))}"
-     class="btn btn-info">
-   <i class="icon-edit icon-white"></i>
-   <span class="hidden-phone">Edit</span>
-  </a>
-
-  <a href="${request.route_url('admin.list', list='brevets')}"
-     class="btn">
-   <i class="icon-arrow-left"></i>
-   <span class="hidden-phone">Brevet List</span>
-  </a>
-
+  ${admin_btns.edit('brevets', brevet)}
+  ${admin_btns.event_list('brevets')}
   <div class="btn-group dropup">
     <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-      Admin Actions
-      <span class="caret"></span>
+      Admin Actions <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
-      <li><a href="#" tabindex="-1">Setup 1-2-3</a></li>
-      <li><a href="#" tabindex="-1">Copy Google Template</a></li>
-      <li><a href="#" tabindex="-1">Email Organizer(s)</a></li>
-      <li><a href="#" tabindex="-1">Email Webmaster</a></li>
+      <li>${admin_btns.setup_123('brevets', brevet)}</li>
+      <li>${admin_btns.create_rider_list('brevets', brevet)}</li>
+      <li>${admin_btns.email_to_organizer('brevets', brevet)}</li>
+      <li>${admin_btns.email_to_webmaster('brevets', brevet)}</li>
     </ul>
   </div>
 </div>

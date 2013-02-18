@@ -1,10 +1,7 @@
 <%inherit file="page.mako"/>
+<%namespace name="admin_btns" file="admin_buttons.mako"/>
 
 <%block name="title">RandoPony::Admin::${populaire}</%block>
-
-%if request.session.peek_flash():
-${self.flash(request.session.pop_flash())}
-%endif
 
 <h4>Populaire</h4>
 <p>
@@ -59,70 +56,17 @@ ${self.flash(request.session.pop_flash())}
 </p>
 
 <div class="btn-toolbar">
-  <a href="${request.route_url('admin.populaires.edit', item=str(populaire))}"
-     class="btn btn-info">
-   <i class="icon-edit icon-white"></i>
-   <span class="hidden-phone">Edit</span>
-  </a>
-
-  <a href="${request.route_url('admin.list', list='populaires')}"
-     class="btn">
-   <i class="icon-arrow-left"></i>
-   <span class="hidden-phone">Populaire List</span>
-  </a>
-
+  ${admin_btns.edit('populaires', populaire)}
+  ${admin_btns.event_list('populaires')}
   <div class="btn-group dropup">
     <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-      Admin Actions
-      <span class="caret"></span>
+      Admin Actions <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
-      <li>
-        <a href="${request.route_url('admin.populaires.setup_123',
-                                     item=str(populaire))}"
-           tabindex="-1">
-           Setup 1-2-3
-        </a>
-      </li>
-
-      <li>
-        <a href="${request.route_url('admin.populaires.create_rider_list',
-                                     item=str(populaire))}"
-           tabindex="-1">
-           Create Rider List
-         </a>
-       </li>
-
-      <li>
-        <a href="${request.route_url('admin.populaires.email_to_organizer',
-                                     item=str(populaire))}"
-           tabindex="-1">
-           Email Organizer(s)
-         </a>
-      </li>
-
-      <li>
-        <a href="${request.route_url('admin.populaires.email_to_webmaster',
-                                     item=str(populaire))}"
-           tabindex="-1">
-           Email Webmaster
-        </a>
-      </li>
+      <li>${admin_btns.setup_123('populaires', populaire)}</li>
+      <li>${admin_btns.create_rider_list('populaires', populaire)}</li>
+      <li>${admin_btns.email_to_organizer('populaires', populaire)}</li>
+      <li>${admin_btns.email_to_webmaster('populaires', populaire)}</li>
     </ul>
   </div>
 </div>
-
-
-<%def name="flash(data)">
-  <div class="row">
-    <div class="span4">
-      <div class="alert alert-${data[0]} alert-block fade in">
-        <span class="close" data-dismiss="alert">&times;</span>
-        <h4 class="alert-heading">${data[0]}!</h4>
-        %for line in data[1:]:
-        ${line}<br>
-        %endfor
-      </div>
-    </div>
-  </div>
-</%def>

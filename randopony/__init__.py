@@ -91,6 +91,9 @@ def map_routes(config):               # pragma: no cover
     config.add_route(
         'brevet.entry',
         '/brevets/{region}/{distance}/{date}/entry')
+    config.add_route(
+        'brevet.rider_emails',
+        '/brevets/{region}/{distance}/{date}/rider_emails/{uuid}')
     # legacy routes to cover when /brevets/ was /register/
     config.add_route('register', '/register/')
     config.add_route('register.region', '/register/{region}-events/')
@@ -110,6 +113,18 @@ def map_routes(config):               # pragma: no cover
     config.add_route('admin.brevets.create', '/admin/brevets/new')
     config.add_route('admin.brevets.edit', '/admin/brevets/{item}/edit')
     config.add_route('admin.brevets.view', '/admin/brevets/{item}')
+    config.add_route(
+        'admin.brevets.create_rider_list',
+        'admin/brevet/{item}/create_rider_list')
+    config.add_route(
+        'admin.brevets.email_to_organizer',
+        'admin.brevet/{item}/email_to_organizer')
+    config.add_route(
+        'admin.brevets.email_to_webmaster',
+        'admin.brevet/{item}/email_to_webmaster')
+    config.add_route(
+        'admin.brevets.setup_123',
+        'admin.brevet/{item}/setup_123')
      # populaire admin routes
     config.add_route('admin.populaires.create', '/admin/populaire/new')
     config.add_route('admin.populaires.edit', '/admin/populaire/{item}/edit')
