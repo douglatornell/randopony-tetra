@@ -210,7 +210,8 @@ class PopulaireEntry(FormView):
                 [rider for rider in populaire.riders],
                 populaire.google_doc_id.split(':')[1],
                 self.request.registry.settings['google_drive.username'],
-                self.request.registry.settings['google_drive.password'])
+                self.request.registry.settings['google_drive.password'],
+                )
             message = self._rider_message(populaire, rider)
             mailer.send(message)
             message = self._organizer_message(populaire, rider)
@@ -312,10 +313,10 @@ def update_google_spreadsheet(riders, doc_key, username, password):
 
 
 def _make_spreadsheet_row_dict(rider_number, rider):
-        row_data = {
-            'ridernumber': str(rider_number),
-            'lastname': rider.last_name,
-            'firstname': rider.first_name,
-            'distance': str(rider.distance),
-        }
-        return row_data
+    row_data = {
+        'ridernumber': str(rider_number),
+        'lastname': rider.last_name,
+        'firstname': rider.first_name,
+        'distance': str(rider.distance),
+    }
+    return row_data
