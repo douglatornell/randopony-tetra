@@ -1,33 +1,18 @@
 # -*- coding: utf-8 -*-
 """RandoPony brevet admin views.
 """
-from datetime import (
-    datetime,
-    timedelta,
-    )
 from deform import Button
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
+from . import google_drive
+from . import core as admin_core
 from ...models import (
     Brevet,
     BrevetSchema,
     )
 from ...models.meta import DBSession
 from ... import __version__ as version
-
-
-def get_brevet(code, date):
-    region = code[:2]
-    distance = code[2:]
-    date = datetime.strptime(date, '%d%b%Y')
-    return (DBSession.query(Brevet)
-        .filter_by(region=region)
-        .filter_by(distance=distance)
-        .filter(Brevet.date_time >= date)
-        .filter(Brevet.date_time < date + timedelta(days=1))
-        .first()
-        )
 
 
 @view_config(
@@ -37,7 +22,7 @@ def get_brevet(code, date):
     )
 def brevet_details(request):
     code, date = request.matchdict['item'].split()
-    brevet = get_brevet(code, date)
+    brevet = admin_core.get_brevet(code, date)
     return {
         'version': version.number + version.release,
         'logout_btn': True,
@@ -112,7 +97,7 @@ class BrevetEdit(FormView):
 
     def appstruct(self):
         code, date = self.request.matchdict['item'].split()
-        brevet = get_brevet(code, date)
+        brevet = admin_core.get_brevet(code, date)
         return {
             'id': brevet.id,
             'region': brevet.region,
@@ -157,3 +142,91 @@ class BrevetEdit(FormView):
             'cancel_url': self.view_url()
             })
         return tmpl_vars
+
+
+@view_config(
+    route_name='admin.brevets.create_rider_list',
+    permission='admin',
+    )
+def create_rider_list(request):
+    code, date = request.matchdict['item'].split()
+    brevet = admin_core.get_brevet(code, date)
+    flash = _create_rider_list(request, brevet)
+    admin_core.finalize_flash_msg(request, flash)
+    redirect_url = request.route_url(
+        'admin.brevets.view', item=request.matchdict['item'])
+    return HTTPFound(redirect_url)
+
+
+def _create_rider_list(request, brevet):
+    username = request.registry.settings['google_drive.username']
+    password = request.registry.settings['google_drive.password']
+    flash = google_drive.create_rider_list(
+        brevet, 'Brevet Rider List Template', username, password)
+    if flash[0] == 'success':
+        flash += google_drive.update_rider_list_info_question(
+            brevet, username, password)
+    return flash
+
+
+@view_config(
+    route_name='admin.brevets.email_to_organizer',
+    permission='admin',
+    )
+def email_to_organizer(request):
+    code, date = request.matchdict['item'].split()
+    brevet = admin_core.get_brevet(code, date)
+    flash = _email_to_organizer(request, brevet, date)
+    admin_core.finalize_flash_msg(request, flash)
+    redirect_url = request.route_url(
+        'admin.brevets.view', item=request.matchdict['item'])
+    return HTTPFound(redirect_url)
+
+
+def _email_to_organizer(request, brevet, date):
+    event_page_url = request.route_url(
+        'brevet', region=brevet.region, distance=brevet.distance, date=date)
+    rider_emails_url = request.route_url(
+        'brevet.rider_emails', region=brevet.region, distance=brevet.distance,
+        date=date, uuid=brevet.uuid)
+    flash = admin_core.email_to_organizer(
+        request, brevet, event_page_url, rider_emails_url)
+    return flash
+
+
+@view_config(
+    route_name='admin.brevets.email_to_webmaster',
+    permission='admin',
+    )
+def email_to_webmaster(request):
+    code, date = request.matchdict['item'].split()
+    brevet = admin_core.get_brevet(code, date)
+    flash = _email_to_webmaster(request, brevet, date)
+    admin_core.finalize_flash_msg(request, flash)
+    redirect_url = request.route_url(
+        'admin.brevets.view', item=request.matchdict['item'])
+    return HTTPFound(redirect_url)
+
+
+def _email_to_webmaster(request, brevet, date):
+    event_page_url = request.route_url(
+        'brevet', region=brevet.region, distance=brevet.distance, date=date)
+    flash = admin_core.email_to_webmaster(request, brevet, event_page_url)
+    return flash
+
+
+@view_config(
+    route_name='admin.brevets.setup_123',
+    permission='admin',
+    )
+def setup_123(request):
+    code, date = request.matchdict['item'].split()
+    brevet = admin_core.get_brevet(code, date)
+    flash = _create_rider_list(request, brevet)
+    if 'error' not in flash:
+        flash += _email_to_organizer(request, brevet, date)
+        flash += _email_to_webmaster(request, brevet, date)
+    admin_core.finalize_flash_msg(request, flash)
+    redirect_url = request.route_url(
+        'admin.brevets.view', item=request.matchdict['item'])
+    return HTTPFound(redirect_url)

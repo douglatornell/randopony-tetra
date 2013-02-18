@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """RandoPony admin views core components.
 """
+from datetime import (
+    datetime,
+    timedelta,
+    )
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.response import Response
@@ -9,12 +13,14 @@ from pyramid.view import (
     view_config,
     view_defaults,
     )
+from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message
 from sqlalchemy import desc
-from .brevet import get_brevet
 from .populaire import get_populaire
 from ...models import (
     Administrator,
     Brevet,
+    EmailAddress,
     Populaire,
     )
 from ...models.meta import DBSession
@@ -119,3 +125,101 @@ class AdminViews(object):
                 .delete())
             return HTTPFound(list_view)
         return self.tmpl_vars
+
+
+def get_brevet(code, date):
+    region = code[:2]
+    distance = code[2:]
+    date = datetime.strptime(date, '%d%b%Y')
+    return (DBSession.query(Brevet)
+        .filter_by(region=region)
+        .filter_by(distance=distance)
+        .filter(Brevet.date_time >= date)
+        .filter(Brevet.date_time < date + timedelta(days=1))
+        .first()
+        )
+
+
+def email_to_organizer(request, event, event_page_url, rider_emails_url):
+    if not event.google_doc_id:
+        request.session.flash('error')
+        request.session.flash(
+            'Google Drive rider list must be created before email to '
+            'organizer(s) can be sent')
+        return
+    from_randopony = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='from_randopony')
+        .first().email
+        )
+    rider_list_url = (
+        'https://spreadsheets.google.com/ccc?key={0}'
+        .format(event.google_doc_id.split(':')[1]))
+    admin_email = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='admin_email')
+        .first().email
+        )
+    message = Message(
+        subject='RandoPony URLs for {}'.format(event),
+        sender=from_randopony,
+        recipients=[
+            addr.strip() for addr in event.organizer_email.split(',')],
+        body=render(
+            'email/event_URLs_to_organizer.mako',
+            {
+                'event': str(event),
+                'event_page_url': event_page_url,
+                'rider_list_url': rider_list_url,
+                'rider_emails_url': rider_emails_url,
+                'admin_email': admin_email,
+            }))
+    mailer = get_mailer(request)
+    mailer.send(message)
+    return [
+        'success',
+        'Email sent to {} organizer(s)'.format(event),
+    ]
+
+
+def email_to_webmaster(request, event, event_page_url):
+    from_randopony = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='from_randopony')
+        .first().email
+        )
+    club_webmaster = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='club_webmaster').first().email)
+    admin_email = (
+        DBSession.query(EmailAddress)
+        .filter_by(key='admin_email')
+        .first().email
+        )
+    message = Message(
+        subject='RandoPony Pre-registration page for {}'.format(event),
+        sender=from_randopony,
+        recipients=[club_webmaster],
+        body=render(
+            'email/event_URL_to_webmaster.mako',
+            {
+                'event': str(event),
+                'event_page_url': event_page_url,
+                'admin_email': admin_email,
+            }))
+    mailer = get_mailer(request)
+    mailer.send(message)
+    return [
+        'success',
+        'Email with {} page URL sent to webmaster'.format(event),
+    ]
+
+
+def finalize_flash_msg(request, flash):
+    if 'error' in flash:
+        request.session.flash('error')
+    else:
+        request.session.flash('success')
+    for msg in flash:
+        if msg not in 'success error'.split():
+            request.session.flash(msg)

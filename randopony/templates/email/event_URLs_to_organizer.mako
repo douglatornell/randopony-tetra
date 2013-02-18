@@ -1,4 +1,4 @@
-The pre-registration page for the ${populaire} event has been added to the RandoPony. The URL is <${pop_page_url}>.
+The pre-registration page for the ${event} event has been added to the RandoPony. The URL is <${event_page_url}>.
 
 The rider list spreadsheet is a Google Drive spreadsheet that is updated as riders pre-register. You can download the data in various formats (Excel, OpenOffice, CSV, PDF, ...), or save a copy in the cloud if you have a Google account (free).  The rider list URL is <${rider_list_url}>.
 
