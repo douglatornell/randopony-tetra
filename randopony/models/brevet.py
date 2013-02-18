@@ -3,6 +3,7 @@
 """
 from datetime import timedelta
 from operator import itemgetter
+import uuid
 import colander
 from deform.widget import (
     DateTimeInputWidget,
@@ -82,6 +83,13 @@ class Brevet(EventMixin, Base):
 
     def __repr__(self):
         return '<Brevet({})>'.format(self)
+
+    @property
+    def uuid(self):
+        return uuid.uuid5(
+            uuid.NAMESPACE_URL,
+            '/randopony/{0.region}/{0.distance}/{0.date_time:%d%b%Y}'
+            .format(self))
 
 
 class BrevetSchema(CSRFSchema):
