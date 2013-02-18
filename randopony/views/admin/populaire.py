@@ -247,10 +247,10 @@ def _email_to_organizer(request, populaire):
         recipients=[
             addr.strip() for addr in populaire.organizer_email.split(',')],
         body=render(
-            'email/populaire_URLs_to_organizer.mako',
+            'email/event_URLs_to_organizer.mako',
             {
-                'populaire': populaire.event_name,
-                'pop_page_url': pop_page_url,
+                'event': populaire.event_name,
+                'event_page_url': pop_page_url,
                 'rider_list_url': rider_list_url,
                 'rider_emails_url': rider_emails_url,
                 'admin_email': admin_email,
