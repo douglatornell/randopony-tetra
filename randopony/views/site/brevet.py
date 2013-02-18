@@ -6,19 +6,23 @@ from datetime import (
     timedelta,
     )
 import logging
+from celery.task import task
 from deform import Button
+from gdata.spreadsheet.service import SpreadsheetsService
 from pyramid_deform import FormView
 from pyramid.httpexceptions import (
     HTTPFound,
     HTTPNotFound,
     )
 from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message
 from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.view import view_config
 import pytz
 import requests
 from .core import SiteViews
+from ..admin.google_drive import google_drive_login
 from ...models import (
     Brevet,
     BrevetEntrySchema,
@@ -264,7 +268,16 @@ class BrevetEntry(FormView):
                 )
             brevet.riders.append(rider)
             DBSession.add(rider)
-
+            update_google_spreadsheet.delay(
+                [rider for rider in brevet.riders],
+                brevet.google_doc_id.split(':')[1],
+                self.request.registry.settings['google_drive.username'],
+                self.request.registry.settings['google_drive.password'],
+                )
+            message = self._rider_message(brevet, rider)
+            mailer.send(message)
+            message = self._organizer_message(brevet, rider)
+            mailer.send(message)
             membership_link = (DBSession.query(Link.url)
                 .filter_by(key='membership_link')
                 .one()[0]
@@ -291,6 +304,69 @@ class BrevetEntry(FormView):
             })
         return tmpl_vars
 
+    def _rider_message(self, brevet, rider):
+        from_randopony = (
+            DBSession.query(EmailAddress)
+            .filter_by(key='from_randopony')
+            .first().email
+            )
+        brevet_page_url = self._redirect_url(
+            brevet.region, brevet.distance, brevet.date_time.strftime('%d%b%Y'))
+        message = Message(
+            subject='Pre-registration Confirmation for {0}'
+                    .format(brevet),
+            sender=from_randopony,
+            recipients=[rider.email],
+            extra_headers={
+                'Sender': from_randopony,
+                'Reply-To': brevet.organizer_email,
+            },
+            body=render(
+                'email/brevet_rider.mako',
+                {
+                    'brevet': brevet,
+                    'brevet_page_url': brevet_page_url,
+                }))
+        return message
+
+    def _organizer_message(self, brevet, rider):
+        from_randopony = (
+            DBSession.query(EmailAddress)
+            .filter_by(key='from_randopony')
+            .first().email
+            )
+        brevet_page_url = self._redirect_url(
+            brevet.region, brevet.distance, brevet.date_time.strftime('%d%b%Y'))
+        rider_list_url = (
+            'https://spreadsheets.google.com/ccc?key={0}'
+            .format(brevet.google_doc_id.split(':')[1]))
+        rider_emails = self.request.route_url(
+            'brevet.rider_emails',
+            short_name=brevet.short_name,
+            uuid=brevet.uuid)
+        admin_email = (
+            DBSession.query(EmailAddress)
+            .filter_by(key='admin_email')
+            .first().email
+            )
+        message = Message(
+            subject='{0} has Pre-registered for the {1}'
+                    .format(rider, brevet),
+            sender=from_randopony,
+            recipients=[
+                addr.strip() for addr in brevet.organizer_email.split(',')],
+            body=render(
+                'email/brevet_organizer_entry.mako',
+                {
+                    'rider': rider,
+                    'brevet': brevet,
+                    'brevet_page_url': brevet_page_url,
+                    'rider_list_url': rider_list_url,
+                    'rider_emails': rider_emails,
+                    'admin_email': admin_email,
+                }))
+        return message
+
 
 def _get_member_status_by_name(first_name, last_name):
     is_club_member_url = (DBSession.query(Link.url)
@@ -306,3 +382,36 @@ def _get_member_status_by_name(first_name, last_name):
     except requests.HTTPError:
         is_club_member = None
     return is_club_member
+
+
+@task(ignore_result=True)
+def update_google_spreadsheet(riders, doc_key, username, password):
+    client = google_drive_login(SpreadsheetsService, username, password)
+    spreadsheet_list = client.GetListFeed(doc_key)
+    spreadsheet_rows = len(spreadsheet_list.entry)
+    # Update the rows already in the spreadsheet
+    for row, rider in enumerate(riders[:spreadsheet_rows]):
+        rider_number = row + 1
+        new_row_data = _make_spreadsheet_row_dict(rider_number, rider)
+        client.UpdateRow(spreadsheet_list.entry[row], new_row_data)
+    # Add remaining rows
+    for row, rider in enumerate(riders[spreadsheet_rows:]):
+        rider_number = spreadsheet_rows + row + 1
+        row_data = _make_spreadsheet_row_dict(rider_number, rider)
+        client.InsertRow(row_data, doc_key)
+
+
+def _make_spreadsheet_row_dict(rider_number, rider):
+    if rider.member_status is None:
+        current_member = 'Unknown'
+    else:
+        current_member = 'Yes' if rider.member_status else 'No'
+    current_member
+    row_data = {
+        'ridernumber': str(rider_number),
+        'lastname': rider.last_name,
+        'firstname': rider.first_name,
+        'currentmemner': current_member,
+        'biketype': rider.bike_type,
+    }
+    return row_data
