@@ -6,6 +6,7 @@ from datetime import (
     timedelta,
     )
 import logging
+from operator import attrgetter
 from celery.task import task
 from deform import Button
 from gdata.spreadsheet.service import SpreadsheetsService
@@ -207,7 +208,8 @@ class PopulaireEntry(FormView):
             populaire.riders.append(rider)
             DBSession.add(rider)
             update_google_spreadsheet.delay(
-                [rider for rider in populaire.riders],
+                sorted(
+                    populaire.riders, key=attrgetter('lowercase_last_name')),
                 populaire.google_doc_id.split(':')[1],
                 self.request.registry.settings['google_drive.username'],
                 self.request.registry.settings['google_drive.password'],
