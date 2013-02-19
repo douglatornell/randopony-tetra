@@ -49,16 +49,6 @@ Use the Webfaction control panel to:
    :kbd:`randopony.bcrandonneur.webfactional.com`
    and :kbd:`randopony.randonneurs.bc.ca`
 
-#. Create a staging application,
-   initially just a Pyramid 1.4/Python 2.7 application named to reflect the
-   release that is being prepared;
-   e.g. :kbd:`randopony2013r1`.
-   Make note of the port number that is assigned to the application.
-
-#. Create a website with the same name as the application and host it at
-   :kbd:`randopony.bcrandonneur.webfactional.com` with the application mounted
-   at :kbd:`/`
-
 
 .. _InitialStagingDeployment-section:
 
@@ -67,18 +57,6 @@ Initial Staging Deployment
 
 If the app is being deployed to the staging environment for the first time in a
 newly created Webfaction application directory:
-
-#. Edit :file:`staging.ini` and :file:`production.ini` to set the port number
-   in the :kbd:`server:main` section to the port that Webfaction provided for
-   the application;
-   e.g.
-
-   .. code-block:: ini
-
-      [server:main]
-      use = egg:waitress#main
-      host = 127.0.0.1
-      port = 19306
 
 #. Edit :file:`fabfile.py` to set the module level values appropriately.
    In particular,
@@ -108,6 +86,16 @@ newly created Webfaction application directory:
 
    That launches a sequence of Fabric tasks to:
 
+   * Create a staging application,
+     initially just a Pyramid 1.4/Python 2.7 application named to reflect the
+     release that is being prepared;
+     e.g. :kbd:`randopony2013r1`.
+     Make note of the port number that is assigned to the application.
+
+    *Create a website with the same name as the application and host it at
+     :kbd:`randopony.bcrandonneur.webfactional.com` with the application mounted
+     at :kbd:`/`
+
    * Upload the code via :program:`rsync`
      (:kbd:`rsync_code` task)
 
@@ -136,6 +124,20 @@ newly created Webfaction application directory:
      and initialize it with link and email address records that the app
      requires
      (:kbd:`init_staging_db` task)
+
+#. Edit :file:`staging.ini` and :file:`production.ini` to set the port number
+   in the :kbd:`server:main` section to the port that Webfaction provided for
+   the application;
+   e.g.
+
+   .. code-block:: ini
+
+      [server:main]
+      use = egg:waitress#main
+      host = 127.0.0.1
+      port = 19306
+
+   then upload those changes with the :kbd:`rsync_code` task.
 
 #. Start the app with:
 

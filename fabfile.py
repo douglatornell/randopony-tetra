@@ -21,17 +21,19 @@ env.user = 'bcrandonneur'
 env.hosts = ['bcrandonneur.webfactional.com']
 project_name = 'randopony-tetra'
 app_name = 'randopony'
-staging_release = '2013r2'
+staging_release = '2013r3'
 staging_dir = (
     '/home/{0}/webapps/{1}{2}'.format(env.user, app_name, staging_release))
-production_release = '2013r1'
-production_dir = (
-    '/home/{0}/webapps/{1}{2}'.format(env.user, app_name, production_release))
+env.production_release = '2013r2'
+env.production_dir = (
+    '/home/{0}/webapps/{1}{2}'
+    .format(env.user, app_name, env.production_release))
 release_dirs = {
     'staging': staging_dir,
-    'production': production_dir,
+    'production': env.production_dir,
 }
-production_domain = 'randopony.randonneurs.bc.ca'
+staging_domain = '.'.join((app_name, env.hosts[0]))
+production_domain = '.'.join((app_name, 'randonneurs.bc.ca'))
 
 
 @task(default=True)
@@ -48,14 +50,14 @@ def deploy_staging():
 def promote_staging_to_production():
     """Promote staging deployment to production
     """
-    if production_release is None:
+    if env.production_release is None:
         confirmation = confirm(
             'Create a new production deployment from {}'
             .format(staging_release))
     else:
         confirmation = confirm(
             'Promote {0} deployment to production with data from {1}'
-            .format(staging_release, production_release))
+            .format(staging_release, env.production_release))
     if not confirmation:
         return
     stop_app(release='staging')
@@ -77,19 +79,19 @@ def promote_staging_to_production():
             run('rm -f {}'.format(delete_file))
         run('ln -sf {}/production.ini'.format(project_name))
         sed('bin/start', 'staging.ini', 'production.ini')
-        if production_release is None:
+        if env.production_release is None:
             run('bin/initialize_RandoPony_db production.ini')
         else:
-            stop_app(app_dir=production_dir)
+            stop_app(release='production')
             stop_production_supervisor()
             site = [
                 site for site in sites
-                if site['name'] == app_name + production_release][0]
+                if site['name'] == app_name + env.production_release][0]
             server.update_website(
                 session_id, site['name'], site['ip'], site['https'],
                 [], *site['website_apps'])
             run('cp {0}/RandoPony-production.sqlite {0}/celery.sqlite {1}'
-                .format(production_dir, staging_dir))
+                .format(env.production_dir, staging_dir))
     site = [
         site for site in sites
         if site['name'] == app_name + staging_release][0]
@@ -97,8 +99,8 @@ def promote_staging_to_production():
         session_id, site['name'], site['ip'], site['https'],
         [production_domain], *site['website_apps'])
     # Staging is now production
-    production_release = staging_release
-    production_dir = staging_dir
+    env.production_release = staging_release
+    env.production_dir = staging_dir
     start_app(release='production')
     start_production_supervisor()
 
@@ -107,9 +109,25 @@ def promote_staging_to_production():
 def init_staging():
     """Initial staging deployment to Webfaction
     """
+    init_staging_app()
     rsync_code()
     install_app()
     init_staging_db()
+
+
+@task
+def init_staging_app():
+    """Create & initialize a new staging app on Webfaction
+    """
+    password = getpass('Webfaction password for API calls: ')
+    server = xmlrpclib.ServerProxy('https://api.webfaction.com/')
+    session_id, account = server.login(env.user, password)
+    server.create_app(session_id, app_name + staging_release, 'pyramid_14_27')
+    machines = server.list_ips(session_id)
+    ip = machines[0]['ip']
+    server.create_website(
+        session_id, app_name + staging_release, ip, False, [staging_domain],
+        (app_name + staging_release, '/'))
 
 
 @task
@@ -254,7 +272,7 @@ def tail_staging_celery_log():
 def restart_production_supervisor():
     """Restart production supervisord daemon
     """
-    with cd(production_dir):
+    with cd(env.production_dir):
         stop_production_supervisor()
         while exists('supervisord.pid'):
             sleep(1)
@@ -266,7 +284,7 @@ def restart_production_supervisor():
 def start_production_supervisor():
     """Start production supervisord daemon
     """
-    with cd(production_dir):
+    with cd(env.production_dir):
         run('bin/supervisord -c production.ini')
 
 
@@ -274,7 +292,7 @@ def start_production_supervisor():
 def stop_production_supervisor():
     """Stop production supervisord daemon
     """
-    with cd(production_dir):
+    with cd(env.production_dir):
         while exists('supervisord.pid'):
             run('kill $(cat supervisord.pid)')
             sleep(1)
@@ -284,7 +302,7 @@ def stop_production_supervisor():
 def tail_production_supervisor_log():
     """Tail the production supervisord log file
     """
-    with cd(production_dir):
+    with cd(env.production_dir):
         run('tail $HOME/logs/user/randopony_supervisord.log')
 
 
@@ -292,5 +310,5 @@ def tail_production_supervisor_log():
 def tail_production_celery_log():
     """Tail the production celery log file
     """
-    with cd(production_dir):
+    with cd(env.production_dir):
         run('tail $HOME/logs/user/randopony_celery.log')
