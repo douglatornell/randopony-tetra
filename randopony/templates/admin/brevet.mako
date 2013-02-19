@@ -4,7 +4,15 @@
 <%block name="title">RandoPony::Admin::${brevet}</%block>
 
 <h4>Region, Distance, and Date</h4>
-<p>${brevet}</p>
+<p>
+  <a href="${request.route_url('brevet',
+                               region=brevet.region,
+                               distance=brevet.distance,
+                               date=brevet.date_time.strftime('%d%b%Y'))}"
+     target="_blank">
+    ${brevet}
+  </a>
+</p>
 
 <h4>Start Time</h4>
 <p>${"{:%H:%M}".format(brevet.date_time)}</p>
