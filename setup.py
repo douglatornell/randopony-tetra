@@ -11,6 +11,7 @@ requires = [
     'colander',
     'deform>=0.9.6',
     'gdata',
+    'mock',
     'pyramid>=1.4',
     'pyramid_debugtoolbar',
     'pyramid_deform',
