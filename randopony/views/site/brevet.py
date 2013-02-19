@@ -6,6 +6,7 @@ from datetime import (
     timedelta,
     )
 import logging
+from operator import attrgetter
 from celery.task import task
 from deform import Button
 from gdata.spreadsheet.service import SpreadsheetsService
@@ -269,7 +270,7 @@ class BrevetEntry(FormView):
             brevet.riders.append(rider)
             DBSession.add(rider)
             update_google_spreadsheet.delay(
-                [rider for rider in brevet.riders],
+                sorted(brevet.riders, key=attrgetter('lowercase_last_name')),
                 brevet.google_doc_id.split(':')[1],
                 self.request.registry.settings['google_drive.username'],
                 self.request.registry.settings['google_drive.password'],
@@ -312,6 +313,14 @@ class BrevetEntry(FormView):
             )
         brevet_page_url = self._redirect_url(
             brevet.region, brevet.distance, brevet.date_time.strftime('%d%b%Y'))
+        entry_form_url = (DBSession.query(Link.url)
+            .filter_by(key='entry_form')
+            .one()[0]
+            )
+        membership_link = (DBSession.query(Link.url)
+            .filter_by(key='membership_link')
+            .one()[0]
+            )
         message = Message(
             subject='Pre-registration Confirmation for {0}'
                     .format(brevet),
@@ -325,7 +334,10 @@ class BrevetEntry(FormView):
                 'email/brevet_rider.mako',
                 {
                     'brevet': brevet,
+                    'rider': rider,
                     'brevet_page_url': brevet_page_url,
+                    'entry_form_url': entry_form_url,
+                    'membership_link': membership_link,
                 }))
         return message
 
@@ -335,15 +347,19 @@ class BrevetEntry(FormView):
             .filter_by(key='from_randopony')
             .first().email
             )
+        date = brevet.date_time.strftime('%d%b%Y')
         brevet_page_url = self._redirect_url(
-            brevet.region, brevet.distance, brevet.date_time.strftime('%d%b%Y'))
+            brevet.region, brevet.distance, date)
         rider_list_url = (
             'https://spreadsheets.google.com/ccc?key={0}'
             .format(brevet.google_doc_id.split(':')[1]))
         rider_emails = self.request.route_url(
             'brevet.rider_emails',
-            short_name=brevet.short_name,
-            uuid=brevet.uuid)
+            region=brevet.region,
+            distance=brevet.distance,
+            date=date,
+            uuid=brevet.uuid,
+            )
         admin_email = (
             DBSession.query(EmailAddress)
             .filter_by(key='admin_email')
@@ -406,12 +422,11 @@ def _make_spreadsheet_row_dict(rider_number, rider):
         current_member = 'Unknown'
     else:
         current_member = 'Yes' if rider.member_status else 'No'
-    current_member
     row_data = {
         'ridernumber': str(rider_number),
         'lastname': rider.last_name,
         'firstname': rider.first_name,
-        'currentmemner': current_member,
+        'clubmember': current_member,
         'biketype': rider.bike_type,
     }
     return row_data

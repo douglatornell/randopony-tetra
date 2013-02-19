@@ -153,8 +153,7 @@ ${brevet}
         ${membership_link}
       </a>
     </p>
-    %endif
-    %if not member_status:
+    %elif not member_status:
     <p>
       Your BC Randonneurs club membership has expired.
       Please renew it at
