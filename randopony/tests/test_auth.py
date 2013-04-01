@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class TestAuthConfig(unittest.TestCase):

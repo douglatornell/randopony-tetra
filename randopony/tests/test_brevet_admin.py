@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class TestBrevetDetails(unittest.TestCase):
@@ -42,7 +42,7 @@ class TestBrevetDetails(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         DBSession.add(brevet)
         request = testing.DummyRequest()
         request.matchdict['item'] = str(brevet)
@@ -125,7 +125,7 @@ class TestBrevetCreate(unittest.TestCase):
             'start_locn': 'Bean Around the World Coffee, Lonsdale Quay, '
                           '123 Carrie Cates Ct, North Vancouver',
             'organizer_email': 'tracy@example.com',
-            })
+        })
         brevet = DBSession.query(Brevet).first()
         self.assertEqual(str(brevet), 'LM200 11Nov2012')
         self.assertEqual(
@@ -187,7 +187,7 @@ class TestBrevetEdit(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         DBSession.add(brevet)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'LM200 11Nov2012'
@@ -222,7 +222,7 @@ class TestBrevetEdit(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         DBSession.add(brevet)
         self.config.add_route('admin.brevets.view', '/admin/brevets/{item}')
         request = testing.DummyRequest()
@@ -252,26 +252,26 @@ class TestBrevetEdit(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         DBSession.add(brevet)
         self.config.add_route('admin.brevets.view', '/admin/brevets/{item}')
         request = testing.DummyRequest()
         request.matchdict['item'] = 'LM200 11Nov2012'
         edit = self._make_one(request)
         url = edit.save_success({
-                'id': 1,
-                'region': 'LM',
-                'distance': 200,
-                'date_time': datetime(2012, 11, 11, 7, 0),
-                'route_name': '11th Hour',
-                'start_locn': 'Bean Around the World Coffee, Lonsdale Quay, '
-                              '123 Carrie Cates Ct, North Vancouver',
-                'start_map_url': 'https://maps.google.com/maps?q='
-                                 'Bean+Around+the+World+Coffee,+Lonsdale+Quay,'
-                                 '+123+Carrie+Cates+Ct,+North+Vancouver',
-                'organizer_email': 'tom@example.com',
-                'registration_end': datetime(2012, 11, 10, 12, 0),
-            })
+            'id': 1,
+            'region': 'LM',
+            'distance': 200,
+            'date_time': datetime(2012, 11, 11, 7, 0),
+            'route_name': '11th Hour',
+            'start_locn': 'Bean Around the World Coffee, Lonsdale Quay, '
+                          '123 Carrie Cates Ct, North Vancouver',
+            'start_map_url': 'https://maps.google.com/maps?q='
+                             'Bean+Around+the+World+Coffee,+Lonsdale+Quay,'
+                             '+123+Carrie+Cates+Ct,+North+Vancouver',
+            'organizer_email': 'tom@example.com',
+            'registration_end': datetime(2012, 11, 10, 12, 0),
+        })
         brevet = DBSession.query(Brevet).first()
         self.assertEqual(brevet.organizer_email, 'tom@example.com')
         self.assertEqual(

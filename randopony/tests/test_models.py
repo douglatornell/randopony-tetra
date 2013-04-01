@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class TestAdministrator(unittest.TestCase):
@@ -91,8 +91,11 @@ class TestBrevet(unittest.TestCase):
 
     def test_str(self):
         """Brevet model string rep is like 'LM200 11Nov2012'."""
-        brevet = self._make_one(region='LM', distance=200,
-            date_time=datetime(2012, 11, 11, 7, 0, 0), route_name='11th Hour',
+        brevet = self._make_one(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com')
@@ -101,8 +104,11 @@ class TestBrevet(unittest.TestCase):
     def test_repr(self):
         """Brevet model repr is like '<Brevet(LM200 11Nov2012)>'.
         """
-        brevet = self._make_one(region='LM', distance=200,
-            date_time=datetime(2012, 11, 11, 7, 0, 0), route_name='11th Hour',
+        brevet = self._make_one(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com')
@@ -120,7 +126,7 @@ class TestBrevet(unittest.TestCase):
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
             registration_end=datetime(2012, 11, 11, 7, 0, 0),
-            )
+        )
         self.assertEqual(
             brevet.registration_end, datetime(2012, 11, 11, 7, 0, 0))
 
@@ -134,7 +140,7 @@ class TestBrevet(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         self.assertEqual(
             brevet.registration_end, datetime(2012, 11, 10, 12, 0, 0))
 
@@ -148,7 +154,7 @@ class TestBrevet(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         self.assertEqual(
             brevet.start_map_url,
             'https://maps.google.com/maps'
@@ -166,7 +172,7 @@ class TestBrevet(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         DBSession.add(brevet)
         Brev = self._get_target_class()
         with patch.object(core, 'datetime') as mock_datetime:
@@ -186,7 +192,7 @@ class TestBrevet(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         DBSession.add(brevet)
         Brev = self._get_target_class()
         with patch.object(core, 'datetime') as mock_datetime:
@@ -206,7 +212,7 @@ class TestBrevet(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         DBSession.add(brevet)
         Brev = self._get_target_class()
         with patch.object(core, 'datetime') as mock_datetime:
@@ -244,7 +250,7 @@ class TestBrevetRider(unittest.TestCase):
             last_name='Dickson',
             distance='60',
             comment='',
-            )
+        )
         self.assertEqual(str(rider), 'Tom Dickson')
 
     def test_repr(self):
@@ -256,7 +262,7 @@ class TestBrevetRider(unittest.TestCase):
             last_name='Dickson',
             distance='60',
             comment='',
-            )
+        )
         self.assertEqual(repr(rider), '<Rider(Tom Dickson)>')
 
     def test_full_name_wo_comment(self):
@@ -268,7 +274,7 @@ class TestBrevetRider(unittest.TestCase):
             last_name='Dickson',
             distance='60',
             comment='',
-            )
+        )
         self.assertEqual(rider.full_name, 'Tom Dickson')
 
     def test_full_name_w_comment(self):
@@ -280,7 +286,7 @@ class TestBrevetRider(unittest.TestCase):
             last_name='Dickson',
             distance='60',
             comment='hoping for sun',
-            )
+        )
         self.assertEqual(rider.full_name, 'Tom "hoping for sun" Dickson')
 
 
@@ -318,7 +324,7 @@ class TestPopulaire(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         self.assertEqual(str(populaire), 'VicPop')
 
     def test_repr(self):
@@ -335,7 +341,7 @@ class TestPopulaire(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         self.assertEqual(repr(populaire), '<Populaire(VicPop)>')
 
     def test_entry_form_url(self):
@@ -352,7 +358,7 @@ class TestPopulaire(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         self.assertEqual(
             populaire.entry_form_url,
             'http://www.randonneurs.bc.ca/VicPop/VicPop11_registration.pdf')
@@ -364,7 +370,7 @@ class TestPopulaire(unittest.TestCase):
         entry_form_link = Link(
             key='entry_form',
             url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            )
+        )
         DBSession.add(entry_form_link)
         populaire = self._make_one(
             event_name='Victoria Populaire',
@@ -375,7 +381,7 @@ class TestPopulaire(unittest.TestCase):
                        '(Gabriola Road, near McKinnon Gym)',
             organizer_email='mjansson@example.com',
             registration_end=datetime(2011, 3, 24, 12, 0),
-            )
+        )
         self.assertEqual(
             populaire.entry_form_url,
             'http://www.randonneurs.bc.ca/organize/eventform.pdf')
@@ -410,7 +416,7 @@ class TestPopulaireRider(unittest.TestCase):
             last_name='Dickson',
             distance='60',
             comment='',
-            )
+        )
         self.assertEqual(str(rider), 'Tom Dickson')
 
     def test_repr(self):
@@ -422,7 +428,7 @@ class TestPopulaireRider(unittest.TestCase):
             last_name='Dickson',
             distance='60',
             comment='',
-            )
+        )
         self.assertEqual(repr(rider), '<Rider(Tom Dickson)>')
 
     def test_full_name_wo_comment(self):
@@ -434,7 +440,7 @@ class TestPopulaireRider(unittest.TestCase):
             last_name='Dickson',
             distance='60',
             comment='',
-            )
+        )
         self.assertEqual(rider.full_name, 'Tom Dickson')
 
     def test_full_name_w_comment(self):
@@ -446,5 +452,5 @@ class TestPopulaireRider(unittest.TestCase):
             last_name='Dickson',
             distance='60',
             comment='hoping for sun',
-            )
+        )
         self.assertEqual(rider.full_name, 'Tom "hoping for sun" Dickson')
