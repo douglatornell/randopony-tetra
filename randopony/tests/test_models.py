@@ -248,7 +248,6 @@ class TestBrevetRider(unittest.TestCase):
             email='tom@example.com',
             first_name='Tom',
             last_name='Dickson',
-            distance='60',
             comment='',
         )
         self.assertEqual(str(rider), 'Tom Dickson')
@@ -260,7 +259,6 @@ class TestBrevetRider(unittest.TestCase):
             email='tom@example.com',
             first_name='Tom',
             last_name='Dickson',
-            distance='60',
             comment='',
         )
         self.assertEqual(repr(rider), '<Rider(Tom Dickson)>')
@@ -272,7 +270,6 @@ class TestBrevetRider(unittest.TestCase):
             email='tom@example.com',
             first_name='Tom',
             last_name='Dickson',
-            distance='60',
             comment='',
         )
         self.assertEqual(rider.full_name, 'Tom Dickson')
@@ -284,7 +281,6 @@ class TestBrevetRider(unittest.TestCase):
             email='tom@example.com',
             first_name='Tom',
             last_name='Dickson',
-            distance='60',
             comment='hoping for sun',
         )
         self.assertEqual(rider.full_name, 'Tom "hoping for sun" Dickson')
