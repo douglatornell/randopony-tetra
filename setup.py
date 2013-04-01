@@ -24,7 +24,7 @@ requires = [
     'transaction',
     'waitress',
     'zope.sqlalchemy',
-    ]
+]
 
 setup(name='RandoPony',
       version=__version__.number + __version__.release,
@@ -38,7 +38,7 @@ setup(name='RandoPony',
           "Framework :: Pyramid",
           "Topic :: Internet :: WWW/HTTP",
           "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
-          ],
+      ],
       author='Doug Latornell',
       author_email='djl@douglatornell.ca',
       url='http://randopony.randonneurs.bc.ca',

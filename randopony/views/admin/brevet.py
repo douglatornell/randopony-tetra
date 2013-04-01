@@ -10,7 +10,7 @@ from . import core as admin_core
 from ...models import (
     Brevet,
     BrevetSchema,
-    )
+)
 from ...models.meta import DBSession
 from ... import __version__ as version
 
@@ -19,7 +19,7 @@ from ... import __version__ as version
     route_name='admin.brevets.view',
     renderer='admin/brevet.mako',
     permission='admin',
-    )
+)
 def brevet_details(request):
     code, date = request.matchdict['item'].split()
     brevet = admin_core.get_brevet(code, date)
@@ -27,14 +27,14 @@ def brevet_details(request):
         'version': version.number + version.release,
         'logout_btn': True,
         'brevet': brevet,
-        }
+    }
 
 
 @view_config(
     route_name='admin.brevets.create',
     renderer='admin/brevet_edit.mako',
     permission='admin',
-    )
+)
 class BrevetCreate(FormView):
     schema = BrevetSchema()
     for field in 'id registration_end start_map_url'.split():
@@ -42,7 +42,7 @@ class BrevetCreate(FormView):
     buttons = (
         Button(name='add', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),
-        )
+    )
 
     def list_url(self):
         return self.request.route_url('admin.list', list='brevets')
@@ -53,7 +53,7 @@ class BrevetCreate(FormView):
             'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.list_url()
-            })
+        })
         return tmpl_vars
 
     def add_success(self, appstruct):
@@ -64,7 +64,7 @@ class BrevetCreate(FormView):
             route_name=appstruct['route_name'],
             start_locn=appstruct['start_locn'],
             organizer_email=appstruct['organizer_email'],
-            )
+        )
         DBSession.add(brevet)
         return HTTPFound(
             self.request.route_url('admin.brevets.view', item=brevet))
@@ -75,7 +75,7 @@ class BrevetCreate(FormView):
             'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.list_url()
-            })
+        })
         return tmpl_vars
 
 
@@ -83,13 +83,13 @@ class BrevetCreate(FormView):
     route_name='admin.brevets.edit',
     renderer='admin/brevet_edit.mako',
     permission='admin',
-    )
+)
 class BrevetEdit(FormView):
     schema = BrevetSchema()
     buttons = (
         Button(name='save', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),
-        )
+    )
 
     def view_url(self):
         return self.request.route_url(
@@ -116,13 +116,15 @@ class BrevetEdit(FormView):
             'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.view_url()
-            })
+        })
         return tmpl_vars
 
     def save_success(self, appstruct):
-        brevet = (DBSession.query(Brevet)
+        brevet = (
+            DBSession.query(Brevet)
             .filter_by(id=appstruct['id'])
-            .one())
+            .one()
+        )
         brevet.region = appstruct['region']
         brevet.distance = appstruct['distance']
         brevet.date_time = appstruct['date_time']
@@ -140,14 +142,14 @@ class BrevetEdit(FormView):
             'version': version.number + version.release,
             'logout_btn': True,
             'cancel_url': self.view_url()
-            })
+        })
         return tmpl_vars
 
 
 @view_config(
     route_name='admin.brevets.create_rider_list',
     permission='admin',
-    )
+)
 def create_rider_list(request):
     code, date = request.matchdict['item'].split()
     brevet = admin_core.get_brevet(code, date)
@@ -172,7 +174,7 @@ def _create_rider_list(request, brevet):
 @view_config(
     route_name='admin.brevets.email_to_organizer',
     permission='admin',
-    )
+)
 def email_to_organizer(request):
     code, date = request.matchdict['item'].split()
     brevet = admin_core.get_brevet(code, date)
@@ -197,7 +199,7 @@ def _email_to_organizer(request, brevet, date):
 @view_config(
     route_name='admin.brevets.email_to_webmaster',
     permission='admin',
-    )
+)
 def email_to_webmaster(request):
     code, date = request.matchdict['item'].split()
     brevet = admin_core.get_brevet(code, date)
@@ -218,7 +220,7 @@ def _email_to_webmaster(request, brevet, date):
 @view_config(
     route_name='admin.brevets.setup_123',
     permission='admin',
-    )
+)
 def setup_123(request):
     code, date = request.matchdict['item'].split()
     brevet = admin_core.get_brevet(code, date)

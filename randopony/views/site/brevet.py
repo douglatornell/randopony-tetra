@@ -4,7 +4,7 @@
 from datetime import (
     datetime,
     timedelta,
-    )
+)
 import logging
 from operator import attrgetter
 from celery.task import task
@@ -14,7 +14,7 @@ from pyramid_deform import FormView
 from pyramid.httpexceptions import (
     HTTPFound,
     HTTPNotFound,
-    )
+)
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from pyramid.renderers import render
@@ -31,7 +31,7 @@ from ...models import (
     EmailAddress,
     Link,
     Populaire,
-    )
+)
 from ...models.meta import DBSession
 
 
@@ -40,11 +40,10 @@ log = logging.getLogger(__name__)
 
 def get_brevet(region, distance, date):
     brevet = (DBSession.query(Brevet)
-        .filter_by(region=region, distance=distance)
-        .filter(Brevet.date_time >= date)
-        .filter(Brevet.date_time < date + timedelta(days=1))
-        .first()
-        )
+              .filter_by(region=region, distance=distance)
+              .filter(Brevet.date_time >= date)
+              .filter(Brevet.date_time < date + timedelta(days=1))
+              .first())
     return brevet
 
 
@@ -59,7 +58,7 @@ class BrevetViews(SiteViews):
                 request.matchdict['region'],
                 int(request.matchdict['distance']),
                 datetime.strptime(request.matchdict['date'], '%d%b%Y'),
-                )
+            )
         except KeyError:
             self.brevet = None
         self.tmpl_vars.update({'active_tab': 'brevets'})
@@ -72,9 +71,8 @@ class BrevetViews(SiteViews):
             region_brevets[region] = (
                 self.tmpl_vars['brevets'].filter_by(region=region))
         admin_email = (DBSession.query(EmailAddress)
-            .filter_by(key='admin_email')
-            .one()
-            )
+                       .filter_by(key='admin_email')
+                       .one())
         self.tmpl_vars.update({
             'regions': Brevet.REGIONS,
             'region_brevets': region_brevets,
@@ -87,14 +85,13 @@ class BrevetViews(SiteViews):
     def brevet_list(self):
         region = self.request.matchdict['region']
         region_brevets = (self.tmpl_vars['brevets']
-            .filter_by(region=region)
-            )
+                          .filter_by(region=region))
         images = {
             'LM': {
                 'file': 'LowerMainlandQuartet.jpg',
                 'alt': 'Harrison Hotsprings Road',
                 'credit': 'Nobo Yonemitsu',
-                },
+            },
             'SI': {
                 'file': 'SouthIntLivestock.jpg',
                 'alt': 'Southern Interior Peloton',
@@ -124,10 +121,10 @@ class BrevetViews(SiteViews):
         if self._in_past():
             body = self._moved_on_page()
             return Response(body, status='200 OK')
-        entry_form_url = (DBSession.query(Link.url)
+        entry_form_url = (
+            DBSession.query(Link.url)
             .filter_by(key='entry_form')
-            .one()[0]
-            )
+            .one()[0])
         self.tmpl_vars.update({
             'brevet': self.brevet,
             'REGIONS': Brevet.REGIONS,
@@ -187,8 +184,7 @@ class BrevetViews(SiteViews):
         results_link = (
             DBSession.query(Link.url)
             .filter_by(key='results_link')
-            .one()[0]
-            )
+            .one()[0])
         results_link = results_link.format(
             year=str(self.brevet.date_time.year)[-2:])
         body = render(
@@ -210,7 +206,7 @@ class BrevetEntry(FormView):
     buttons = (
         Button(name='register', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),
-        )
+    )
 
     def _redirect_url(self, region, distance, date):
         return self.request.route_url(
@@ -229,7 +225,7 @@ class BrevetEntry(FormView):
             'populaires': Populaire.get_current(),
             'brevet': brevet,
             'cancel_url': self._redirect_url(region, distance, date),
-            })
+        })
         return tmpl_vars
 
     def register_success(self, appstruct):
@@ -239,13 +235,14 @@ class BrevetEntry(FormView):
         brevet = get_brevet(
             region, distance, datetime.strptime(date, '%d%b%Y'))
         # Check for rider already registered
-        rider = (DBSession.query(BrevetRider)
+        rider = (
+            DBSession.query(BrevetRider)
             .filter_by(
                 email=appstruct['email'],
                 first_name=appstruct['first_name'],
                 last_name=appstruct['last_name'],
                 brevet=brevet.id,
-                )
+            )
             .first())
         if rider is not None:
             # Rider with same name and email is already registered
@@ -266,7 +263,7 @@ class BrevetEntry(FormView):
                 comment=appstruct['comment'],
                 member_status=member_status,
                 bike_type=appstruct['bike_type'],
-                )
+            )
             brevet.riders.append(rider)
             DBSession.add(rider)
             update_google_spreadsheet.delay(
@@ -274,15 +271,15 @@ class BrevetEntry(FormView):
                 brevet.google_doc_id.split(':')[1],
                 self.request.registry.settings['google_drive.username'],
                 self.request.registry.settings['google_drive.password'],
-                )
+            )
             message = self._rider_message(brevet, rider)
             mailer.send(message)
             message = self._organizer_message(brevet, rider)
             mailer.send(message)
-            membership_link = (DBSession.query(Link.url)
+            membership_link = (
+                DBSession.query(Link.url)
                 .filter_by(key='membership_link')
-                .one()[0]
-                )
+                .one()[0])
             self.request.session.flash('success')
             self.request.session.flash(rider.email)
             self.request.session.flash(rider.member_status)
@@ -302,7 +299,7 @@ class BrevetEntry(FormView):
             'populaires': Populaire.get_current(),
             'brevet': brevet,
             'cancel_url': self._redirect_url(region, distance, date)
-            })
+        })
         return tmpl_vars
 
     def _rider_message(self, brevet, rider):
@@ -310,17 +307,19 @@ class BrevetEntry(FormView):
             DBSession.query(EmailAddress)
             .filter_by(key='from_randopony')
             .first().email
-            )
+        )
         brevet_page_url = self._redirect_url(
             brevet.region, brevet.distance, brevet.date_time.strftime('%d%b%Y'))
-        entry_form_url = (DBSession.query(Link.url)
+        entry_form_url = (
+            DBSession.query(Link.url)
             .filter_by(key='entry_form')
             .one()[0]
-            )
-        membership_link = (DBSession.query(Link.url)
+        )
+        membership_link = (
+            DBSession.query(Link.url)
             .filter_by(key='membership_link')
             .one()[0]
-            )
+        )
         message = Message(
             subject='Pre-registration Confirmation for {0}'
                     .format(brevet),
@@ -346,7 +345,7 @@ class BrevetEntry(FormView):
             DBSession.query(EmailAddress)
             .filter_by(key='from_randopony')
             .first().email
-            )
+        )
         date = brevet.date_time.strftime('%d%b%Y')
         brevet_page_url = self._redirect_url(
             brevet.region, brevet.distance, date)
@@ -359,12 +358,12 @@ class BrevetEntry(FormView):
             distance=brevet.distance,
             date=date,
             uuid=brevet.uuid,
-            )
+        )
         admin_email = (
             DBSession.query(EmailAddress)
             .filter_by(key='admin_email')
             .first().email
-            )
+        )
         message = Message(
             subject='{0} has Pre-registered for the {1}'
                     .format(rider, brevet),
@@ -385,10 +384,11 @@ class BrevetEntry(FormView):
 
 
 def _get_member_status_by_name(first_name, last_name):
-    is_club_member_url = (DBSession.query(Link.url)
+    is_club_member_url = (
+        DBSession.query(Link.url)
         .filter_by(key='is_club_member_api').
         one()[0]
-        )
+    )
     response = requests.get(
         is_club_member_url.format(last_name=last_name, first_name=first_name),
         verify=False)

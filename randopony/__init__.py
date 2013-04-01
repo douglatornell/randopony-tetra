@@ -4,7 +4,7 @@ from pyramid.config import Configurator
 from pyramid.security import (
     ALL_PERMISSIONS,
     Allow,
-    )
+)
 from pyramid.settings import asbool
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm.exc import NoResultFound
@@ -15,12 +15,12 @@ from .credentials import (
     google_drive_password,
     email_host_username,
     email_host_password,
-    )
+)
 from .models import Administrator
 from .models.meta import (
     DBSession,
     Base,
-    )
+)
 
 
 class Root(object):
@@ -39,8 +39,8 @@ def groupfinder(userid, request):
 
     If userid is a known Persona email address, the user is an admin.
     """
-    query = DBSession.query(Administrator).\
-                filter(Administrator.persona_email == userid)
+    query = (DBSession.query(Administrator)
+             .filter(Administrator.persona_email == userid))
     try:
         query.one()
         return ['g:admin']
@@ -55,7 +55,7 @@ def main(global_config, **settings):  # pragma: no cover
         'persona.secret': persona_secret,
         'google_drive.username': google_drive_username,
         'google_drive.password': google_drive_password,
-        })
+    })
     if asbool(settings.get('production_deployment', 'false')):
         settings.update({'mail.username': email_host_username})
         settings.update({'mail.password': email_host_password})

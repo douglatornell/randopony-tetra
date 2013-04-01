@@ -8,7 +8,7 @@ from pyramid.view import view_config
 from ...models import (
     Administrator,
     AdministratorSchema,
-    )
+)
 from ...models.meta import DBSession
 from ... import __version__ as version
 
@@ -17,14 +17,14 @@ from ... import __version__ as version
     route_name='admin.wranglers.create',
     renderer='admin/wrangler.mako',
     permission='admin',
-    )
+)
 class WranglerCreate(FormView):
     schema = AdministratorSchema()
     schema.__delitem__('id')
     buttons = (
         Button(name='add', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),
-        )
+    )
 
     def list_url(self):
         return self.request.route_url('admin.list', list='wranglers')
@@ -35,7 +35,7 @@ class WranglerCreate(FormView):
             'version': version.number + version.release,
             'logout_btn': True,
             'list_url': self.list_url()
-            })
+        })
         return tmpl_vars
 
     def add_success(self, appstruct):
@@ -49,7 +49,7 @@ class WranglerCreate(FormView):
             'version': version.number + version.release,
             'logout_btn': True,
             'list_url': self.list_url()
-            })
+        })
         return tmpl_vars
 
 
@@ -57,25 +57,27 @@ class WranglerCreate(FormView):
     route_name='admin.wranglers.edit',
     renderer='admin/wrangler.mako',
     permission='admin',
-    )
+)
 class WranglerEdit(FormView):
     schema = AdministratorSchema()
     buttons = (
         Button(name='save', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),
-        )
+    )
 
     def list_url(self):
         return self.request.route_url('admin.list', list='wranglers')
 
     def appstruct(self):
-        admin = (DBSession.query(Administrator)
+        admin = (
+            DBSession.query(Administrator)
             .filter_by(persona_email=self.request.matchdict['item'])
-            .one())
+            .one()
+        )
         return {
             'id': admin.id,
             'persona_email': admin.persona_email,
-            }
+        }
 
     def show(self, form):
         tmpl_vars = super(WranglerEdit, self).show(form)
@@ -83,13 +85,15 @@ class WranglerEdit(FormView):
             'version': version.number + version.release,
             'logout_btn': True,
             'list_url': self.list_url()
-            })
+        })
         return tmpl_vars
 
     def save_success(self, appstruct):
-        admin = (DBSession.query(Administrator)
+        admin = (
+            DBSession.query(Administrator)
             .filter_by(id=appstruct['id'])
-            .one())
+            .one()
+        )
         admin.persona_email = appstruct['persona_email']
         return HTTPFound(self.list_url())
 
@@ -99,5 +103,5 @@ class WranglerEdit(FormView):
             'version': version.number + version.release,
             'logout_btn': True,
             'list_url': self.list_url()
-            })
+        })
         return tmpl_vars

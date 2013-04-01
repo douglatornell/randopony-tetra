@@ -4,12 +4,12 @@
 from pyramid.view import (
     notfound_view_config,
     view_config,
-    )
+)
 from ...models import (
     Brevet,
     EmailAddress,
     Populaire,
-    )
+)
 from ...models.meta import DBSession
 
 
@@ -32,9 +32,11 @@ class SiteViews(object):
 
     @view_config(route_name='organizer-info', renderer='organizer-info.mako')
     def organizer_info(self):
-        admin_email = (DBSession.query(EmailAddress)
+        admin_email = (
+            DBSession.query(EmailAddress)
             .filter_by(key='admin_email')
-            .one())
+            .one()
+        )
         self.tmpl_vars.update({
             'active_tab': 'organizer-info',
             'admin_email': admin_email.email,

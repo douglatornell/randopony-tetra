@@ -4,17 +4,17 @@
 from datetime import (
     datetime,
     timedelta,
-    )
+)
 from sqlalchemy import (
     Column,
     DateTime,
     Integer,
     Text,
-    )
+)
 from .meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class EmailAddress(Base):
@@ -82,7 +82,6 @@ class EventMixin(object):
         today = today.replace(hour=0, minute=0, second=0, microsecond=0)
         days_ago = today - timedelta(days=recent_days)
         events = (DBSession.query(cls)
-            .filter(cls.date_time >= days_ago)
-            .order_by(cls.date_time)
-            )
+                  .filter(cls.date_time >= days_ago)
+                  .order_by(cls.date_time))
         return events
