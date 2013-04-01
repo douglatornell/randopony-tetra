@@ -174,6 +174,7 @@ def email_to_organizer(request, event, event_page_url, rider_emails_url):
                 'event_page_url': event_page_url,
                 'rider_list_url': rider_list_url,
                 'rider_emails_url': rider_emails_url,
+                'registration_end': event.registration_end,
                 'admin_email': admin_email,
             }))
     mailer = get_mailer(request)

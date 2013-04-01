@@ -60,7 +60,7 @@ class Brevet(EventMixin, Base):
     def __init__(
         self, region, distance, date_time, route_name, start_locn,
         organizer_email, info_question=None, alt_date_time=None,
-        registration_end=None
+        registration_end=None, google_doc_id=None,
     ):
         self.region = region
         self.distance = distance
@@ -79,6 +79,7 @@ class Brevet(EventMixin, Base):
         self.start_map_url = (
             'https://maps.google.com/maps?q={}'
             .format('+'.join(self.start_locn.split())))
+        self.google_doc_id = google_doc_id
 
     def __str__(self):
         return '{0.region}{0.distance} {0.date_time:%d%b%Y}'.format(self)
