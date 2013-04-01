@@ -1,3 +1,21 @@
+2013r3
+------
+
+- Add notes to email sent to organizer(s) when event is set up:
+
+  * Recommendation to publicize their event 7 to 10 days in advance on
+    the club email list in order to increase pre-registration volume
+
+  * Notification of the pre-registration closure date/time that has been
+    set for the event
+
+- Change Info for Organizers page to make date/time for pre-registartion
+  closure part of the data that organizers should supply,
+  but note that,
+  for brevets,
+  the default is noon on the day before the start.
+
+
 2013r2
 ------
 

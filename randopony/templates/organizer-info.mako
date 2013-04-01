@@ -32,6 +32,23 @@
       Email address(es) that you want to receive rider pre-registration
       notices at (you can specify more than 1 if you want)
     </li>
+    <li>
+      <p>Optionally,
+        the date and time when you would like pre-registration on the pony
+        to close.
+        For brevets it is set to noon on the day before the start,
+        but you can change that if you say so.
+        For populaires and other club events,
+        please choose a date and time.</p>
+
+      <p>The idea behind closing pre-registration on the pony is to give you
+        time to prepare paperwork for the event without having to worry about
+        someone pre-registering at the last minute.
+        Some organizers like that,
+        others are okay with pre-registrations coming in right up until start
+        time.
+        The choice is yours...</p>
+    </li>
   </ul>
 
   <p>
@@ -57,16 +74,6 @@
     email address,
     and club membership status.
     Easy, eh!?
-  </p>
-
-  <p>
-    Pre-registration for brevets auto-magically closes at noon on the
-    day before the event so you can do your paperwork without having to
-    worry about riders registering in the middle of the night,
-    mere hours before the start.
-    If you prefer a different time for pre-registration to close,
-    just include that in your email to
-    <a href="mailto:${admin_email}">${admin_email}</a>.
   </p>
 
   <p>
