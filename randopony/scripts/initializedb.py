@@ -7,17 +7,17 @@ import transaction
 from pyramid.paster import (
     get_appsettings,
     setup_logging,
-    )
+)
 from sqlalchemy import engine_from_config
 from ..models import (
     Administrator,
     EmailAddress,
     Link,
-    )
+)
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 def usage(argv):
@@ -41,32 +41,32 @@ def main(argv=sys.argv):
     admin_email = EmailAddress(
         key='admin_email',
         email='djl@douglatornell.ca',
-        )
+    )
     from_randopony = EmailAddress(
         key='from_randopony',
         email='randopony@randonneurs.bc.ca',
-        )
+    )
     club_webmaster = EmailAddress(
         key='club_webmaster',
         email='eric_fergusson@telus.net',
-        )
+    )
     entry_form_url = Link(
         key='entry_form',
         url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-        )
+    )
     results_url = Link(
         key='results_url',
         url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
-        )
+    )
     is_club_member_api = Link(
         key='is_club_member_api',
         url='https://database.randonneurs.bc.ca/api/member/'
             '{last_name}/{first_name}/status/',
-        )
+    )
     membership_link = Link(
         key='membership_link',
         url='http://www.2mevents.com/index.php/event/bc-randonneurs-membership',
-        )
+    )
     with transaction.manager:
         DBSession.add_all((
             admin,
@@ -77,4 +77,4 @@ def main(argv=sys.argv):
             results_url,
             is_club_member_api,
             membership_link,
-            ))
+        ))

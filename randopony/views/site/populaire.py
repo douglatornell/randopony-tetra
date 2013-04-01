@@ -4,7 +4,7 @@
 from datetime import (
     datetime,
     timedelta,
-    )
+)
 import logging
 from operator import attrgetter
 from celery.task import task
@@ -14,7 +14,7 @@ from pyramid_deform import FormView
 from pyramid.httpexceptions import (
     HTTPFound,
     HTTPNotFound,
-    )
+)
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from pyramid.renderers import render
@@ -30,7 +30,7 @@ from ...models import (
     Populaire,
     PopulaireEntrySchema,
     PopulaireRider,
-    )
+)
 from ...models.meta import DBSession
 
 
@@ -38,10 +38,11 @@ log = logging.getLogger(__name__)
 
 
 def get_populaire(short_name):
-    populaire = (DBSession.query(Populaire)
+    populaire = (
+        DBSession.query(Populaire)
         .filter_by(short_name=short_name)
         .first()
-        )
+    )
     return populaire
 
 
@@ -59,9 +60,11 @@ class PopulaireViews(SiteViews):
 
     @view_config(route_name='populaire.list', renderer='populaire-list.mako')
     def populaire_list(self):
-        admin_email = (DBSession.query(EmailAddress)
+        admin_email = (
+            DBSession.query(EmailAddress)
             .filter_by(key='admin_email')
-            .one())
+            .one()
+        )
         self.tmpl_vars.update({'admin_email': admin_email.email})
         return self.tmpl_vars
 
@@ -113,7 +116,7 @@ class PopulaireViews(SiteViews):
             DBSession.query(Link.url)
             .filter_by(key='results_link')
             .one()[0]
-            )
+        )
         results_link = results_link.format(
             year=str(self.populaire.date_time.year)[-2:])
         body = render(
@@ -132,7 +135,7 @@ class PopulaireViews(SiteViews):
 @view_config(
     route_name='populaire.entry',
     renderer='populaire-entry.mako',
-    )
+)
 class PopulaireEntry(FormView):
     def maybe_include_distance(node, kw):
         if not kw.get('include_distance'):
@@ -142,7 +145,7 @@ class PopulaireEntry(FormView):
     buttons = (
         Button(name='register', css_class='btn btn-primary'),
         Button(name='cancel', css_class='btn', type='reset'),
-        )
+    )
 
     def _redirect_url(self, short_name):
         return self.request.route_url('populaire', short_name=short_name)
@@ -153,11 +156,11 @@ class PopulaireEntry(FormView):
         distances = [
             (int(d.split()[0]), d.strip())
             for d in populaire.distance.split(',')
-            ]
+        ]
         data.update({
             'distances': distances,
             'include_distance': len(distances) > 1,
-            })
+        })
         return data
 
     def show(self, form):
@@ -170,21 +173,23 @@ class PopulaireEntry(FormView):
             'populaire': populaire,
             'cancel_url': self._redirect_url(
                 self.request.matchdict['short_name']),
-            })
+        })
         return tmpl_vars
 
     def register_success(self, appstruct):
         pop_short_name = self.request.matchdict['short_name']
         populaire = get_populaire(pop_short_name)
         # Check for rider already registered
-        rider = (DBSession.query(PopulaireRider)
+        rider = (
+            DBSession.query(PopulaireRider)
             .filter_by(
                 email=appstruct['email'],
                 first_name=appstruct['first_name'],
                 last_name=appstruct['last_name'],
                 populaire=populaire.id,
-                )
-            .first())
+            )
+            .first()
+        )
         if rider is not None:
             # Rider with same name and email is already registered
             self.request.session.flash('duplicate')
@@ -204,7 +209,7 @@ class PopulaireEntry(FormView):
                 last_name=appstruct['last_name'],
                 distance=distance,
                 comment=appstruct['comment'],
-                )
+            )
             populaire.riders.append(rider)
             DBSession.add(rider)
             update_google_spreadsheet.delay(
@@ -213,7 +218,7 @@ class PopulaireEntry(FormView):
                 populaire.google_doc_id.split(':')[1],
                 self.request.registry.settings['google_drive.username'],
                 self.request.registry.settings['google_drive.password'],
-                )
+            )
             message = self._rider_message(populaire, rider)
             mailer.send(message)
             message = self._organizer_message(populaire, rider)
@@ -232,7 +237,7 @@ class PopulaireEntry(FormView):
             'populaire': populaire,
             'cancel_url': self._redirect_url(
                 self.request.matchdict['short_name']),
-            })
+        })
         return tmpl_vars
 
     def _rider_message(self, populaire, rider):
@@ -240,7 +245,7 @@ class PopulaireEntry(FormView):
             DBSession.query(EmailAddress)
             .filter_by(key='from_randopony')
             .first().email
-            )
+        )
         pop_page_url = self._redirect_url(populaire.short_name)
         message = Message(
             subject='Pre-registration Confirmation for {0}'
@@ -264,7 +269,7 @@ class PopulaireEntry(FormView):
             DBSession.query(EmailAddress)
             .filter_by(key='from_randopony')
             .first().email
-            )
+        )
         pop_page_url = self._redirect_url(populaire.short_name)
         rider_list_url = (
             'https://spreadsheets.google.com/ccc?key={0}'
@@ -277,7 +282,7 @@ class PopulaireEntry(FormView):
             DBSession.query(EmailAddress)
             .filter_by(key='admin_email')
             .first().email
-            )
+        )
         message = Message(
             subject='{0} has Pre-registered for the {1}'
                     .format(rider, populaire),

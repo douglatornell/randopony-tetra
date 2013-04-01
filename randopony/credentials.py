@@ -23,6 +23,6 @@ try:
         google_drive_password,
         email_host_username,
         email_host_password,
-        )
+    )
 except ImportError:
     log.error('private_credentials.py module missing or incomplete')

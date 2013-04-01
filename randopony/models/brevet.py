@@ -11,7 +11,7 @@ from deform.widget import (
     RadioChoiceWidget,
     SelectWidget,
     TextInputWidget,
-    )
+)
 from pyramid_deform import CSRFSchema
 from sqlalchemy import (
     Boolean,
@@ -20,7 +20,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Text,
-    )
+)
 from sqlalchemy.orm import relationship
 from .core import EventMixin
 from .meta import Base
@@ -55,11 +55,13 @@ class Brevet(EventMixin, Base):
     riders = relationship(
         'BrevetRider',
         order_by='BrevetRider.lowercase_last_name',
-        )
+    )
 
-    def __init__(self, region, distance, date_time, route_name, start_locn,
+    def __init__(
+        self, region, distance, date_time, route_name, start_locn,
         organizer_email, info_question=None, alt_date_time=None,
-        registration_end=None):
+        registration_end=None
+    ):
         self.region = region
         self.distance = distance
         self.date_time = date_time
@@ -98,7 +100,7 @@ class BrevetSchema(CSRFSchema):
     id = colander.SchemaNode(
         colander.Integer(),
         widget=HiddenWidget(),
-        )
+    )
     region = colander.SchemaNode(
         colander.String(),
         widget=SelectWidget(
@@ -106,9 +108,9 @@ class BrevetSchema(CSRFSchema):
                     in sorted(Brevet.REGIONS.items(), key=itemgetter(0))],
             autofocus=True,
             placeholder='Please choose...',
-            ),
+        ),
         validator=colander.OneOf(Brevet.REGIONS.keys()),
-        )
+    )
     distance = colander.SchemaNode(
         colander.Integer(),
         widget=RadioChoiceWidget(
@@ -116,7 +118,7 @@ class BrevetSchema(CSRFSchema):
                     in sorted(Brevet.DISTANCES.items(), key=itemgetter(0))],
             css_class='radio inline'),
         validator=colander.OneOf(Brevet.DISTANCES.keys()),
-        )
+    )
     datetimeinputwidget_options = {
         'dateFormat': 'yy-mm-dd',
         'separator': ' ',
@@ -128,26 +130,26 @@ class BrevetSchema(CSRFSchema):
         colander.DateTime(default_tzinfo=None),
         title='Date and Start Time',
         widget=DateTimeInputWidget(options=datetimeinputwidget_options),
-        )
+    )
     route_name = colander.SchemaNode(
         colander.String()
-        )
+    )
     start_locn = colander.SchemaNode(
         colander.String(),
         title='Start Location',
         widget=TextInputWidget(
             css_class='input-xxlarge',
             placeholder='Venue, Address, City',
-            )
         )
+    )
     start_map_url = colander.SchemaNode(
         colander.String(),
         title='Map URL for Start',
         widget=TextInputWidget(
             template='locationinput',
             css_class='input-xxlarge',
-            )
         )
+    )
     organizer_email = colander.SchemaNode(
         colander.String(),
         title='Organizer Email(s)',
@@ -155,14 +157,14 @@ class BrevetSchema(CSRFSchema):
             template='emailinput',
             placeholder='tom@example.com, harry@example.com',
             css_class='input-xlarge',
-            ),
+        ),
         validator=colander.Email(),
-        )
+    )
     registration_end = colander.SchemaNode(
         colander.DateTime(default_tzinfo=None),
         title='Registration Closes',
         widget=DateTimeInputWidget(options=datetimeinputwidget_options),
-        )
+    )
 
 
 class BrevetRider(Base):
@@ -179,7 +181,7 @@ class BrevetRider(Base):
         ('triplet', 'Triplet'),
         ('velomobile', 'Velomobile'),
         ('other', 'Other... Seriously?!'),
-        )
+    )
 
     __tablename__ = 'brevet_riders'
 
@@ -229,15 +231,15 @@ class BrevetEntrySchema(CSRFSchema):
             template='emailinput',
             autofocus=True,
             placeholder='you@example.com',
-            ),
+        ),
         validator=colander.Email(),
-        )
+    )
     first_name = colander.SchemaNode(
         colander.String(),
-        )
+    )
     last_name = colander.SchemaNode(
         colander.String(),
-        )
+    )
     comment = colander.SchemaNode(
         colander.String(),
         widget=TextInputWidget(
@@ -248,11 +250,11 @@ class BrevetEntrySchema(CSRFSchema):
                 'Tom "fueled by coffee" Dickson. It is optional. '
                 'Please be sensible and respectful. This is the Internet. '
                 'What is written once can never be unwritten.'),
-            ),
+        ),
         missing=None,
-        )
+    )
     bike_type = colander.SchemaNode(
         colander.String(),
         default='single',
         widget=SelectWidget(values=BrevetRider.BIKE_TYPES),
-        )
+    )

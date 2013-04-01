@@ -8,23 +8,23 @@ from deform.widget import (
     HiddenWidget,
     RadioChoiceWidget,
     TextInputWidget,
-    )
+)
 from pyramid_deform import CSRFSchema
 from sqlalchemy import (
     Column,
     ForeignKey,
     Integer,
     Text,
-    )
+)
 from sqlalchemy.orm import relationship
 from .core import (
     EventMixin,
     Link,
-    )
+)
 from .meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class Populaire(EventMixin, Base):
@@ -41,11 +41,13 @@ class Populaire(EventMixin, Base):
     riders = relationship(
         'PopulaireRider',
         order_by='PopulaireRider.lowercase_last_name',
-        )
+    )
 
-    def __init__(self, event_name, short_name, distance, date_time,
+    def __init__(
+        self, event_name, short_name, distance, date_time,
         start_locn, organizer_email, registration_end, entry_form_url=None,
-        google_doc_id=None):
+        google_doc_id=None
+    ):
         self.event_name = event_name
         self.short_name = short_name
         self.distance = distance
@@ -82,22 +84,22 @@ class PopulaireSchema(CSRFSchema):
     id = colander.SchemaNode(
         colander.Integer(),
         widget=HiddenWidget(),
-        )
+    )
     event_name = colander.SchemaNode(
         colander.String(),
-        )
+    )
     short_name = colander.SchemaNode(
         colander.String(),
         widget=TextInputWidget(
             placeholder='e.g. VicPop',
-            )
         )
+    )
     distance = colander.SchemaNode(
         colander.String(),
         widget=TextInputWidget(
             placeholder='e.g. 50 km, 100 km',
-            )
         )
+    )
     datetimeinputwidget_options = {
         'dateFormat': 'yy-mm-dd',
         'separator': ' ',
@@ -109,23 +111,23 @@ class PopulaireSchema(CSRFSchema):
         colander.DateTime(default_tzinfo=None),
         title='Date and Start Time',
         widget=DateTimeInputWidget(options=datetimeinputwidget_options),
-        )
+    )
     start_locn = colander.SchemaNode(
         colander.String(),
         title='Start Location',
         widget=TextInputWidget(
             css_class='input-xxlarge',
             placeholder='Venue, Address, City',
-            ),
-        )
+        ),
+    )
     start_map_url = colander.SchemaNode(
         colander.String(),
         title='Map URL for Start',
         widget=TextInputWidget(
             template='locationinput',
             css_class='input-xxlarge',
-            ),
-        )
+        ),
+    )
     organizer_email = colander.SchemaNode(
         colander.String(),
         title='Organizer Email(s)',
@@ -133,23 +135,23 @@ class PopulaireSchema(CSRFSchema):
             template='emailinput',
             placeholder='tom@example.com, harry@example.com',
             css_class='input-xlarge',
-            ),
+        ),
         validator=colander.Email(),
-        )
+    )
     registration_end = colander.SchemaNode(
         colander.DateTime(default_tzinfo=None),
         title='Registration Closes',
         widget=DateTimeInputWidget(options=datetimeinputwidget_options),
-        )
+    )
     entry_form_url = colander.SchemaNode(
         colander.String(),
         title='Entry Form URL',
         widget=TextInputWidget(
             css_class='input-xxlarge',
             placeholder='http://randonneurs.bc.ca/...',
-            ),
+        ),
         missing=None,
-        )
+    )
 
 
 class PopulaireRider(Base):
@@ -198,15 +200,15 @@ class PopulaireEntrySchema(CSRFSchema):
             template='emailinput',
             autofocus=True,
             placeholder='you@example.com',
-            ),
+        ),
         validator=colander.Email(),
-        )
+    )
     first_name = colander.SchemaNode(
         colander.String(),
-        )
+    )
     last_name = colander.SchemaNode(
         colander.String(),
-        )
+    )
     comment = colander.SchemaNode(
         colander.String(),
         widget=TextInputWidget(
@@ -217,9 +219,9 @@ class PopulaireEntrySchema(CSRFSchema):
                 'Tom "fueled by coffee" Dickson. It is optional. '
                 'Please be sensible and respectful. This is the Internet. '
                 'What is written once can never be unwritten.'),
-            ),
+        ),
         missing=None,
-        )
+    )
 
     @colander.deferred
     def deferred_distance_widget(node, kw):
@@ -227,10 +229,10 @@ class PopulaireEntrySchema(CSRFSchema):
         return RadioChoiceWidget(
             values=distances,
             css_class='radio inline',
-            )
+        )
 
     distance = colander.SchemaNode(
         colander.Integer(),
         title='Distance (choose one)',
         widget=deferred_distance_widget,
-        )
+    )

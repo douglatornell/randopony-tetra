@@ -4,7 +4,7 @@
 from datetime import (
     datetime,
     timedelta,
-    )
+)
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.response import Response
@@ -12,7 +12,7 @@ from pyramid.view import (
     forbidden_view_config,
     view_config,
     view_defaults,
-    )
+)
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from sqlalchemy import desc
@@ -22,7 +22,7 @@ from ...models import (
     Brevet,
     EmailAddress,
     Populaire,
-    )
+)
 from ...models.meta import DBSession
 from ... import __version__ as version
 
@@ -86,15 +86,17 @@ class AdminViews(object):
             'version': version.number + version.release,
             'logout_btn': True,
             'items': (DBSession.query(params['model'])
-                .order_by(params['order_by'])),
+                      .order_by(params['order_by'])),
             'action': params['action'],
             'list': list_name,
             'list_title': params['list_title'],
         })
         return self.tmpl_vars
 
-    @view_config(route_name='admin.delete',
-        renderer='admin/confirm_delete.mako')
+    @view_config(
+        route_name='admin.delete',
+        renderer='admin/confirm_delete.mako',
+    )
     def delete(self):
         """Delete the specified list item, after confirmation.
         """
@@ -132,12 +134,12 @@ def get_brevet(code, date):
     distance = code[2:]
     date = datetime.strptime(date, '%d%b%Y')
     return (DBSession.query(Brevet)
-        .filter_by(region=region)
-        .filter_by(distance=distance)
-        .filter(Brevet.date_time >= date)
-        .filter(Brevet.date_time < date + timedelta(days=1))
-        .first()
-        )
+            .filter_by(region=region)
+            .filter_by(distance=distance)
+            .filter(Brevet.date_time >= date)
+            .filter(Brevet.date_time < date + timedelta(days=1))
+            .first()
+            )
 
 
 def email_to_organizer(request, event, event_page_url, rider_emails_url):
@@ -151,7 +153,7 @@ def email_to_organizer(request, event, event_page_url, rider_emails_url):
         DBSession.query(EmailAddress)
         .filter_by(key='from_randopony')
         .first().email
-        )
+    )
     rider_list_url = (
         'https://spreadsheets.google.com/ccc?key={0}'
         .format(event.google_doc_id.split(':')[1]))
@@ -159,7 +161,7 @@ def email_to_organizer(request, event, event_page_url, rider_emails_url):
         DBSession.query(EmailAddress)
         .filter_by(key='admin_email')
         .first().email
-        )
+    )
     message = Message(
         subject='RandoPony URLs for {}'.format(event),
         sender=from_randopony,
@@ -187,7 +189,7 @@ def email_to_webmaster(request, event, event_page_url):
         DBSession.query(EmailAddress)
         .filter_by(key='from_randopony')
         .first().email
-        )
+    )
     club_webmaster = (
         DBSession.query(EmailAddress)
         .filter_by(key='club_webmaster').first().email)
@@ -195,7 +197,7 @@ def email_to_webmaster(request, event, event_page_url):
         DBSession.query(EmailAddress)
         .filter_by(key='admin_email')
         .first().email
-        )
+    )
     message = Message(
         subject='RandoPony Pre-registration page for {}'.format(event),
         sender=from_randopony,

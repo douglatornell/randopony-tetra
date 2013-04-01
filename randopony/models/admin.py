@@ -5,13 +5,13 @@ import colander
 from deform.widget import (
     HiddenWidget,
     TextInputWidget,
-    )
+)
 from pyramid_deform import CSRFSchema
 from sqlalchemy import (
     Column,
     Integer,
     Text,
-    )
+)
 from .meta import Base
 
 
@@ -41,13 +41,13 @@ class AdministratorSchema(CSRFSchema):
     id = colander.SchemaNode(
         colander.Integer(),
         widget=HiddenWidget(),
-        )
+    )
     persona_email = colander.SchemaNode(
         colander.String(),
         widget=TextInputWidget(
             template='emailinput',
             autofocus=True,
             placeholder='tom@example.com',
-            ),
+        ),
         validator=colander.Email(),
-        )
+    )
