@@ -158,3 +158,173 @@ class TestCoreAdminViews(unittest.TestCase):
         admin.delete()
         with self.assertRaises(NoResultFound):
             Brevet.get_current().one()
+
+
+class TestEmailToOrganizer(unittest.TestCase):
+    """Unit tests for email_to_organizer function.
+    """
+    def _call_email_to_organizer(self, *args, **kwargs):
+        from ..views.admin.core import email_to_organizer
+        return email_to_organizer(*args, **kwargs)
+
+    def setUp(self):
+        from ..models import EmailAddress
+        self.config = testing.setUp(
+            settings={
+                'mako.directories': 'randopony:templates',
+            })
+        self.config.include('pyramid_mailer.testing')
+        self.config.add_route(
+            'admin.populaires.view', '/admin/brevet/{item}')
+        self.config.add_route(
+            'brevet', '/brevets/{region}/{distance}/{date}')
+        self.config.add_route(
+            'brevet.rider_emails',
+            '/brevets/{region}/{distance}/{date}/rider_emails/{uuid}')
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+        from_randopony = EmailAddress(
+            key='from_randopony',
+            email='randopony@randonneurs.bc.ca',
+        )
+        admin_email = EmailAddress(
+            key='admin_email',
+            email='djl@douglatornell.ca',
+        )
+        DBSession.add_all((from_randopony, admin_email))
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_email_to_organizer_sends_email(self):
+        """email_to_organizer sends message & sets expected flash message
+        """
+        from ..models import Brevet
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+        )
+        DBSession.add(brevet)
+        request = testing.DummyRequest()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        date = '03Mar2013'
+        event_page_url = request.route_url(
+            'brevet', region=brevet.region, distance=brevet.distance,
+            date=date)
+        rider_emails_url = request.route_url(
+            'brevet.rider_emails', region=brevet.region,
+            distance=brevet.distance, date=date, uuid=brevet.uuid)
+        mailer = get_mailer(request)
+        flash = self._call_email_to_organizer(
+            request, brevet, event_page_url, rider_emails_url)
+        self.assertEqual(len(mailer.outbox), 1)
+        self.assertEqual(
+            flash,
+            ['success', 'Email sent to VI200 03Mar2013 organizer(s)'])
+
+    def test_email_to_organizer_message(self):
+        """email_to_organizer message has expected content
+        """
+        from ..models import (
+            EmailAddress,
+            Brevet,
+        )
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+        )
+        DBSession.add(brevet)
+        request = testing.DummyRequest()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        date = '03Mar2013'
+        event_page_url = request.route_url(
+            'brevet', region=brevet.region, distance=brevet.distance,
+            date=date)
+        rider_emails_url = request.route_url(
+            'brevet.rider_emails', region=brevet.region,
+            distance=brevet.distance, date=date, uuid=brevet.uuid)
+        mailer = get_mailer(request)
+        self._call_email_to_organizer(
+            request, brevet, event_page_url, rider_emails_url)
+        msg = mailer.outbox[0]
+        self.assertEqual(msg.subject, 'RandoPony URLs for VI200 03Mar2013')
+        from_randopony = (
+            DBSession.query(EmailAddress)
+            .filter_by(key='from_randopony').first().email)
+        self.assertEqual(msg.sender, from_randopony)
+        self.assertEqual(msg.recipients, ['mcroy@example.com'])
+        self.assertIn(
+            'The URL is <http://example.com/brevets/VI/200/03Mar2013>.', msg.body)
+        self.assertIn(
+            'rider list URL is <https://spreadsheets.google.com/ccc?key='
+            '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc>.',
+            msg.body)
+        self.assertIn(
+            'email address list URL is <http://example.com/brevets/'
+            'VI/200/03Mar2013/rider_emails/'
+            'ba8e8e00-dd42-5c6c-9b30-b65ce9c8df26>.',
+            msg.body)
+        self.assertIn(
+            'Pre-registration on the pony closes at 12:00 on 2013-03-02',
+            msg.body)
+        self.assertIn('send email to <djl@douglatornell.ca>.', msg.body)
+
+    def test_email_to_organizer_multi_organizer(self):
+        """email to organizer has expected to list for multi-organizer event
+        """
+        from ..models import Brevet
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mjansson@example.com, mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+            google_doc_id='spreadsheet:'
+                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+        )
+        DBSession.add(brevet)
+        request = testing.DummyRequest()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        date = '03Mar2013'
+        event_page_url = request.route_url(
+            'brevet', region=brevet.region, distance=brevet.distance,
+            date=date)
+        rider_emails_url = request.route_url(
+            'brevet.rider_emails', region=brevet.region,
+            distance=brevet.distance, date=date, uuid=brevet.uuid)
+        mailer = get_mailer(request)
+        self._call_email_to_organizer(
+            request, brevet, event_page_url, rider_emails_url)
+        msg = mailer.outbox[0]
+        self.assertEqual(
+            msg.recipients, ['mjansson@example.com', 'mcroy@example.com'])

@@ -256,6 +256,7 @@ def _email_to_organizer(request, populaire):
                 'event_page_url': pop_page_url,
                 'rider_list_url': rider_list_url,
                 'rider_emails_url': rider_emails_url,
+                'registration_end': populaire.registration_end,
                 'admin_email': admin_email,
             }))
     mailer = get_mailer(request)

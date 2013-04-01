@@ -6,6 +6,10 @@ If you want to send an email message to all of the pre-registered riders you can
 
 All of the above URLs will be included in the notification email that you should receive when each rider pre-registers.
 
+Studies have shown that pre-registration response is better if you send an email to the bcrandonneurs email list 7 to 10 days before the event reminding people of the event and the availability of pre-registration on the pony. The CPO (chief pony officer) has thought about letting me do that, but many organizers have said they prefer the human touch of sending the message themselves.
+
+Pre-registration on the pony closes at ${'{:%H:%M}'.format(registration_end)} on ${'{:%Y-%m-%d}'.format(registration_end)} so you have from then until event start time to prepare paperwork without having to worry about someone pre-registering at the last minute.
+
 This is an auto-generated email. If you are having problems with the RandoPony system please send email to <${admin_email}>.
 
 Sincerely,
