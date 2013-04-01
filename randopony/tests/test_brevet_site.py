@@ -6,13 +6,13 @@ import unittest
 from mock import (
     MagicMock,
     patch,
-    )
+)
 from pyramid import testing
 from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class TestBrevetViews(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestBrevetViews(unittest.TestCase):
         from ..models import (
             Brevet,
             EmailAddress,
-            )
+        )
         email = EmailAddress(key='admin_email', email='tom@example.com')
         DBSession.add(email)
         request = testing.DummyRequest()
@@ -66,7 +66,7 @@ class TestBrevetViews(unittest.TestCase):
         from ..models import (
             Brevet,
             EmailAddress,
-            )
+        )
         brevet = Brevet(
             region='LM',
             distance=200,
@@ -74,7 +74,7 @@ class TestBrevetViews(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         brevet_id = str(brevet)
         email = EmailAddress(key='admin_email', email='tom@example.com')
         DBSession.add_all((brevet, email))
@@ -93,7 +93,7 @@ class TestBrevetViews(unittest.TestCase):
         from ..models import (
             Brevet,
             EmailAddress,
-            )
+        )
         brevet = Brevet(
             region='LM',
             distance=200,
@@ -101,7 +101,7 @@ class TestBrevetViews(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         brevet_id = str(brevet)
         email = EmailAddress(key='admin_email', email='tom@example.com')
         DBSession.add_all((brevet, email))
@@ -132,7 +132,7 @@ class TestBrevetViews(unittest.TestCase):
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         views = self._make_one(request)
         views._coming_soon_page = MagicMock(
             '_coming_soon', return_value='coming-soon body')
@@ -152,7 +152,7 @@ class TestBrevetViews(unittest.TestCase):
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         views = self._make_one(request)
         views._coming_soon_page = MagicMock(
             '_coming_soon', return_value='coming-soon body')
@@ -172,7 +172,7 @@ class TestBrevetViews(unittest.TestCase):
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         views = self._make_one(request)
         render_patch = patch.object(brevet_module, 'render')
         with render_patch as mock_render:
@@ -197,14 +197,14 @@ class TestBrevetViews(unittest.TestCase):
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2014',
-            })
+        })
         views = self._make_one(request)
         datetime_patch = patch.object(brevet_module, 'datetime')
         with datetime_patch as mock_datetime:
             mock_datetime.today.return_value = datetime(2013, 2, 13, 18, 43)
             mock_datetime.strptime = datetime.strptime
             with self.assertRaises(HTTPNotFound):
-                resp = views.brevet_page()
+                views.brevet_page()
 
     def test_brevet_page_registration_open(self):
         """brevet_page view has expected tmpl_vars when registration is open
@@ -212,7 +212,7 @@ class TestBrevetViews(unittest.TestCase):
         from ..models import (
             Brevet,
             Link,
-            )
+        )
         from ..views.site import brevet as brevet_module
         brevet = Brevet(
             region='VI',
@@ -222,18 +222,18 @@ class TestBrevetViews(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            )
+        )
         entry_form_link = Link(
             key='entry_form',
             url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            )
+        )
         DBSession.add_all((brevet, entry_form_link))
         request = testing.DummyRequest()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         views = self._make_one(request)
         with patch.object(brevet_module, 'datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = datetime(2011, 3, 22, 23, 18)
@@ -249,7 +249,7 @@ class TestBrevetViews(unittest.TestCase):
         from ..models import (
             Brevet,
             Link,
-            )
+        )
         from ..views.site import brevet as brevet_module
         brevet = Brevet(
             region='VI',
@@ -259,18 +259,18 @@ class TestBrevetViews(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            )
+        )
         entry_form_link = Link(
             key='entry_form',
             url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            )
+        )
         DBSession.add_all((brevet, entry_form_link))
         request = testing.DummyRequest()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         views = self._make_one(request)
         with patch.object(brevet_module, 'datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = datetime(2013, 3, 2, 23, 24)
@@ -284,7 +284,7 @@ class TestBrevetViews(unittest.TestCase):
         from ..models import (
             Brevet,
             Link,
-            )
+        )
         from ..views.site import brevet as brevet_module
         brevet = Brevet(
             region='VI',
@@ -294,18 +294,18 @@ class TestBrevetViews(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            )
+        )
         entry_form_link = Link(
             key='entry_form',
             url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            )
+        )
         DBSession.add_all((brevet, entry_form_link))
         request = testing.DummyRequest()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         views = self._make_one(request)
         with patch.object(brevet_module, 'datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = datetime(2013, 3, 3, 15, 1)
@@ -319,7 +319,7 @@ class TestBrevetViews(unittest.TestCase):
         from ..models import (
             Brevet,
             Link,
-            )
+        )
         from ..views.site import brevet as brevet_module
         brevet = Brevet(
             region='VI',
@@ -329,18 +329,18 @@ class TestBrevetViews(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            )
+        )
         entry_form_link = Link(
             key='entry_form',
             url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            )
+        )
         DBSession.add_all((brevet, entry_form_link))
         request = testing.DummyRequest()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         views = self._make_one(request)
         with patch.object(brevet_module, 'datetime') as mock_datetime:
             mock_datetime.utcnow.return_value = datetime(2013, 3, 3, 14, 59)
@@ -354,7 +354,7 @@ class TestBrevetViews(unittest.TestCase):
         from ..models import (
             Link,
             Brevet,
-            )
+        )
         from ..views.site import brevet as brevet_module
         brevet = Brevet(
             region='VI',
@@ -364,18 +364,18 @@ class TestBrevetViews(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            )
+        )
         results_link = Link(
             key='results_link',
             url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
-            )
+        )
         DBSession.add_all((brevet, results_link))
         request = testing.DummyRequest()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         views = self._make_one(request)
         views._moved_on_page = MagicMock('_moved_on', return_value='moved-on body')
         with patch.object(brevet_module, 'datetime') as mock_datetime:
@@ -389,7 +389,7 @@ class TestBrevetViews(unittest.TestCase):
         from ..models import (
             Brevet,
             Link,
-            )
+        )
         from ..views.site import brevet as brevet_module
         brevet = Brevet(
             region='VI',
@@ -399,18 +399,18 @@ class TestBrevetViews(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            )
+        )
         results_link = Link(
             key='results_link',
             url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
-            )
+        )
         DBSession.add_all((brevet, results_link))
         request = testing.DummyRequest()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         views = self._make_one(request)
         render_patch = patch.object(brevet_module, 'render')
         with render_patch as mock_render:
@@ -463,11 +463,11 @@ class TestBrevetEntry(unittest.TestCase):
         from_randopony = EmailAddress(
             key='from_randopony',
             email='randopony@randonneurs.bc.ca',
-            )
+        )
         admin_email = EmailAddress(
             key='admin_email',
             email='djl@douglatornell.ca',
-            )
+        )
         DBSession.add_all((from_randopony, admin_email))
 
     def tearDown(self):
@@ -494,14 +494,14 @@ class TestBrevetEntry(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            )
+        )
         DBSession.add(brevet)
         request = testing.DummyRequest()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
-            })
+        })
         entry = self._make_one(request)
         tmpl_vars = entry.show(MagicMock(name='form'))
         self.assertEqual(tmpl_vars['active_tab'], 'brevets')

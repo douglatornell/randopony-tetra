@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class TestWranglerCreate(unittest.TestCase):
@@ -177,7 +177,7 @@ class TestWranglerEdit(unittest.TestCase):
         url = edit.save_success({
             'id': 1,
             'persona_email': 'harry@example.com',
-            })
+        })
         wrangler = DBSession.query(Administrator).first()
         self.assertEqual(wrangler.persona_email, 'harry@example.com')
         self.assertEqual(

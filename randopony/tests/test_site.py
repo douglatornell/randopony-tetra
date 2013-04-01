@@ -1,24 +1,23 @@
 # -*- coding: utf-8 -*-
 """Tests for RandoPony public site core views and functionality.
 """
-from datetime import datetime
 import unittest
 try:
     from unittest.mock import (
         MagicMock,
         patch,
-        )
+    )
 except ImportError:                  # pragma: no cover
     from mock import (
         MagicMock,
         patch,
-        )
+    )
 from pyramid import testing
 from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class TestSiteViews(unittest.TestCase):

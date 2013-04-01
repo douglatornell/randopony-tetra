@@ -8,11 +8,12 @@ try:
 except ImportError:                  # pragma: no cover
     from mock import patch
 from pyramid import testing
+from pyramid_mailer import get_mailer
 from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class TestCoreAdminViews(unittest.TestCase):
@@ -65,7 +66,8 @@ class TestCoreAdminViews(unittest.TestCase):
         self.assertEqual(tmpl_vars['action'], 'edit')
 
     def test_wranglers_list_order(self):
-        """admin wranglers list is alpha ordered by persona email"""
+        """admin wranglers list is alpha ordered by persona email
+        """
         from ..models import Administrator
         admin1 = Administrator(persona_email='tom@example.com')
         admin2 = Administrator(persona_email='harry@example.com')
@@ -74,7 +76,7 @@ class TestCoreAdminViews(unittest.TestCase):
         request.matchdict['list'] = 'wranglers'
         admin = self._make_one(request)
         tmpl_vars = admin.items_list()
-        admins = [admin.persona_email for admin in tmpl_vars['items'].all()]
+        admins = [a.persona_email for a in tmpl_vars['items'].all()]
         self.assertEqual(
             admins, 'harry@example.com tom@example.com'.split())
 
@@ -144,7 +146,7 @@ class TestCoreAdminViews(unittest.TestCase):
             start_locn='Bean Around the World Coffee, Lonsdale Quay, '
                        '123 Carrie Cates Ct, North Vancouver',
             organizer_email='tracy@example.com',
-            )
+        )
         DBSession.add(brevet)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest(post={'delete': 'delete'})

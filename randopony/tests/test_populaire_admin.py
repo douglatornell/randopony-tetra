@@ -7,19 +7,19 @@ try:
     from unittest.mock import (
         MagicMock,
         patch,
-        )
+    )
 except ImportError:                      # pragma: no cover
     from mock import (
         MagicMock,
         patch,
-        )
+    )
 from pyramid import testing
 from pyramid_mailer import get_mailer
 from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class TestPopulaireDetails(unittest.TestCase):
@@ -52,7 +52,7 @@ class TestPopulaireDetails(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = str(populaire)
@@ -138,7 +138,7 @@ class TestPopulaireCreate(unittest.TestCase):
             'registration_end': datetime(2011, 3, 24, 12, 0),
             'entry_form_url': 'http://www.randonneurs.bc.ca/VicPop/'
                               'VicPop11_registration.pdf',
-            })
+        })
         populaire = DBSession.query(Populaire).first()
         self.assertEqual(str(populaire), 'VicPop')
         self.assertEqual(
@@ -203,7 +203,7 @@ class TestPopulaireEdit(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         self.config.add_route(
             'admin.populaires.view', '/admin/populaires/{item}')
@@ -246,7 +246,7 @@ class TestPopulaireEdit(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         self.config.add_route(
             'admin.populaires.view', '/admin/populaires/{item}')
@@ -279,7 +279,7 @@ class TestPopulaireEdit(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         self.config.add_route(
             'admin.populaires.view', '/admin/populaires/{item}')
@@ -287,21 +287,21 @@ class TestPopulaireEdit(unittest.TestCase):
         request.matchdict['item'] = 'VicPop'
         edit = self._make_one(request)
         url = edit.save_success({
-                'id': 1,
-                'event_name': 'Victoria Populaire',
-                'short_name': 'VicPop',
-                'distance': '50 km, 100 km',
-                'date_time': datetime(2011, 3, 27, 10, 0),
-                'start_locn': 'University of Victoria, Parking Lot #2 '
-                              '(Gabriola Road, near McKinnon Gym)',
-                'start_map_url': 'https://maps.google.com/maps?q='
-                                 'University+of+Victoria,+Parking+Lot+#2'
-                                 '+(Gabriola+Road,+near+McKinnon+Gym)',
-                'organizer_email': 'tom@example.com',
-                'registration_end': datetime(2011, 3, 24, 12, 0),
-                'entry_form_url': 'http://www.randonneurs.bc.ca/VicPop/'
-                                  'VicPop11_registration.pdf',
-            })
+            'id': 1,
+            'event_name': 'Victoria Populaire',
+            'short_name': 'VicPop',
+            'distance': '50 km, 100 km',
+            'date_time': datetime(2011, 3, 27, 10, 0),
+            'start_locn': 'University of Victoria, Parking Lot #2 '
+                          '(Gabriola Road, near McKinnon Gym)',
+            'start_map_url': 'https://maps.google.com/maps?q='
+                             'University+of+Victoria,+Parking+Lot+#2'
+                             '+(Gabriola+Road,+near+McKinnon+Gym)',
+            'organizer_email': 'tom@example.com',
+            'registration_end': datetime(2011, 3, 24, 12, 0),
+            'entry_form_url': 'http://www.randonneurs.bc.ca/VicPop/'
+                              'VicPop11_registration.pdf',
+        })
         populaire = DBSession.query(Populaire).first()
         self.assertEqual(populaire.organizer_email, 'tom@example.com')
         self.assertEqual(
@@ -367,7 +367,7 @@ class TestCreateRiderList(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:1234',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -395,7 +395,7 @@ class TestCreateRiderList(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -420,7 +420,7 @@ class TestCreateRiderList(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -445,7 +445,7 @@ class TestCreateRiderList(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -488,11 +488,11 @@ class TestEmailToOrganizer(unittest.TestCase):
         from_randopony = EmailAddress(
             key='from_randopony',
             email='randopony@randonneurs.bc.ca',
-            )
+        )
         admin_email = EmailAddress(
             key='admin_email',
             email='djl@douglatornell.ca',
-            )
+        )
         DBSession.add_all((from_randopony, admin_email))
 
     def tearDown(self):
@@ -514,7 +514,7 @@ class TestEmailToOrganizer(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -525,8 +525,8 @@ class TestEmailToOrganizer(unittest.TestCase):
         self.assertEqual(
             flash,
             ['error',
-            'Google Drive rider list must be created before email to '
-            'organizer(s) can be sent'])
+             'Google Drive rider list must be created before email to '
+             'organizer(s) can be sent'])
         self.assertEqual(
             resp.location, 'http://example.com/admin/populaire/VicPop')
 
@@ -547,7 +547,7 @@ class TestEmailToOrganizer(unittest.TestCase):
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -567,7 +567,7 @@ class TestEmailToOrganizer(unittest.TestCase):
         from ..models import (
             EmailAddress,
             Populaire,
-            )
+        )
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -581,7 +581,7 @@ class TestEmailToOrganizer(unittest.TestCase):
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -604,6 +604,9 @@ class TestEmailToOrganizer(unittest.TestCase):
             'email address list URL is <http://example.com/populaires/VicPop/'
             'rider_emails/f279f382-57e7-5658-8de2-f4aebcdb0b3d>.',
             msg.body)
+        self.assertIn(
+            'Pre-registration on the pony closes at 12:00 on 2011-03-24',
+            msg.body)
         self.assertIn('send email to <djl@douglatornell.ca>.', msg.body)
 
     def test_email_to_organizer_multi_organizer(self):
@@ -623,7 +626,7 @@ class TestEmailToOrganizer(unittest.TestCase):
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -658,15 +661,15 @@ class TestEmailToWebmaster(unittest.TestCase):
         from_randopony = EmailAddress(
             key='from_randopony',
             email='randopony@randonneurs.bc.ca',
-            )
+        )
         club_webmaster = EmailAddress(
             key='club_webmaster',
             email='webmaster@randonneurs.bc.ca',
-            )
+        )
         admin_email = EmailAddress(
             key='admin_email',
             email='djl@douglatornell.ca',
-            )
+        )
         DBSession.add_all((from_randopony, club_webmaster, admin_email))
 
     def tearDown(self):
@@ -690,7 +693,7 @@ class TestEmailToWebmaster(unittest.TestCase):
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -721,7 +724,7 @@ class TestEmailToWebmaster(unittest.TestCase):
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -784,7 +787,7 @@ class TestSetup123(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -818,7 +821,7 @@ class TestSetup123(unittest.TestCase):
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['item'] = 'VicPop'
@@ -839,7 +842,7 @@ class TestSetup123(unittest.TestCase):
         from ..models import (
             EmailAddress,
             Populaire,
-            )
+        )
         from ..views.admin import populaire as pop_module
         populaire = Populaire(
             event_name='Victoria Populaire',
@@ -852,19 +855,19 @@ class TestSetup123(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         from_randopony = EmailAddress(
             key='from_randopony',
             email='randopony@randonneurs.bc.ca',
-            )
+        )
         admin_email = EmailAddress(
             key='admin_email',
             email='djl@douglatornell.ca',
-            )
+        )
         club_webmaster = EmailAddress(
             key='club_webmaster',
             email='webmaster@randonneurs.bc.ca',
-            )
+        )
         DBSession.add_all(
             (populaire, from_randopony, admin_email, club_webmaster))
         request = testing.DummyRequest()
@@ -876,8 +879,9 @@ class TestSetup123(unittest.TestCase):
         flash = request.session.pop_flash()
         self.assertEqual(
             flash,
-            ['success',
-             'Rider list spreadsheet created',
-             'Email sent to VicPop organizer(s)',
-             'Email with VicPop page URL sent to webmaster',
+            [
+                'success',
+                'Rider list spreadsheet created',
+                'Email sent to VicPop organizer(s)',
+                'Email with VicPop page URL sent to webmaster',
             ])

@@ -7,19 +7,19 @@ try:
     from unittest.mock import (
         MagicMock,
         patch,
-        )
+    )
 except ImportError:                  # pragma: no cover
     from mock import (
         MagicMock,
         patch,
-        )
+    )
 from pyramid import testing
 from pyramid_mailer import get_mailer
 from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
-    )
+)
 
 
 class TestPopulaireViews(unittest.TestCase):
@@ -77,7 +77,7 @@ class TestPopulaireViews(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -107,7 +107,7 @@ class TestPopulaireViews(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -135,7 +135,7 @@ class TestPopulaireViews(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -163,7 +163,7 @@ class TestPopulaireViews(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -180,7 +180,7 @@ class TestPopulaireViews(unittest.TestCase):
         from ..models import (
             Link,
             Populaire,
-            )
+        )
         from ..views.site import populaire as pop_module
         self.config.registry.settings['timezone'] = 'Canada/Pacific'
         populaire = Populaire(
@@ -194,11 +194,11 @@ class TestPopulaireViews(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         results_link = Link(
             key='results_link',
             url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
-            )
+        )
         DBSession.add_all((populaire, results_link))
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -215,7 +215,7 @@ class TestPopulaireViews(unittest.TestCase):
         from ..models import (
             Link,
             Populaire,
-            )
+        )
         from ..views.site import populaire as pop_module
         self.config.registry.settings['timezone'] = 'Canada/Pacific'
         populaire = Populaire(
@@ -229,11 +229,11 @@ class TestPopulaireViews(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         results_link = Link(
             key='results_link',
             url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
-            )
+        )
         DBSession.add_all((populaire, results_link))
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -290,11 +290,11 @@ class TestPopulaireEntry(unittest.TestCase):
         from_randopony = EmailAddress(
             key='from_randopony',
             email='randopony@randonneurs.bc.ca',
-            )
+        )
         admin_email = EmailAddress(
             key='admin_email',
             email='djl@douglatornell.ca',
-            )
+        )
         DBSession.add_all((from_randopony, admin_email))
 
     def tearDown(self):
@@ -324,7 +324,7 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -346,7 +346,7 @@ class TestPopulaireEntry(unittest.TestCase):
             organizer_email='mcroy@example.com',
             registration_end=datetime(2012, 12, 31, 17, 0),
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
@@ -370,7 +370,7 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -389,7 +389,7 @@ class TestPopulaireEntry(unittest.TestCase):
         from ..models import (
             Populaire,
             PopulaireRider,
-            )
+        )
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -401,14 +401,14 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         rider = PopulaireRider(
             email='tom@example.com',
             first_name='Tom',
             last_name='Dickson',
             distance=100,
             comment='',
-            )
+        )
         populaire.riders.append(rider)
         DBSession.add(populaire)
         DBSession.add(rider)
@@ -420,7 +420,7 @@ class TestPopulaireEntry(unittest.TestCase):
             'first_name': 'Tom',
             'last_name': 'Dickson',
             'populaire': populaire.id,
-            })
+        })
         self.assertEqual(url.location, 'http://example.com/populaires/VicPop')
         self.assertEqual(
             request.session.pop_flash(),
@@ -432,7 +432,7 @@ class TestPopulaireEntry(unittest.TestCase):
         from ..models import (
             Populaire,
             PopulaireRider,
-            )
+        )
         from ..views.site import populaire as pop_module
         populaire = Populaire(
             event_name='Victoria Populaire',
@@ -447,7 +447,7 @@ class TestPopulaireEntry(unittest.TestCase):
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'VicPop'
@@ -460,7 +460,7 @@ class TestPopulaireEntry(unittest.TestCase):
                 'comment': 'Sunshine Man',
                 'distance': 100,
                 'populaire': populaire.id,
-                })
+            })
         rider = DBSession.query(PopulaireRider).first()
         self.assertEqual(rider.email, 'fred@example.com')
         self.assertEqual(rider.full_name, 'Fred "Sunshine Man" Dickson')
@@ -476,7 +476,7 @@ class TestPopulaireEntry(unittest.TestCase):
         from ..models import (
             Populaire,
             PopulaireRider,
-            )
+        )
         from ..views.site import populaire as pop_module
         populaire = Populaire(
             event_name="New Year's Populaire",
@@ -489,7 +489,7 @@ class TestPopulaireEntry(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
@@ -501,7 +501,7 @@ class TestPopulaireEntry(unittest.TestCase):
                 'last_name': 'Dickson',
                 'comment': 'Sunshine Man',
                 'populaire': populaire.id,
-                })
+            })
         rider = DBSession.query(PopulaireRider).first()
         self.assertEqual(rider.distance, '60')
 
@@ -521,7 +521,7 @@ class TestPopulaireEntry(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
@@ -533,7 +533,7 @@ class TestPopulaireEntry(unittest.TestCase):
                 'first_name': 'Fred',
                 'last_name': 'Dickson',
                 'comment': 'Sunshine Man',
-                })
+            })
         self.assertEqual(len(mailer.outbox), 2)
 
     def test_rider_email_message(self):
@@ -543,7 +543,7 @@ class TestPopulaireEntry(unittest.TestCase):
             EmailAddress,
             Populaire,
             PopulaireRider,
-            )
+        )
         populaire = Populaire(
             event_name="New Year's Populaire",
             short_name='NewYearsPop',
@@ -555,14 +555,14 @@ class TestPopulaireEntry(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         rider = PopulaireRider(
             email='fred@example.com',
             first_name='Fred',
             last_name='Dickson',
             distance=60,
             comment='',
-            )
+        )
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
@@ -592,7 +592,7 @@ class TestPopulaireEntry(unittest.TestCase):
             EmailAddress,
             Populaire,
             PopulaireRider,
-            )
+        )
         populaire = Populaire(
             event_name="New Year's Populaire",
             short_name='NewYearsPop',
@@ -604,14 +604,14 @@ class TestPopulaireEntry(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         rider = PopulaireRider(
             email='fred@example.com',
             first_name='Fred',
             last_name='Dickson',
             distance=60,
             comment='Sunshine Man',
-            )
+        )
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
@@ -634,7 +634,8 @@ class TestPopulaireEntry(unittest.TestCase):
             'spreadsheet at <https://spreadsheets.google.com/ccc?'
             'key=0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc>,',
             msg.body)
-        self.assertIn('email address list at '
+        self.assertIn(
+            'email address list at '
             '<http://example.com/populaire/NewYearsPop/rider_emails/'
             '524abf1c-0f42-545e-974f-91fba9b34f8d>.',
             msg.body)
@@ -647,7 +648,7 @@ class TestPopulaireEntry(unittest.TestCase):
         from ..models import (
             Populaire,
             PopulaireRider,
-            )
+        )
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -661,14 +662,14 @@ class TestPopulaireEntry(unittest.TestCase):
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         rider = PopulaireRider(
             email='fred@example.com',
             first_name='Fred',
             last_name='Dickson',
             distance=100,
             comment='Sunshine Man',
-            )
+        )
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
@@ -676,7 +677,7 @@ class TestPopulaireEntry(unittest.TestCase):
         msg = entry._organizer_message(populaire, rider)
         self.assertIn(
             'Fred Dickson has indicated that zhe is planning to ride the 100 km',
-             msg.body)
+            msg.body)
 
     def test_organizer_email_message_multi_organizer(self):
         """reg notify email to orgs for multi-org event has expected content
@@ -684,7 +685,7 @@ class TestPopulaireEntry(unittest.TestCase):
         from ..models import (
             Populaire,
             PopulaireRider,
-            )
+        )
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -698,14 +699,14 @@ class TestPopulaireEntry(unittest.TestCase):
                            'VicPop11_registration.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         rider = PopulaireRider(
             email='fred@example.com',
             first_name='Fred',
             last_name='Dickson',
             distance=100,
             comment='Sunshine Man',
-            )
+        )
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
         entry = self._make_one(request)
@@ -730,7 +731,7 @@ class TestPopulaireEntry(unittest.TestCase):
             entry_form_url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
             google_doc_id='spreadsheet:'
                 '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
-            )
+        )
         DBSession.add(populaire)
         request = testing.DummyRequest()
         request.matchdict['short_name'] = 'NewYearsPop'
@@ -742,7 +743,7 @@ class TestPopulaireEntry(unittest.TestCase):
                 'first_name': 'Fred',
                 'last_name': 'Dickson',
                 'comment': 'Sunshine Man',
-                })
+            })
         mock_task.delay.assert_called_once()
 
     def test_failure(self):
@@ -762,7 +763,7 @@ class TestPopulaireEntry(unittest.TestCase):
             registration_end=datetime(2011, 3, 24, 12, 0),
             entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
                            'VicPop11_registration.pdf',
-            )
+        )
         populare_id = str(populaire)
         DBSession.add(populaire)
         request = testing.DummyRequest()
