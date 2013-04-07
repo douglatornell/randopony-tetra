@@ -161,6 +161,10 @@ def create_rider_list(request):
 
 
 def _create_rider_list(request, brevet):
+    """Actual creation of rider list spreadsheet on Google Drive.
+
+    For use by :func:`create_rider_list` and :func:`setup_123` views.
+    """
     username = request.registry.settings['google_drive.username']
     password = request.registry.settings['google_drive.password']
     flash = google_drive.create_rider_list(
@@ -186,6 +190,11 @@ def email_to_organizer(request):
 
 
 def _email_to_organizer(request, brevet, date):
+    """Actual sending of email to brevet organizer(s) to notify them of
+    event URLs, etc.
+
+    For use by :func:`email_to_organizer` and :func:`setup_123` views.
+    """
     event_page_url = request.route_url(
         'brevet', region=brevet.region, distance=brevet.distance, date=date)
     rider_emails_url = request.route_url(
@@ -211,6 +220,11 @@ def email_to_webmaster(request):
 
 
 def _email_to_webmaster(request, brevet, date):
+    """Actual sending of email to club webmaster to notify them of
+    event URLs, etc.
+
+    For use by :func:`email_to_webmaster` and :func:`setup_123` views.
+    """
     event_page_url = request.route_url(
         'brevet', region=brevet.region, distance=brevet.distance, date=date)
     flash = admin_core.email_to_webmaster(request, brevet, event_page_url)
