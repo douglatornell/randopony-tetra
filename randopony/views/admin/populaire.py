@@ -9,11 +9,8 @@ from pyramid_mailer.message import Message
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.view import view_config
-from .google_drive import (
-    google_drive_login,
-    get_rider_list_template,
-    share_rider_list_publicly,
-)
+from . import google_drive
+from . import core as admin_core
 from ...models import (
     EmailAddress,
     Populaire,
@@ -23,14 +20,6 @@ from ...models.meta import DBSession
 from ... import __version__ as version
 
 
-def get_populaire(short_name):
-    return (
-        DBSession.query(Populaire)
-        .filter_by(short_name=short_name)
-        .first()
-    )
-
-
 @view_config(
     route_name='admin.populaires.view',
     renderer='admin/populaire.mako',
@@ -38,7 +27,7 @@ def get_populaire(short_name):
 )
 def populaire_details(request):
     short_name = request.matchdict['item']
-    populaire = get_populaire(short_name)
+    populaire = admin_core.get_populaire(short_name)
     return {
         'version': version.number + version.release,
         'logout_btn': True,
@@ -114,7 +103,7 @@ class PopulaireEdit(FormView):
 
     def appstruct(self):
         short_name = self.request.matchdict['item']
-        populaire = get_populaire(short_name)
+        populaire = admin_core.get_populaire(short_name)
         return {
             'id': populaire.id,
             'event_name': populaire.event_name,
@@ -170,40 +159,23 @@ class PopulaireEdit(FormView):
 )
 def create_rider_list(request):
     short_name = request.matchdict['item']
-    populaire = get_populaire(short_name)
-    _create_rider_list(request, populaire)
+    populaire = admin_core.get_populaire(short_name)
+    flash = _create_rider_list(request, populaire)
+    admin_core.finalize_flash_msg(request, flash)
     redirect_url = request.route_url('admin.populaires.view', item=short_name)
     return HTTPFound(redirect_url)
 
 
 def _create_rider_list(request, populaire):
-    if populaire.google_doc_id:
-        request.session.flash('error')
-        request.session.flash('Rider list spreadsheet already created')
-        return 'error'
-    google_doc_id = _create_google_drive_list(populaire, request)
-    populaire.google_doc_id = google_doc_id
-    request.session.flash('success')
-    request.session.flash('Rider list spreadsheet created')
-    return 'success'
+    """Actual creation of rider list spreadsheet on Google Drive.
 
-
-def _create_google_drive_list(populaire, request):      # pragma: no cover
-    """Execute Google Drive operations to create rider list from template,
-    and share it publicly.
-
-    Returns the id of the created document that is used to construct its
-    URL.
+    For use by :func:`create_rider_list` and :func:`setup_123` views.
     """
-    client = google_drive_login(
-        DocsClient,
-        request.registry.settings['google_drive.username'],
-        request.registry.settings['google_drive.password'])
-    template = get_rider_list_template('Populaire Rider List Template', client)
-    created_doc = client.copy_resource(
-        template, '{0} {0.date_time:%d-%b-%Y}'.format(populaire))
-    share_rider_list_publicly(created_doc, client)
-    return created_doc.resource_id.text
+    username = request.registry.settings['google_drive.username']
+    password = request.registry.settings['google_drive.password']
+    flash = google_drive.create_rider_list(
+        populaire, 'Populaire Rider List Template', username, password)
+    return flash
 
 
 @view_config(
@@ -212,58 +184,27 @@ def _create_google_drive_list(populaire, request):      # pragma: no cover
 )
 def email_to_organizer(request):
     short_name = request.matchdict['item']
-    populaire = get_populaire(short_name)
+    populaire = admin_core.get_populaire(short_name)
     _email_to_organizer(request, populaire)
     redirect_url = request.route_url('admin.populaires.view', item=short_name)
     return HTTPFound(redirect_url)
 
 
 def _email_to_organizer(request, populaire):
-    if not populaire.google_doc_id:
-        request.session.flash('error')
-        request.session.flash(
-            'Google Drive rider list must be created before email to '
-            'organizer(s) can be sent')
-        return
-    from_randopony = (
-        DBSession.query(EmailAddress)
-        .filter_by(key='from_randopony')
-        .first().email
-    )
-    pop_page_url = request.route_url(
+    """Actual sending of email to populaire organizer(s) to notify them of
+    event URLs, etc..
+
+    For use by :func:`email_to_organizer` and :func:`setup_123` views.
+    """
+    event_page_url = request.route_url(
         'populaire', short_name=populaire.short_name)
-    rider_list_url = (
-        'https://spreadsheets.google.com/ccc?key={0}'
-        .format(populaire.google_doc_id.split(':')[1]))
     rider_emails_url = request.route_url(
         'populaire.rider_emails',
         short_name=populaire.short_name,
         uuid=populaire.uuid)
-    admin_email = (
-        DBSession.query(EmailAddress)
-        .filter_by(key='admin_email')
-        .first().email
-    )
-    message = Message(
-        subject='RandoPony URLs for {.event_name}'.format(populaire),
-        sender=from_randopony,
-        recipients=[
-            addr.strip() for addr in populaire.organizer_email.split(',')],
-        body=render(
-            'email/event_URLs_to_organizer.mako',
-            {
-                'event': populaire.event_name,
-                'event_page_url': pop_page_url,
-                'rider_list_url': rider_list_url,
-                'rider_emails_url': rider_emails_url,
-                'registration_end': populaire.registration_end,
-                'admin_email': admin_email,
-            }))
-    mailer = get_mailer(request)
-    mailer.send(message)
-    request.session.flash('success')
-    request.session.flash(
-        'Email sent to {} organizer(s)'.format(populaire.short_name))
+    flash = admin_core.email_to_organizer(
+        request, populaire, event_page_url, rider_emails_url)
+    return flash
 
 
 @view_config(
@@ -272,46 +213,22 @@ def _email_to_organizer(request, populaire):
 )
 def email_to_webmaster(request):
     short_name = request.matchdict['item']
-    populaire = get_populaire(short_name)
+    populaire = admin_core.get_populaire(short_name)
     _email_to_webmaster(request, populaire)
     redirect_url = request.route_url('admin.populaires.view', item=short_name)
     return HTTPFound(redirect_url)
 
 
 def _email_to_webmaster(request, populaire):
-    from_randopony = (
-        DBSession.query(EmailAddress)
-        .filter_by(key='from_randopony')
-        .first().email
-    )
-    club_webmaster = (
-        DBSession.query(EmailAddress)
-        .filter_by(key='club_webmaster').first().email)
-    pop_page_url = request.route_url(
+    """Actual sending of email to club webmaster to notify them of
+    event URLs, etc.
+
+    For use by :func:`email_to_webmaster` and :func:`setup_123` views.
+    """
+    event_page_url = request.route_url(
         'populaire', short_name=populaire.short_name)
-    admin_email = (
-        DBSession.query(EmailAddress)
-        .filter_by(key='admin_email')
-        .first().email
-    )
-    message = Message(
-        subject='RandoPony Pre-registration page for {.event_name}'
-                .format(populaire),
-        sender=from_randopony,
-        recipients=[club_webmaster],
-        body=render(
-            'email/event_URL_to_webmaster.mako',
-            {
-                'event': populaire.event_name,
-                'event_page_url': pop_page_url,
-                'admin_email': admin_email,
-            }))
-    mailer = get_mailer(request)
-    mailer.send(message)
-    request.session.flash('success')
-    request.session.flash(
-        'Email with {} page URL sent to webmaster'
-        .format(populaire.short_name))
+    flash = admin_core.email_to_webmaster(request, populaire, event_page_url)
+    return flash
 
 
 @view_config(
@@ -320,16 +237,11 @@ def _email_to_webmaster(request, populaire):
 )
 def setup_123(request):
     short_name = request.matchdict['item']
-    populaire = get_populaire(short_name)
-    result = _create_rider_list(request, populaire)
-    if result == 'success':
-        _email_to_organizer(request, populaire)
-        _email_to_webmaster(request, populaire)
-        # Rewrite flash message list with only 1 success element
-        flash = request.session.pop_flash()
-        request.session.flash('success')
-        for msg in flash:
-            if msg != 'success':
-                request.session.flash(msg)
+    populaire = admin_core.get_populaire(short_name)
+    flash = _create_rider_list(request, populaire)
+    if 'error' not in flash:
+        flash += _email_to_organizer(request, populaire)
+        flash += _email_to_webmaster(request, populaire)
+    admin_core.finalize_flash_msg(request, flash)
     redirect_url = request.route_url('admin.populaires.view', item=short_name)
     return HTTPFound(redirect_url)

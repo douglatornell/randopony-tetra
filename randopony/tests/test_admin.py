@@ -161,7 +161,7 @@ class TestCoreAdminViews(unittest.TestCase):
 
 
 class TestEmailToOrganizer(unittest.TestCase):
-    """Unit tests for email_to_organizer function.
+    """Unit tests for email_to_organizer admin function re: event URLs.
     """
     def _call_email_to_organizer(self, *args, **kwargs):
         from ..views.admin.core import email_to_organizer
@@ -198,6 +198,42 @@ class TestEmailToOrganizer(unittest.TestCase):
         DBSession.remove()
         testing.tearDown()
 
+    def test_email_to_organizer_catches_missing_google_doc_id(self):
+        """email_to_organizer return error flash if google_doc_id not set
+        """
+        from ..models import Brevet
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+        )
+        DBSession.add(brevet)
+        request = testing.DummyRequest()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        date = '03Mar2013'
+        event_page_url = request.route_url(
+            'brevet', region=brevet.region, distance=brevet.distance,
+            date=date)
+        rider_emails_url = request.route_url(
+            'brevet.rider_emails', region=brevet.region,
+            distance=brevet.distance, date=date, uuid=brevet.uuid)
+        flash = self._call_email_to_organizer(
+            request, brevet, event_page_url, rider_emails_url)
+        self.assertEqual(
+            flash, [
+                'error',
+                'Google Drive rider list must be created before email to '
+                'organizer(s) can be sent'
+            ])
+
     def test_email_to_organizer_sends_email(self):
         """email_to_organizer sends message & sets expected flash message
         """
@@ -210,8 +246,7 @@ class TestEmailToOrganizer(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            google_doc_id='spreadsheet:'
-                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:1234',
         )
         DBSession.add(brevet)
         request = testing.DummyRequest()
@@ -250,8 +285,7 @@ class TestEmailToOrganizer(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            google_doc_id='spreadsheet:'
-                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:123'
         )
         DBSession.add(brevet)
         request = testing.DummyRequest()
@@ -278,10 +312,10 @@ class TestEmailToOrganizer(unittest.TestCase):
         self.assertEqual(msg.sender, from_randopony)
         self.assertEqual(msg.recipients, ['mcroy@example.com'])
         self.assertIn(
-            'The URL is <http://example.com/brevets/VI/200/03Mar2013>.', msg.body)
+            'The URL is <http://example.com/brevets/VI/200/03Mar2013>.',
+            msg.body)
         self.assertIn(
-            'rider list URL is <https://spreadsheets.google.com/ccc?key='
-            '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc>.',
+            'rider list URL is <https://spreadsheets.google.com/ccc?key=123>.',
             msg.body)
         self.assertIn(
             'email address list URL is <http://example.com/brevets/'
@@ -305,8 +339,7 @@ class TestEmailToOrganizer(unittest.TestCase):
             start_locn='Chez Croy, 3131 Millgrove St, Victoria',
             organizer_email='mjansson@example.com, mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
-            google_doc_id='spreadsheet:'
-                '0AtBTJntkFrPQdFJDN3lvRmVOQW5RXzRZbzRTRFJLYnc',
+            google_doc_id='spreadsheet:1234'
         )
         DBSession.add(brevet)
         request = testing.DummyRequest()
@@ -328,3 +361,140 @@ class TestEmailToOrganizer(unittest.TestCase):
         msg = mailer.outbox[0]
         self.assertEqual(
             msg.recipients, ['mjansson@example.com', 'mcroy@example.com'])
+
+
+class TestEmailToWebmaster(unittest.TestCase):
+    """Unit tests for email_to_webmaster admin function re: event page URL.
+    """
+    def _call_email_to_webmaster(self, *args, **kwargs):
+        from ..views.admin.core import email_to_webmaster
+        return email_to_webmaster(*args, **kwargs)
+
+    def setUp(self):
+        from ..models import EmailAddress
+        self.config = testing.setUp(
+            settings={
+                'mako.directories': 'randopony:templates',
+            })
+        self.config.include('pyramid_mailer.testing')
+        self.config.add_route(
+            'admin.populaires.view', '/admin/populaire/{item}')
+        self.config.add_route(
+            'populaire', '/populaires/{short_name}')
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+        from_randopony = EmailAddress(
+            key='from_randopony',
+            email='randopony@randonneurs.bc.ca',
+        )
+        club_webmaster = EmailAddress(
+            key='club_webmaster',
+            email='webmaster@randonneurs.bc.ca',
+        )
+        admin_email = EmailAddress(
+            key='admin_email',
+            email='djl@douglatornell.ca',
+        )
+        DBSession.add_all((from_randopony, club_webmaster, admin_email))
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_email_to_webmaster_sends_email(self):
+        """email_to_webmaster sends message & sets expected flash message
+        """
+        from ..models import Populaire
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            google_doc_id='spreadsheet:1234'
+        )
+        DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VicPop'
+        event_page_url = request.route_url(
+            'populaire', short_name=populaire.short_name)
+        mailer = get_mailer(request)
+        flash = self._call_email_to_webmaster(
+            request, populaire, event_page_url)
+        self.assertEqual(len(mailer.outbox), 1)
+        self.assertEqual(
+            flash,
+            ['success', 'Email with VicPop page URL sent to webmaster'])
+
+    def test_email_to_webmaster_message(self):
+        """email_to_webmaster message has expected content
+        """
+        from ..models import Populaire
+        populaire = Populaire(
+            event_name='Victoria Populaire',
+            short_name='VicPop',
+            distance='50 km, 100 km',
+            date_time=datetime(2011, 3, 27, 10, 0),
+            start_locn='University of Victoria, Parking Lot #2 '
+                       '(Gabriola Road, near McKinnon Gym)',
+            organizer_email='mjansson@example.com',
+            registration_end=datetime(2011, 3, 24, 12, 0),
+            entry_form_url='http://www.randonneurs.bc.ca/VicPop/'
+                           'VicPop11_registration.pdf',
+            google_doc_id='spreadsheet:1234'
+        )
+        DBSession.add(populaire)
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VicPop'
+        event_page_url = request.route_url(
+            'populaire', short_name=populaire.short_name)
+        mailer = get_mailer(request)
+        self._call_email_to_webmaster(request, populaire, event_page_url)
+        msg = mailer.outbox[0]
+        self.assertEqual(
+            msg.subject, 'RandoPony Pre-registration page for VicPop')
+        self.assertEqual(msg.sender, 'randopony@randonneurs.bc.ca')
+        self.assertEqual(msg.recipients, ['webmaster@randonneurs.bc.ca'])
+        self.assertIn('page for the VicPop event has been added', msg.body)
+        self.assertIn(
+            'The URL is <http://example.com/populaires/VicPop>.', msg.body)
+        self.assertIn('send email to <djl@douglatornell.ca>.', msg.body)
+
+
+class TestFinalizeFlashMsg(unittest.TestCase):
+    """Unit tests for finalize_flash_msg function.
+    """
+    def _call_finalize_flash_msg(self, *args, **kwargs):
+        from ..views.admin.core import finalize_flash_msg
+        return finalize_flash_msg(*args, **kwargs)
+
+    def test_finalize_flash_msg_error(self):
+        """flash 1st element is error when error present in flash list
+        """
+        request = testing.DummyRequest()
+        self._call_finalize_flash_msg(request, 'success foo error bar'.split())
+        flash = request.session.pop_flash()
+        self.assertEqual(flash[0], 'error')
+
+    def test_finalize_flash_msg_success(self):
+        """flash 1st element is success when error not present in flash list
+        """
+        request = testing.DummyRequest()
+        self._call_finalize_flash_msg(
+            request, 'success foo sucess bar'.split())
+        flash = request.session.pop_flash()
+        self.assertEqual(flash[0], 'success')
+
+    def test_finalize_flash_msg_content(self):
+        """flash[1:] are msgs w/o error or success elements of flash list
+        """
+        request = testing.DummyRequest()
+        self._call_finalize_flash_msg(request, 'success foo error bar'.split())
+        flash = request.session.pop_flash()
+        self.assertEqual(flash[1:], 'foo bar'.split())

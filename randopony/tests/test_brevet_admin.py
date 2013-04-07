@@ -4,9 +4,15 @@
 from datetime import datetime
 import unittest
 try:
-    from unittest.mock import MagicMock
+    from unittest.mock import (
+        MagicMock,
+        patch,
+    )
 except ImportError:                      # pragma: no cover
-    from mock import MagicMock
+    from mock import (
+        MagicMock,
+        patch,
+    )
 from pyramid import testing
 from sqlalchemy import create_engine
 from ..models.meta import (
@@ -296,3 +302,230 @@ class TestBrevetEdit(unittest.TestCase):
                 'cancel_url':
                     'http://example.com/admin/brevets/LM200%2011Nov2012'
             })
+
+
+class TestCreateRiderList(unittest.TestCase):
+    """Unit tests for _create_rider_list.
+    """
+    def _call_create_rider_list(self, *args, **kwargs):
+        from ..views.admin.brevet import _create_rider_list
+        return _create_rider_list(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp(
+            settings={
+                'google_drive.username': 'randopony',
+                'google_drive.password': 'sEcReT',
+            })
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_create_rider_list_already_exists(self):
+        """_create_rider_list returns expected flash when rider list exists
+        """
+        from ..models import Brevet
+        from ..views.admin.brevet import google_drive
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+            google_doc_id='spreadsheet:1234',
+        )
+        DBSession.add(brevet)
+        request = testing.DummyRequest()
+        patch_crl = patch.object(google_drive, 'create_rider_list')
+        with patch_crl as mock_crl:
+            mock_crl.return_value = [
+                'error',
+                'Rider list spreadsheet already created',
+            ]
+            flash = self._call_create_rider_list(request, brevet)
+        self.assertEqual(
+            flash, [
+                'error', 'Rider list spreadsheet already created',
+            ])
+
+    def test_create_rider_list_success(self):
+        """rider list spreadsheet updated w/ info question upon create success
+        """
+        from ..models import Brevet
+        from ..views.admin.brevet import google_drive
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+            google_doc_id='spreadsheet:1234',
+        )
+        DBSession.add(brevet)
+        request = testing.DummyRequest()
+        patch_crl = patch.object(google_drive, 'create_rider_list')
+        patch_urliq = patch.object(
+            google_drive, 'update_rider_list_info_question')
+        with patch_crl as mock_crl, patch_urliq as mock_urliq:
+            mock_crl.return_value = [
+                'success', 'Rider list spreadsheet created',
+            ]
+            mock_urliq.return_value = [
+                'success', 'Rider list info question column updated',
+            ]
+            flash = self._call_create_rider_list(request, brevet)
+        self.assertEqual(
+            flash, [
+                'success',
+                'Rider list spreadsheet created',
+                'success',
+                'Rider list info question column updated',
+            ])
+
+
+class TestSetup123(unittest.TestCase):
+    """Unit tests for combined 3-step setup admin function view.
+    """
+    def _call_setup_123(self, *args, **kwargs):
+        from ..views.admin.brevet import setup_123
+        return setup_123(*args, **kwargs)
+
+    def setUp(self):
+        self.config = testing.setUp(
+            settings={
+                'google_drive.username': 'randopony',
+                'google_drive.password': 'sEcReT',
+                'mako.directories': 'randopony:templates',
+            })
+        self.config.include('pyramid_mailer.testing')
+        self.config.add_route(
+            'admin.brevets.view', '/admin/brevets/{item}')
+        self.config.add_route(
+            'brevet', '/brevets/{region}/{distance}/{date}')
+        self.config.add_route(
+            'brevet.rider_emails',
+            '/brevets/{region}/{distance}/{date}/rider_emails/{uuid}')
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+        testing.tearDown()
+
+    def test_setup_123(self):
+        """setup_123 calls expected 3 setup steps
+        """
+        from ..models import Brevet
+        from ..views.admin import brevet as brevet_module
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+            google_doc_id='spreadsheet:1234',
+        )
+        DBSession.add(brevet)
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VI200 03Mar2013'
+        date = '03Mar2013'
+        patch_crl = patch.object(brevet_module, '_create_rider_list')
+        patch_eto = patch.object(brevet_module, '_email_to_organizer')
+        patch_etw = patch.object(brevet_module, '_email_to_webmaster')
+        with patch_crl as mock_crl, patch_eto as mock_eto, patch_etw as mock_etw:
+            mock_crl.return_value = 'success'
+            resp = self._call_setup_123(request)
+        mock_crl.assert_called_once_with(request, brevet)
+        mock_eto.assert_called_once_with(request, brevet, date)
+        mock_etw.assert_called_once_with(request, brevet, date)
+        self.assertEqual(
+            resp.location, 'http://example.com/admin/brevets/VI200%2003Mar2013')
+
+    def test_setup_123_error_create_rider_list_already_done(self):
+        """setup_123 stops w/ exp flash msg if rider list doc id is setup
+        """
+        from ..models import Brevet
+        from ..views.admin import brevet as brevet_module
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+            google_doc_id='spreadsheet:1234',
+        )
+        DBSession.add(brevet)
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VI200 03Mar2013'
+        patch_eto = patch.object(brevet_module, '_email_to_organizer')
+        patch_etw = patch.object(brevet_module, '_email_to_webmaster')
+        with patch_eto as mock_eto, patch_etw as mock_etw:
+            self._call_setup_123(request)
+        self.assertFalse(mock_eto.called)
+        self.assertFalse(mock_etw.called)
+        flash = request.session.pop_flash()
+        self.assertEqual(
+            flash,
+            ['error', 'Rider list spreadsheet already created'])
+
+    def test_setup_123_success_flash(self):
+        """setup_123 sets expected flash message on success
+        """
+        from ..models import (
+            EmailAddress,
+            Brevet,
+        )
+        from ..views.admin import brevet as brevet_module
+        brevet = Brevet(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+            google_doc_id='spreadsheet:1234',
+        )
+        from_randopony = EmailAddress(
+            key='from_randopony',
+            email='randopony@randonneurs.bc.ca',
+        )
+        admin_email = EmailAddress(
+            key='admin_email',
+            email='djl@douglatornell.ca',
+        )
+        club_webmaster = EmailAddress(
+            key='club_webmaster',
+            email='webmaster@randonneurs.bc.ca',
+        )
+        DBSession.add_all(
+            (brevet, from_randopony, admin_email, club_webmaster))
+        request = testing.DummyRequest()
+        request.matchdict['item'] = 'VI200 03Mar2013'
+        crl_patch = patch.object(brevet_module, '_create_rider_list')
+        with crl_patch as mock_crl:
+            mock_crl.return_value = [
+                'success', 'Rider list spreadsheet created']
+            self._call_setup_123(request)
+        flash = request.session.pop_flash()
+        self.assertEqual(
+            flash,
+            [
+                'success',
+                'Rider list spreadsheet created',
+                'Email sent to VI200 03Mar2013 organizer(s)',
+                'Email with VI200 03Mar2013 page URL sent to webmaster',
+            ])

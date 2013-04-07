@@ -16,7 +16,6 @@ from pyramid.view import (
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from sqlalchemy import desc
-from .populaire import get_populaire
 from ...models import (
     Administrator,
     Brevet,
@@ -133,22 +132,31 @@ def get_brevet(code, date):
     region = code[:2]
     distance = code[2:]
     date = datetime.strptime(date, '%d%b%Y')
-    return (DBSession.query(Brevet)
-            .filter_by(region=region)
-            .filter_by(distance=distance)
-            .filter(Brevet.date_time >= date)
-            .filter(Brevet.date_time < date + timedelta(days=1))
-            .first()
-            )
+    return (
+        DBSession.query(Brevet)
+        .filter_by(region=region)
+        .filter_by(distance=distance)
+        .filter(Brevet.date_time >= date)
+        .filter(Brevet.date_time < date + timedelta(days=1))
+        .first()
+    )
+
+
+def get_populaire(short_name):
+    return (
+        DBSession.query(Populaire)
+        .filter_by(short_name=short_name)
+        .first()
+    )
 
 
 def email_to_organizer(request, event, event_page_url, rider_emails_url):
     if not event.google_doc_id:
-        request.session.flash('error')
-        request.session.flash(
+        return [
+            'error',
             'Google Drive rider list must be created before email to '
-            'organizer(s) can be sent')
-        return
+            'organizer(s) can be sent',
+        ]
     from_randopony = (
         DBSession.query(EmailAddress)
         .filter_by(key='from_randopony')
@@ -219,6 +227,13 @@ def email_to_webmaster(request, event, event_page_url):
 
 
 def finalize_flash_msg(request, flash):
+    """Transform a list of flash messages into a session.flash object
+    with either `error` or `success` as its 1st message,
+    and the remaining msgs as subsequent messages.
+
+    :arg flash: Flash message pairs; `error` or `success` followed by a msg
+    :type flash: list
+    """
     if 'error' in flash:
         request.session.flash('error')
     else:
