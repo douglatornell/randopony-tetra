@@ -395,7 +395,7 @@ def _get_member_status_by_name(first_name, last_name):
     try:
         response.raise_for_status()
         is_club_member = response.json()['is_current_member']
-    except requests.HTTPError:
+    except (requests.HTTPError, KeyError):
         is_club_member = None
     return is_club_member
 
