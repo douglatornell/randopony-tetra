@@ -54,8 +54,8 @@ def main(argv=sys.argv):
         key='entry_form',
         url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
     )
-    results_url = Link(
-        key='results_url',
+    results_link = Link(
+        key='results_link',
         url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
     )
     is_club_member_api = Link(
@@ -74,7 +74,7 @@ def main(argv=sys.argv):
             from_randopony,
             club_webmaster,
             entry_form_url,
-            results_url,
+            results_link,
             is_club_member_api,
             membership_link,
         ))
