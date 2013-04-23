@@ -1,6 +1,12 @@
 2013r3
 ------
 
+- Fix handling of empty response to club membership query.
+
+- Fix error in past event results link key value.
+
+- Refactor populaire admin to use admin.core functions for event setup.
+
 - Add notes to email sent to organizer(s) when event is set up:
 
   * Recommendation to publicize their event 7 to 10 days in advance on
