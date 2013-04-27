@@ -72,6 +72,12 @@
       Brevets
     </a>
   </li>
+  <li id="brevet-rules">
+    <a href="http://www.randonneurs.bc.ca/introduction/rules.html"
+       class="nav-tab">
+      Brevet Rules
+    </a>
+  </li>
   %endif
   %if populaires.count() > 0:
   <li id="populaires">
@@ -86,7 +92,8 @@
     </a>
   </li>
   <li id="membership">
-    <a href="http://www.2mevents.com/index.php/event/bc-randonneurs-membership" class="nav-tab">
+    <a href="http://www.2mevents.com/index.php/event/bc-randonneurs-membership"
+       class="nav-tab">
       Join BC Randonneurs Club
     </a>
   </li>

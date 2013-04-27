@@ -1,6 +1,9 @@
 2013r3
 ------
 
+- Add sidebar link to brevet rules page on club site when there are brevets
+  listed.
+
 - Fix handling of empty response to club membership query.
 
 - Fix error in past event results link key value.
