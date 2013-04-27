@@ -255,7 +255,9 @@ class BrevetEntry(FormView):
             mailer = get_mailer(self.request)
             first_name = appstruct['first_name']
             last_name = appstruct['last_name']
-            member_status = _get_member_status_by_name(first_name, last_name)
+            is_club_member_url = _get_is_club_member_url()
+            member_status = _get_member_status_by_name(
+                first_name, last_name, is_club_member_url)
             rider = BrevetRider(
                 email=appstruct['email'],
                 first_name=first_name,
@@ -271,6 +273,7 @@ class BrevetEntry(FormView):
                 brevet.google_doc_id.split(':')[1],
                 self.request.registry.settings['google_drive.username'],
                 self.request.registry.settings['google_drive.password'],
+                is_club_member_url,
             )
             message = self._rider_message(brevet, rider)
             mailer.send(message)
@@ -383,12 +386,15 @@ class BrevetEntry(FormView):
         return message
 
 
-def _get_member_status_by_name(first_name, last_name):
-    is_club_member_url = (
+def _get_is_club_member_url():
+    return (
         DBSession.query(Link.url)
-        .filter_by(key='is_club_member_api').
-        one()[0]
+        .filter_by(key='is_club_member_api')
+        .one()[0]
     )
+
+
+def _get_member_status_by_name(first_name, last_name, is_club_member_url):
     response = requests.get(
         is_club_member_url.format(last_name=last_name, first_name=first_name),
         verify=False)
@@ -401,23 +407,29 @@ def _get_member_status_by_name(first_name, last_name):
 
 
 @task(ignore_result=True)
-def update_google_spreadsheet(riders, doc_key, username, password):
+def update_google_spreadsheet(riders, doc_key, username, password,
+                              is_club_member_url):
     client = google_drive_login(SpreadsheetsService, username, password)
     spreadsheet_list = client.GetListFeed(doc_key)
     spreadsheet_rows = len(spreadsheet_list.entry)
     # Update the rows already in the spreadsheet
     for row, rider in enumerate(riders[:spreadsheet_rows]):
         rider_number = row + 1
-        new_row_data = _make_spreadsheet_row_dict(rider_number, rider)
+        new_row_data = _make_spreadsheet_row_dict(
+            rider_number, rider, is_club_member_url)
         client.UpdateRow(spreadsheet_list.entry[row], new_row_data)
     # Add remaining rows
     for row, rider in enumerate(riders[spreadsheet_rows:]):
         rider_number = spreadsheet_rows + row + 1
-        row_data = _make_spreadsheet_row_dict(rider_number, rider)
+        row_data = _make_spreadsheet_row_dict(
+            rider_number, rider, is_club_member_url)
         client.InsertRow(row_data, doc_key)
 
 
-def _make_spreadsheet_row_dict(rider_number, rider):
+def _make_spreadsheet_row_dict(rider_number, rider, is_club_member_url):
+    if not rider.member_status:
+        rider.member_status = _get_member_status_by_name(
+            rider.first_name, rider.last_name, is_club_member_url)
     if rider.member_status is None:
         current_member = 'Unknown'
     else:

@@ -13,6 +13,7 @@ from ..models.meta import (
     Base,
     DBSession,
 )
+from ..views.site import brevet as brevet_module
 
 
 class TestBrevetViews(unittest.TestCase):
@@ -511,3 +512,78 @@ class TestBrevetEntry(unittest.TestCase):
         self.assertEqual(
             tmpl_vars['cancel_url'],
             'http://example.com/brevets/VI/200/03Mar2013')
+
+
+class TestMakeSpreadsheetRowDict(unittest.TestCase):
+    """Unit tests for _make_spreadsheet_row_dict function.
+    """
+    def _call_make_spreadsheet_row_dict(self, *args, **kwargs):
+        from ..views.site.brevet import _make_spreadsheet_row_dict
+        return _make_spreadsheet_row_dict(*args, **kwargs)
+
+    @patch.object(brevet_module, '_get_member_status_by_name')
+    def test_member_status_unknown(self, mock_gmsbn):
+        """clubmember value set to "Unknown" when member_status in None
+        """
+        mock_rider = MagicMock(name='mock_rider', member_status=None)
+        mock_gmsbn.return_value = None
+        row_data = self._call_make_spreadsheet_row_dict(
+            1, mock_rider, 'is_current_member_url')
+        self.assertEqual(row_data['clubmember'], 'Unknown')
+
+    def test_member_status_true(self):
+        """clubmember value set to "Yes" when member_status in True
+        """
+        mock_rider = MagicMock(name='mock_rider', member_status=True)
+        row_data = self._call_make_spreadsheet_row_dict(
+            1, mock_rider, 'is_current_member_url')
+        self.assertEqual(row_data['clubmember'], 'Yes')
+
+    @patch.object(brevet_module, '_get_member_status_by_name')
+    def test_member_status_false(self, mock_gmsbn):
+        """clubmember value set to "No" when member_status in False
+        """
+        mock_rider = MagicMock(name='mock_rider', member_status=False)
+        mock_gmsbn.return_value = False
+        row_data = self._call_make_spreadsheet_row_dict(
+            1, mock_rider, 'is_current_member_url')
+        self.assertEqual(row_data['clubmember'], 'No')
+
+    @patch.object(brevet_module, '_get_member_status_by_name')
+    def test_member_status_not_updated_if_true(self, mock_gmsbn):
+        """don't update member status from club database if it is True
+        """
+        mock_rider = MagicMock(name='mock_rider', member_status=True)
+        self._call_make_spreadsheet_row_dict(
+            1, mock_rider, 'is_current_member_url')
+        self.assertFalse(mock_gmsbn.called)
+
+    @patch.object(brevet_module, '_get_member_status_by_name')
+    def test_update_member_status_if_none(self, mock_gmsbn):
+        """update member status from club database if it is none
+        """
+        mock_rider = MagicMock(
+            name='mock_rider',
+            first_name='Tom',
+            last_name='Jones',
+            member_status=None,
+        )
+        self._call_make_spreadsheet_row_dict(
+            1, mock_rider, 'is_current_member_url')
+        mock_gmsbn.assert_called_once_with(
+            'Tom', 'Jones', 'is_current_member_url')
+
+    @patch.object(brevet_module, '_get_member_status_by_name')
+    def test_update_member_status_if_false(self, mock_gmsbn):
+        """update member status from club database if it is False
+        """
+        mock_rider = MagicMock(
+            name='mock_rider',
+            first_name='Tom',
+            last_name='Jones',
+            member_status=False,
+        )
+        self._call_make_spreadsheet_row_dict(
+            1, mock_rider, 'is_current_member_url')
+        mock_gmsbn.assert_called_once_with(
+            'Tom', 'Jones', 'is_current_member_url')

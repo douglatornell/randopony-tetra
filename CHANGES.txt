@@ -1,6 +1,10 @@
 2013r3
 ------
 
+- Update club membership status from club database for new or expired
+  members in brevet rider list spreadsheets every time a rider is added
+  to the spreadsheet so that it reflects most current available data.
+
 - Add sidebar link to brevet rules page on club site when there are brevets
   listed.
 
