@@ -30,6 +30,7 @@ class Brevet(EventMixin, Base):
     """Brevet event.
     """
     REGIONS = {
+        'HW': 'Eau de Hell Week',
         'LM': 'Lower Mainland',
         'PR': 'Peace Region',
         'SI': 'Southern Interior',

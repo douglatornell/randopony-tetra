@@ -87,6 +87,11 @@ class BrevetViews(SiteViews):
         region_brevets = (self.tmpl_vars['brevets']
                           .filter_by(region=region))
         images = {
+            'HW': {
+                'file': 'VI400UnionBay.jpg',
+                'alt': 'Van Isle - Ocean and Mountains',
+                'credit': 'John McGillivray',
+            },
             'LM': {
                 'file': 'LowerMainlandQuartet.jpg',
                 'alt': 'Harrison Hotsprings Road',
