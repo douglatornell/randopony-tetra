@@ -312,3 +312,9 @@ def tail_production_celery_log():
     """
     with cd(env.production_dir):
         run('tail $HOME/logs/user/randopony_celery.log')
+
+@task
+def ps():
+    """Process status for bcrandonneur user
+    """
+    run('ps -u {.user} -o pid,rss,command'.format(env))
