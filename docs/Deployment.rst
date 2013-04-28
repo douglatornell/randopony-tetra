@@ -32,8 +32,8 @@ The deployment strategy described here is:
 Most of the deployment and management activities described in this section
 have been implemented as Fabric_ tasks,
 so,
-Fabric_ needs to be installed in the local virtualenv from which ou are working,
-and you ned to have ssh key authentication working on Webfaction.
+Fabric_ needs to be installed in the local virtualenv from which you are working,
+and you need to have ssh key authentication working on Webfaction.
 
 .. _Fabric: http://docs.fabfile.org/
 
