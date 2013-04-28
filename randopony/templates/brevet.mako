@@ -94,11 +94,11 @@ ${brevet}
 
   %if len(brevet.riders) < 15:
   <div class="img-container hidden-phone">
-    <img src="${request.static_url('randopony:static/img/BrevetPeloton.jpg')}"
+    <img src="${request.static_url('randopony:static/img/Darcy400Peloton.jpg')}"
          alt="Brevet peloton rolling out"
          class="filler-img">
     <div class="photo-credit muted pull-right">
-      <em><small>Susan Allen</small></em>
+      <em><small>Darren Maclachlan</small></em>
     </div>
   </div>
   %endif
