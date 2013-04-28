@@ -92,6 +92,11 @@ class BrevetViews(SiteViews):
                 'alt': 'Van Isle - Ocean and Mountains',
                 'credit': 'John McGillivray',
             },
+            '6K': {
+                'file': 'SI600Cheryl.jpg',
+                'alt': 'You and the Road in the Southern Interior',
+                'credit': 'Nigel Press',
+            },
             'LM': {
                 'file': 'LowerMainlandQuartet.jpg',
                 'alt': 'Harrison Hotsprings Road',
