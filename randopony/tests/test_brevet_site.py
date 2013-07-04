@@ -378,7 +378,8 @@ class TestBrevetViews(unittest.TestCase):
             'date': '03Mar2013',
         })
         views = self._make_one(request)
-        views._moved_on_page = MagicMock('_moved_on', return_value='moved-on body')
+        views._moved_on_page = MagicMock(
+            '_moved_on', return_value='moved-on body')
         with patch.object(brevet_module, 'datetime') as mock_datetime:
             mock_datetime.today.return_value = datetime(2013, 3, 11, 18, 47)
             resp = views.brevet_page()
@@ -428,6 +429,80 @@ class TestBrevetViews(unittest.TestCase):
             tmpl_vars['results_link'],
             'http://randonneurs.bc.ca/results/13_times/13_times.html')
         self.assertEqual(kwargs['request'], request)
+
+    @patch.object(brevet_module, 'get_brevet')
+    def test_rider_emails_invalid_uuid(self, mock_get_brevet):
+        """rider_emails raises 404 when request uuid doesn't match database
+        """
+        from pyramid.httpexceptions import HTTPNotFound
+        mock_get_brevet.return_value = MagicMock(name='brevet', uuid='bar')
+        request = testing.DummyRequest()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+            'uuid': 'foo',
+        })
+        views = self._make_one(request)
+        with self.assertRaises(HTTPNotFound):
+            views.rider_emails()
+
+    @patch.object(brevet_module, 'get_brevet')
+    def test_rider_emails_past_event(self, mock_get_brevet):
+        """rider_emails raises 404 when event is beyond in_past horizon
+        """
+        from pyramid.httpexceptions import HTTPNotFound
+        mock_get_brevet.return_value = MagicMock(name='brevet', uuid='foo')
+        request = testing.DummyRequest()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+            'uuid': 'foo',
+        })
+        views = self._make_one(request)
+        views._in_past = MagicMock(return_value=True)
+        with self.assertRaises(HTTPNotFound):
+            views.rider_emails()
+
+    @patch.object(brevet_module, 'get_brevet')
+    def test_rider_emails_no_riders_registered(self, mock_get_brevet):
+        """rider_emails returns expected message when no riders are registered
+        """
+        mock_get_brevet.return_value = MagicMock(name='brevet', uuid='foo')
+        request = testing.DummyRequest()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+            'uuid': 'foo',
+        })
+        views = self._make_one(request)
+        views._in_past = MagicMock(return_value=False)
+        resp = views.rider_emails()
+        self.assertEqual(resp, 'No riders have registered yet!')
+
+    @patch.object(brevet_module, 'get_brevet')
+    def test_rider_emails_list_of_addresses(self, mock_get_brevet):
+        """rider_emails returns expected list of registered rider's addresses
+        """
+        mock_riders = [
+            MagicMock(name='rider_tom', email='tom@example.com'),
+            MagicMock(name='rider_dick', email='dick@example.com'),
+        ]
+        mock_get_brevet.return_value = MagicMock(
+            name='brevet', uuid='foo', riders=mock_riders)
+        request = testing.DummyRequest()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+            'uuid': 'foo',
+        })
+        views = self._make_one(request)
+        views._in_past = MagicMock(return_value=False)
+        resp = views.rider_emails()
+        self.assertEqual(resp, 'tom@example.com, dick@example.com')
 
 
 class TestBrevetEntry(unittest.TestCase):

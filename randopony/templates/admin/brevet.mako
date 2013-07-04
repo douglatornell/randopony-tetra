@@ -52,10 +52,10 @@
 
 <h4>Riders Email Address List UUID</h4>
 <p>
-  <a href="${request.route_url('brevet.entry',
+  <a href="${request.route_url('brevet.rider_emails',
                                region=brevet.region,
                                distance=brevet.distance,
-                               date=brevet.date_time.strftime('%d%b%Y'))}
+                               date=brevet.date_time.strftime('%d%b%Y'),
                                uuid=brevet.uuid)}"
      target="_blank">
     ${brevet.uuid}
