@@ -4,5 +4,11 @@
 		{
 			"path": "/Users/doug/Documents/devel/python/randopony-tetra"
 		}
-	]
-}
+	],
+   "build_systems":
+    [
+        {
+            "name": "unittest-discover",
+            "shell_cmd": "~/.virtualenvs/randopony-tetra-2.7/bin/python -m unittest discover ${project_path}"
+        }
+    ]}
