@@ -144,6 +144,19 @@ class BrevetViews(SiteViews):
         })
         return self.tmpl_vars
 
+    @view_config(route_name='brevet.rider_emails', renderer='string')
+    def rider_emails(self):
+        region = self.request.matchdict['region']
+        distance = int(self.request.matchdict['distance'])
+        date = self.request.matchdict['date']
+        brevet = get_brevet(
+            region, distance, datetime.strptime(date, '%d%b%Y'))
+        uuid = self.request.matchdict['uuid']
+        if uuid != str(brevet.uuid) or self._in_past():
+            raise HTTPNotFound
+        return (', '.join(rider.email for rider in brevet.riders)
+                or 'No riders have registered yet!')
+
     @property
     def _maybe_coming_soon(self):
         brevet_date = datetime.strptime(
