@@ -57,7 +57,7 @@ class TestBrevetViews(unittest.TestCase):
         self.assertEqual(tmpl_vars['active_tab'], 'brevets')
         self.assertEqual(tmpl_vars['regions'], Brevet.REGIONS)
         self.assertEqual(
-            tmpl_vars['region_brevets'].keys(), Brevet.REGIONS.keys())
+            set(tmpl_vars['region_brevets'].keys()), set(Brevet.REGIONS.keys()))
         self.assertEqual(tmpl_vars['admin_email'], 'tom@example.com')
 
     def test_region_list_brevet(self):
