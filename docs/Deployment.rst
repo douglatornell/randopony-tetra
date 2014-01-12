@@ -93,7 +93,7 @@ If the app is being deployed to the staging environment for the first time in a 
        and :program:`supervisor` and :program:`celery` will work properly
 
      * Change the :file:`bin/start` file to use :file:`staging.ini` to configure the app
-     (:kbd:`install_app` task)
+       (:kbd:`install_app` task)
 
    * Create the :file:`RandoPony-staging.sqlite` database,
      and initialize it with link and email address records that the app requires
