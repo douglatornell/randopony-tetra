@@ -8,11 +8,11 @@ from fabric.api import (
     env,
     run,
     task,
-    )
+)
 from fabric.contrib.files import (
     exists,
     sed,
-    )
+)
 from fabric.contrib.console import confirm
 from fabric.contrib.project import rsync_project
 
@@ -92,9 +92,7 @@ def promote_staging_to_production():
                 [], *site['website_apps'])
             run('cp {0}/RandoPony-production.sqlite {0}/celery.sqlite {1}'
                 .format(env.production_dir, staging_dir))
-    site = [
-        site for site in sites
-        if site['name'] == app_name + staging_release][0]
+    site = [s for s in sites if s['name'] == app_name + staging_release][0]
     server.update_website(
         session_id, site['name'], site['ip'], site['https'],
         [production_domain], *site['website_apps'])
@@ -156,13 +154,13 @@ def rsync_code():
         '.hg*',
         '*.pyc',
         '*~',
-        )
+    )
     rsync_project(
         remote_dir=staging_dir,
         exclude=exclusions,
         delete=True,
         extra_opts='--links',
-        )
+    )
 
 
 @task
@@ -312,6 +310,7 @@ def tail_production_celery_log():
     """
     with cd(env.production_dir):
         run('tail $HOME/logs/user/randopony_celery.log')
+
 
 @task
 def ps():
