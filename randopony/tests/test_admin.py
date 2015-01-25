@@ -174,6 +174,7 @@ class TestEmailToOrganizer(unittest.TestCase):
                 'mako.directories': 'randopony:templates',
             })
         self.config.include('pyramid_mailer.testing')
+        self.config.include('pyramid_mako')
         self.config.add_route(
             'admin.populaires.view', '/admin/brevet/{item}')
         self.config.add_route(
@@ -377,6 +378,7 @@ class TestEmailToWebmaster(unittest.TestCase):
                 'mako.directories': 'randopony:templates',
             })
         self.config.include('pyramid_mailer.testing')
+        self.config.include('pyramid_mako')
         self.config.add_route(
             'admin.populaires.view', '/admin/populaire/{item}')
         self.config.add_route(

@@ -406,6 +406,7 @@ class TestSetup123(unittest.TestCase):
                 'mako.directories': 'randopony:templates',
             })
         self.config.include('pyramid_mailer.testing')
+        self.config.include('pyramid_mako')
         self.config.add_route(
             'admin.brevets.view', '/admin/brevets/{item}')
         self.config.add_route(

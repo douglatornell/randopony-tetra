@@ -280,6 +280,7 @@ class TestPopulaireEntry(unittest.TestCase):
                 'google_drive.password': 'sEcReT',
             })
         self.config.include('pyramid_mailer.testing')
+        self.config.include('pyramid_mako')
         self.config.add_route('populaire', '/populaires/{short_name}')
         self.config.add_route(
             'populaire.rider_emails',
