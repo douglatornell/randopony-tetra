@@ -48,7 +48,7 @@ def main(argv=sys.argv):
     )
     club_webmaster = EmailAddress(
         key='club_webmaster',
-        email='eric_fergusson@telus.net',
+        email='gowlin@gmail.com',
     )
     entry_form_url = Link(
         key='entry_form',
