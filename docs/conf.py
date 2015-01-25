@@ -13,6 +13,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import datetime
 import os
 import sys
 
@@ -38,7 +39,10 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'RandoPony'
-copyright = '2012-2014, Doug Latornell'
+copyright = (
+    '2012-{:%Y}, Doug Latornell'
+    .format(datetime.date.today())
+)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
