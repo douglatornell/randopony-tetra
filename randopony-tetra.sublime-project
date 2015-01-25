@@ -8,7 +8,8 @@
    "build_systems":
     [
         {
-            "name": "unittest-discover",
-            "shell_cmd": "~/.virtualenvs/randopony-tetra-2.7/bin/python -m unittest discover ${project_path}"
+            "name": "py.test",
+            "selector": "source.python",
+            "shell_cmd": "~/.virtualenvs/randopony-2015r1/bin/py.test ${project_path}"
         }
     ]}
