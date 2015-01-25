@@ -65,7 +65,7 @@ def main(argv=sys.argv):
     )
     membership_link = Link(
         key='membership_link',
-        url='http://www.2mevents.com/index.php/event/bc-randonneurs-membership',
+        url='https://ccnbikes.com/#/events/2015-bc-randonneurs-cycling-club-membership',
     )
     with transaction.manager:
         DBSession.add_all((
