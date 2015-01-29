@@ -21,7 +21,10 @@ from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.view import view_config
 import pytz
-from .core import SiteViews
+from .core import (
+    get_membership_link,
+    SiteViews,
+)
 from ..admin.google_drive import google_drive_login
 from ...models import (
     Brevet,
@@ -125,6 +128,7 @@ class PopulaireViews(SiteViews):
                 'populaires': self.tmpl_vars['populaires'],
                 'event': '{0} {0.date_time:%d-%b-%Y}'.format(self.populaire),
                 'results_link': results_link,
+                'membership_link': get_membership_link(),
             },
             request=self.request)
         return body

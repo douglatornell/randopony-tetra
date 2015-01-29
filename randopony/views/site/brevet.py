@@ -22,7 +22,10 @@ from pyramid.response import Response
 from pyramid.view import view_config
 import pytz
 import requests
-from .core import SiteViews
+from .core import (
+    get_membership_link,
+    SiteViews,
+)
 from ..admin.google_drive import google_drive_login
 from ...models import (
     Brevet,
@@ -199,6 +202,7 @@ class BrevetViews(SiteViews):
                 'brevets': self.tmpl_vars['brevets'],
                 'populaires': self.tmpl_vars['populaires'],
                 'maybe_brevet': maybe_brevet,
+                'membership_link': get_membership_link(),
             },
             request=self.request)
         return body
@@ -216,6 +220,7 @@ class BrevetViews(SiteViews):
                 'populaires': self.tmpl_vars['populaires'],
                 'event': self.brevet,
                 'results_link': results_link,
+                'membership_link': get_membership_link(),
             },
             request=self.request)
         return body
@@ -300,10 +305,7 @@ class BrevetEntry(FormView):
             mailer.send(message)
             message = self._organizer_message(brevet, rider)
             mailer.send(message)
-            membership_link = (
-                DBSession.query(Link.url)
-                .filter_by(key='membership_link')
-                .one()[0])
+            membership_link = get_membership_link()
             self.request.session.flash('success')
             self.request.session.flash(rider.email)
             self.request.session.flash(rider.member_status)
@@ -339,11 +341,7 @@ class BrevetEntry(FormView):
             .filter_by(key='entry_form')
             .one()[0]
         )
-        membership_link = (
-            DBSession.query(Link.url)
-            .filter_by(key='membership_link')
-            .one()[0]
-        )
+        membership_link = get_membership_link()
         message = Message(
             subject='Pre-registration Confirmation for {0}'
                     .format(brevet),

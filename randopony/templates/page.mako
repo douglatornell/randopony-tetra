@@ -92,8 +92,7 @@
     </a>
   </li>
   <li id="membership">
-    <a href="http://www.2mevents.com/index.php/event/bc-randonneurs-membership"
-       class="nav-tab">
+    <a href="${membership_link}" class="nav-tab">
       Join BC Randonneurs Club
     </a>
   </li>
