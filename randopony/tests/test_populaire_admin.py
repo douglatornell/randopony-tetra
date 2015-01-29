@@ -14,7 +14,6 @@ except ImportError:                      # pragma: no cover
         patch,
     )
 from pyramid import testing
-from pyramid_mailer import get_mailer
 from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
