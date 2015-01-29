@@ -8,6 +8,7 @@ from pyramid.view import (
 from ...models import (
     Brevet,
     EmailAddress,
+    Link,
     Populaire,
 )
 from ...models.meta import DBSession
@@ -21,6 +22,7 @@ class SiteViews(object):
         self.tmpl_vars = {
             'brevets': Brevet.get_current(),
             'populaires': Populaire.get_current(),
+            'membership_link': get_membership_link(),
         }
 
     @view_config(route_name='home', renderer='home.mako')
@@ -57,3 +59,14 @@ class SiteViews(object):
             'active_tab': None,
         })
         return self.tmpl_vars
+
+
+def get_membership_link():
+    """Return club membership sign-up site URL from database.
+    """
+    membership_link = (
+        DBSession.query(Link.url)
+        .filter_by(key='membership_link')
+        .one()[0]
+    )
+    return membership_link

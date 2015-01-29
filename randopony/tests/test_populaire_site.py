@@ -35,7 +35,9 @@ class TestPopulaireViews(unittest.TestCase):
         return PopulaireViews
 
     def _make_one(self, *args, **kwargs):
-        return self._get_target_class()(*args, **kwargs)
+        from ..views.site import core
+        with patch.object(core, 'get_membership_link'):
+            return self._get_target_class()(*args, **kwargs)
 
     def setUp(self):
         self.config = testing.setUp()

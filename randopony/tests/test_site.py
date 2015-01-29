@@ -28,7 +28,9 @@ class TestSiteViews(unittest.TestCase):
         return SiteViews
 
     def _make_one(self, *args, **kwargs):
-        return self._get_target_class()(*args, **kwargs)
+        from ..views.site import core
+        with patch.object(core, 'get_membership_link'):
+            return self._get_target_class()(*args, **kwargs)
 
     def setUp(self):
         self.config = testing.setUp()
@@ -48,6 +50,7 @@ class TestSiteViews(unittest.TestCase):
         self.assertEqual(views.request, request)
         self.assertIn('brevets', views.tmpl_vars)
         self.assertIn('populaires', views.tmpl_vars)
+        self.assertIn('membership_link', views.tmpl_vars)
 
     def test_home(self):
         """home view has home tab set as active tab
@@ -85,3 +88,28 @@ class TestSiteViews(unittest.TestCase):
         tmpl_vars = views.notfound()
         self.assertIsNone(tmpl_vars['active_tab'])
         self.assertEqual(request.response.status, '404 Not Found')
+
+
+class TestGetMembershipLink(unittest.TestCase):
+    """Unit test for get_membership_link() function.
+    """
+    def _get_target_function(self):
+        from ..views.site.core import get_membership_link
+        return get_membership_link
+
+    def setUp(self):
+        engine = create_engine('sqlite://')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+
+    def test_get_membership_link(self):
+        """returns club membership sign-up site URL from database
+        """
+        from ..models import Link
+        link = Link(key='membership_link', url='https://membership_link/')
+        DBSession.add(link)
+        membership_link = self._get_target_function()()
+        self.assertEqual(membership_link, 'https://membership_link/')
