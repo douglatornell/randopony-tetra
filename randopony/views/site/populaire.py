@@ -117,8 +117,6 @@ class PopulaireViews(SiteViews):
             .filter_by(key='results_link')
             .one()[0]
         )
-        results_link = results_link.format(
-            year=str(self.populaire.date_time.year)[-2:])
         body = render(
             'moved-on.mako',
             {

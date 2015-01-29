@@ -208,8 +208,6 @@ class BrevetViews(SiteViews):
             DBSession.query(Link.url)
             .filter_by(key='results_link')
             .one()[0])
-        results_link = results_link.format(
-            year=str(self.brevet.date_time.year)[-2:])
         body = render(
             'moved-on.mako',
             {

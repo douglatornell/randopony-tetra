@@ -197,7 +197,7 @@ class TestPopulaireViews(unittest.TestCase):
         )
         results_link = Link(
             key='results_link',
-            url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
+            url='https://database.randonneurs.bc.ca/browse/randonnees',
         )
         DBSession.add_all((populaire, results_link))
         request = testing.DummyRequest()
@@ -232,7 +232,7 @@ class TestPopulaireViews(unittest.TestCase):
         )
         results_link = Link(
             key='results_link',
-            url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
+            url='https://database.randonneurs.bc.ca/browse/randonnees',
         )
         DBSession.add_all((populaire, results_link))
         request = testing.DummyRequest()
@@ -251,7 +251,7 @@ class TestPopulaireViews(unittest.TestCase):
         self.assertEqual(tmpl_vars['event'], 'VicPop 27-Mar-2011')
         self.assertEqual(
             tmpl_vars['results_link'],
-            'http://randonneurs.bc.ca/results/11_times/11_times.html')
+            'https://database.randonneurs.bc.ca/browse/randonnees')
         self.assertEqual(kwargs['request'], request)
 
 
