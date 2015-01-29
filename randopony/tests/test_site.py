@@ -3,15 +3,9 @@
 """
 import unittest
 try:
-    from unittest.mock import (
-        MagicMock,
-        patch,
-    )
+    from unittest.mock import patch
 except ImportError:                  # pragma: no cover
-    from mock import (
-        MagicMock,
-        patch,
-    )
+    from mock import patch
 from pyramid import testing
 from sqlalchemy import create_engine
 from ..models.meta import (
