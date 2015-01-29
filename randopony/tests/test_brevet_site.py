@@ -368,7 +368,7 @@ class TestBrevetViews(unittest.TestCase):
         )
         results_link = Link(
             key='results_link',
-            url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
+            url='https://database.randonneurs.bc.ca/browse/randonnees',
         )
         DBSession.add_all((brevet, results_link))
         request = testing.DummyRequest()
@@ -404,7 +404,7 @@ class TestBrevetViews(unittest.TestCase):
         )
         results_link = Link(
             key='results_link',
-            url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
+            url='https://database.randonneurs.bc.ca/browse/randonnees',
         )
         DBSession.add_all((brevet, results_link))
         request = testing.DummyRequest()
@@ -427,7 +427,7 @@ class TestBrevetViews(unittest.TestCase):
         self.assertEqual(str(tmpl_vars['event']), 'VI200 03Mar2013')
         self.assertEqual(
             tmpl_vars['results_link'],
-            'http://randonneurs.bc.ca/results/13_times/13_times.html')
+            'https://database.randonneurs.bc.ca/browse/randonnees')
         self.assertEqual(kwargs['request'], request)
 
     @patch.object(brevet_module, 'get_brevet')

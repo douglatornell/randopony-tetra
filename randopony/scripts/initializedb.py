@@ -56,7 +56,7 @@ def main(argv=sys.argv):
     )
     results_link = Link(
         key='results_link',
-        url='http://randonneurs.bc.ca/results/{year}_times/{year}_times.html',
+        url='https://database.randonneurs.bc.ca/browse/randonnees',
     )
     is_club_member_api = Link(
         key='is_club_member_api',
