@@ -178,8 +178,9 @@ class TestBrevetViews(unittest.TestCase):
         })
         views = self._make_one(request)
         render_patch = patch.object(brevet_module, 'render')
-        with render_patch as mock_render:
-            views._coming_soon_page()
+        with patch.object(brevet_module, 'get_membership_link'):
+            with render_patch as mock_render:
+                views._coming_soon_page()
         tmpl_name = mock_render.call_args[0][0]
         tmpl_vars = mock_render.call_args[0][1]
         kwargs = mock_render.call_args[1]
@@ -417,8 +418,9 @@ class TestBrevetViews(unittest.TestCase):
         })
         views = self._make_one(request)
         render_patch = patch.object(brevet_module, 'render')
-        with render_patch as mock_render:
-            views._moved_on_page()
+        with patch.object(brevet_module, 'get_membership_link'):
+            with render_patch as mock_render:
+                views._moved_on_page()
         tmpl_name = mock_render.call_args[0][0]
         tmpl_vars = mock_render.call_args[0][1]
         kwargs = mock_render.call_args[1]
