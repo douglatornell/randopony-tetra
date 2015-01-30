@@ -7,11 +7,18 @@ try:
 except ImportError:                  # pragma: no cover
     from mock import patch
 from pyramid import testing
+import pytest
 from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
 )
+
+
+@pytest.fixture(scope='module')
+def site_core_module():
+    from ..views.site import core
+    return core
 
 
 class TestSiteViews(unittest.TestCase):
@@ -84,26 +91,15 @@ class TestSiteViews(unittest.TestCase):
         self.assertEqual(request.response.status, '404 Not Found')
 
 
-class TestGetMembershipLink(unittest.TestCase):
+@pytest.mark.usefixtures('db_session', 'site_core_module')
+class TestGetMembershipLink(object):
     """Unit test for get_membership_link() function.
     """
-    def _get_target_function(self):
-        from ..views.site.core import get_membership_link
-        return get_membership_link
-
-    def setUp(self):
-        engine = create_engine('sqlite://')
-        DBSession.configure(bind=engine)
-        Base.metadata.create_all(engine)
-
-    def tearDown(self):
-        DBSession.remove()
-
-    def test_get_membership_link(self):
+    def test_get_membership_link(self, db_session, site_core_module):
         """returns club membership sign-up site URL from database
         """
         from ..models import Link
         link = Link(key='membership_link', url='https://membership_link/')
-        DBSession.add(link)
-        membership_link = self._get_target_function()()
-        self.assertEqual(membership_link, 'https://membership_link/')
+        db_session.add(link)
+        membership_link = site_core_module.get_membership_link()
+        assert membership_link == 'https://membership_link/'
