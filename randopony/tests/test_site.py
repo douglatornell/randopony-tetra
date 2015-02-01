@@ -27,11 +27,11 @@ def views(core_module, pyramid_config):
 class TestGetMembershipLink(object):
     """Unit test for get_membership_link() function.
     """
-    def test_get_membership_link(self, core_module, db_session):
+    def test_get_membership_link(self, core_module, link_model, db_session):
         """returns club membership sign-up site URL from database
         """
-        from ..models import Link
-        link = Link(key='membership_link', url='https://membership_link/')
+        link = link_model(
+            key='membership_link', url='https://membership_link/')
         db_session.add(link)
         membership_link = core_module.get_membership_link()
         assert membership_link == 'https://membership_link/'
@@ -55,11 +55,11 @@ class TestSiteViews(object):
         tmpl_vars = views.home()
         assert tmpl_vars['active_tab'] == 'home'
 
-    def test_organizer_info(self, views, db_session):
+    def test_organizer_info(self, views, email_address_model, db_session):
         """organizer_info view has expected tmpl_vars
         """
-        from ..models import EmailAddress
-        email = EmailAddress(key='admin_email', email='tom@example.com')
+        email = email_address_model(
+            key='admin_email', email='tom@example.com')
         db_session.add(email)
         tmpl_vars = views.organizer_info()
         assert tmpl_vars['active_tab'] == 'organizer-info'
