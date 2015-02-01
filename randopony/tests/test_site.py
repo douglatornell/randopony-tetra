@@ -23,7 +23,7 @@ def views(core_module, pyramid_config):
         return SiteViews(get_current_request())
 
 
-@pytest.mark.usefixtures('db_session', 'core_module')
+@pytest.mark.usefixtures('core_module', 'link_model', 'db_session')
 class TestGetMembershipLink(object):
     """Unit test for get_membership_link() function.
     """
@@ -37,7 +37,9 @@ class TestGetMembershipLink(object):
         assert membership_link == 'https://membership_link/'
 
 
-@pytest.mark.usefixtures('views', 'db_session', 'pyramid_config')
+@pytest.mark.usefixtures(
+    'views', 'email_address_model', 'db_session', 'pyramid_config',
+)
 class TestSiteViews(object):
     """Unit tests for public site views.
     """

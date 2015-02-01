@@ -5,15 +5,203 @@ from datetime import datetime
 import unittest
 from mock import (
     MagicMock,
+    Mock,
     patch,
 )
 from pyramid import testing
+from pyramid.threadlocal import get_current_request
+import pytest
 from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
     DBSession,
 )
 from ..views.site import brevet as brevet_module
+
+
+@pytest.fixture(scope='module')
+def views_core_module():
+    from ..views.site import core
+    return core
+
+
+@pytest.fixture(scope='module')
+def brevet_views_module():
+    from ..views.site import brevet
+    return brevet
+
+
+@pytest.fixture(scope='module')
+def views_class():
+    from ..views.site.brevet import BrevetViews
+    return BrevetViews
+
+
+@pytest.fixture(scope='function')
+def views(views_core_module, pyramid_config):
+    """BrevetViews instance with mocked get_membership_link() function
+    """
+    from ..views.site.brevet import BrevetViews
+    with patch.object(views_core_module, 'get_membership_link'):
+        return BrevetViews(get_current_request())
+
+
+@pytest.fixture(scope='function')
+def entry(pyramid_config):
+    from ..views.site.brevet import BrevetEntry
+    return BrevetEntry(get_current_request())
+
+
+@pytest.mark.usefixtures(
+    'views_class', 'email_address_model', 'brevet_model', 'views_core_module',
+    'brevet_views_module', 'db_session', 'pyramid_config',
+)
+class TestBrevetViews_New(object):
+    """Unit tests for public site brevet views.
+
+    *TODO*: Add integrations tests:
+
+      * Registration closed & no register button rendered after registration_end
+      * Past event template is rendered for events more than 7 days in the past
+    """
+    def test_region_list(
+        self, views_class, email_address_model, brevet_model,
+        views_core_module, db_session,
+    ):
+        """region_list view has expected tmpl_vars
+        """
+        email = email_address_model(
+            key='admin_email', email='tom@example.com')
+        db_session.add(email)
+        with patch.object(views_core_module, 'get_membership_link'):
+            views = views_class(get_current_request())
+            tmpl_vars = views.region_list()
+        assert tmpl_vars['active_tab'] == 'brevets'
+        assert tmpl_vars['regions'] == brevet_model.REGIONS
+        expected = set(brevet_model.REGIONS.keys())
+        assert set(tmpl_vars['region_brevets'].keys()) == expected
+        assert tmpl_vars['admin_email'] == 'tom@example.com'
+
+    def test_region_list_brevet(
+        self, views_class, email_address_model, brevet_model, core_model,
+        views_core_module, db_session,
+    ):
+        """region_list view has expected tmpl_vars
+        """
+        brevet = brevet_model(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+        )
+        brevet_id = str(brevet)
+        email = email_address_model(key='admin_email', email='tom@example.com')
+        db_session.add_all((brevet, email))
+        with patch.object(views_core_module, 'get_membership_link'):
+            with patch.object(core_model, 'datetime') as m_datetime:
+                m_datetime.today.return_value = datetime(
+                    2012, 11, 1, 12, 55, 42)
+                views = views_class(get_current_request())
+                tmpl_vars = views.region_list()
+        assert str(tmpl_vars['region_brevets']['LM'].one()) == brevet_id
+
+    def test_brevet_list(
+        self, views_class, email_address_model, brevet_model, core_model,
+        views_core_module, db_session,
+    ):
+        """brevet_list view has expected tmpl_vars
+        """
+        brevet = brevet_model(
+            region='LM',
+            distance=200,
+            date_time=datetime(2012, 11, 11, 7, 0, 0),
+            route_name='11th Hour',
+            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
+                       '123 Carrie Cates Ct, North Vancouver',
+            organizer_email='tracy@example.com',
+        )
+        brevet_id = str(brevet)
+        email = email_address_model(key='admin_email', email='tom@example.com')
+        db_session.add_all((brevet, email))
+        request = get_current_request()
+        request.matchdict['region'] = 'LM'
+        with patch.object(views_core_module, 'get_membership_link'):
+            with patch.object(core_model, 'datetime') as m_datetime:
+                m_datetime.today.return_value = datetime(
+                    2012, 11, 1, 12, 55, 42)
+                views = views_class(get_current_request())
+                tmpl_vars = views.brevet_list()
+        assert tmpl_vars['active_tab'] == 'brevets'
+        assert tmpl_vars['region'] == 'LM'
+        assert tmpl_vars['regions'] == brevet_model.REGIONS
+        assert str(tmpl_vars['region_brevets'].one()) == brevet_id
+        expected = {
+            'file': 'LowerMainlandQuartet.jpg',
+            'alt': 'Harrison Hotsprings Road',
+            'credit': 'Nobo Yonemitsu',
+        }
+        assert tmpl_vars['image'] == expected
+
+    def test_brevet_coming_soon_before_nov(self, views, brevet_views_module):
+        """brevet this yr not in db redirects to coming soon for Jan-Oct
+        """
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        views._coming_soon_page = Mock(
+            '_coming_soon', return_value='coming-soon body')
+        datetime_patch = patch.object(brevet_views_module, 'datetime')
+        with datetime_patch as m_datetime:
+            m_datetime.today.return_value = datetime(2013, 2, 1, 18, 35)
+            m_datetime.strptime = datetime.strptime
+            resp = views.brevet_page()
+        assert resp.body == b'coming-soon body'
+
+    def test_brevet_coming_soon_after_oct(self, views, brevet_views_module):
+        """brevet this yr or next not in db redirects to coming soon for Nov-Dec
+        """
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        views._coming_soon_page = Mock(
+            '_coming_soon', return_value='coming-soon body')
+        datetime_patch = patch.object(brevet_views_module, 'datetime')
+        with datetime_patch as m_datetime:
+            m_datetime.today.return_value = datetime(2012, 11, 1, 18, 1)
+            m_datetime.strptime = datetime.strptime
+            resp = views.brevet_page()
+        assert resp.body == b'coming-soon body'
+
+    def test_brevet_coming_soon_page(self, views, brevet_views_module):
+        """_coming_soon_page calls render with expected args
+        """
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        with patch.object(brevet_views_module, 'get_membership_link'):
+            with patch.object(brevet_views_module, 'render') as m_render:
+                views._coming_soon_page()
+        tmpl_name = m_render.call_args[0][0]
+        tmpl_vars = m_render.call_args[0][1]
+        kwargs = m_render.call_args[1]
+        assert tmpl_name == 'coming-soon.mako'
+        assert 'brevets' in tmpl_vars
+        assert 'populaires' in tmpl_vars
+        assert tmpl_vars['active_tab'] == 'brevets'
+        assert tmpl_vars['maybe_brevet'] == 'VI200 03Mar2013'
+        assert kwargs['request'] == request
 
 
 class TestBrevetViews(unittest.TestCase):
@@ -43,153 +231,6 @@ class TestBrevetViews(unittest.TestCase):
     def tearDown(self):
         DBSession.remove()
         testing.tearDown()
-
-    def test_region_list(self):
-        """region_list view has expected tmpl_vars
-        """
-        from ..models import (
-            Brevet,
-            EmailAddress,
-        )
-        email = EmailAddress(key='admin_email', email='tom@example.com')
-        DBSession.add(email)
-        request = testing.DummyRequest()
-        views = self._make_one(request)
-        tmpl_vars = views.region_list()
-        self.assertEqual(tmpl_vars['active_tab'], 'brevets')
-        self.assertEqual(tmpl_vars['regions'], Brevet.REGIONS)
-        self.assertEqual(
-            set(tmpl_vars['region_brevets'].keys()), set(Brevet.REGIONS.keys()))
-        self.assertEqual(tmpl_vars['admin_email'], 'tom@example.com')
-
-    def test_region_list_brevet(self):
-        """region_list view has expected tmpl_vars
-        """
-        from ..models import core
-        from ..models import (
-            Brevet,
-            EmailAddress,
-        )
-        brevet = Brevet(
-            region='LM',
-            distance=200,
-            date_time=datetime(2012, 11, 11, 7, 0, 0), route_name='11th Hour',
-            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
-                       '123 Carrie Cates Ct, North Vancouver',
-            organizer_email='tracy@example.com',
-        )
-        brevet_id = str(brevet)
-        email = EmailAddress(key='admin_email', email='tom@example.com')
-        DBSession.add_all((brevet, email))
-        request = testing.DummyRequest()
-        with patch.object(core, 'datetime') as mock_datetime:
-            mock_datetime.today.return_value = datetime(2012, 11, 1, 12, 55, 42)
-            views = self._make_one(request)
-            tmpl_vars = views.region_list()
-        self.assertEqual(
-            str(tmpl_vars['region_brevets']['LM'].one()), brevet_id)
-
-    def test_brevet_list(self):
-        """brevet_list view has expected tmpl_vars
-        """
-        from ..models import core
-        from ..models import (
-            Brevet,
-            EmailAddress,
-        )
-        brevet = Brevet(
-            region='LM',
-            distance=200,
-            date_time=datetime(2012, 11, 11, 7, 0, 0), route_name='11th Hour',
-            start_locn='Bean Around the World Coffee, Lonsdale Quay, '
-                       '123 Carrie Cates Ct, North Vancouver',
-            organizer_email='tracy@example.com',
-        )
-        brevet_id = str(brevet)
-        email = EmailAddress(key='admin_email', email='tom@example.com')
-        DBSession.add_all((brevet, email))
-        request = testing.DummyRequest()
-        request.matchdict['region'] = 'LM'
-        with patch.object(core, 'datetime') as mock_datetime:
-            mock_datetime.today.return_value = datetime(2012, 11, 1, 12, 55, 42)
-            views = self._make_one(request)
-            tmpl_vars = views.brevet_list()
-        self.assertEqual(tmpl_vars['active_tab'], 'brevets')
-        self.assertEqual(tmpl_vars['region'], 'LM')
-        self.assertEqual(tmpl_vars['regions'], Brevet.REGIONS)
-        self.assertEqual(
-            str(tmpl_vars['region_brevets'].one()), brevet_id)
-        self.assertEqual(
-            tmpl_vars['image'], {
-                'file': 'LowerMainlandQuartet.jpg',
-                'alt': 'Harrison Hotsprings Road',
-                'credit': 'Nobo Yonemitsu',
-            })
-
-    def test_brevet_coming_soon_before_nov(self):
-        """brevet this yr not in db redirects to coming soon for Jan-Oct
-        """
-        from ..views.site import brevet as brevet_module
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2013',
-        })
-        views = self._make_one(request)
-        views._coming_soon_page = MagicMock(
-            '_coming_soon', return_value='coming-soon body')
-        datetime_patch = patch.object(brevet_module, 'datetime')
-        with datetime_patch as mock_datetime:
-            mock_datetime.today.return_value = datetime(2013, 2, 1, 18, 35)
-            mock_datetime.strptime = datetime.strptime
-            resp = views.brevet_page()
-        self.assertEqual(resp.body, b'coming-soon body')
-
-    def test_brevet_coming_soon_after_oct(self):
-        """brevet this yr or next not in db redirects to coming soon for Nov-Dec
-        """
-        from ..views.site import brevet as brevet_module
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2013',
-        })
-        views = self._make_one(request)
-        views._coming_soon_page = MagicMock(
-            '_coming_soon', return_value='coming-soon body')
-        datetime_patch = patch.object(brevet_module, 'datetime')
-        with datetime_patch as mock_datetime:
-            mock_datetime.today.return_value = datetime(2012, 11, 1, 18, 1)
-            mock_datetime.strptime = datetime.strptime
-            resp = views.brevet_page()
-        self.assertEqual(resp.body, b'coming-soon body')
-
-    def test_brevet_coming_soon_page(self):
-        """_coming_soon_page calls render with expected args
-        """
-        from ..views.site import brevet as brevet_module
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2013',
-        })
-        views = self._make_one(request)
-        render_patch = patch.object(brevet_module, 'render')
-        with patch.object(brevet_module, 'get_membership_link'):
-            with render_patch as mock_render:
-                views._coming_soon_page()
-        tmpl_name = mock_render.call_args[0][0]
-        tmpl_vars = mock_render.call_args[0][1]
-        kwargs = mock_render.call_args[1]
-        self.assertEqual(tmpl_name, 'coming-soon.mako')
-        self.assertIn('brevets', tmpl_vars)
-        self.assertIn('populaires', tmpl_vars)
-        self.assertEqual(tmpl_vars['active_tab'], 'brevets')
-        self.assertEqual(tmpl_vars['maybe_brevet'], 'VI200 03Mar2013')
-        self.assertEqual(kwargs['request'], request)
 
     def test_brevet_not_in_db_and_not_coming_soon(self):
         """brevet date not in db & outside coming soon range raises 404
@@ -509,7 +550,10 @@ class TestBrevetViews(unittest.TestCase):
         self.assertEqual(resp, 'tom@example.com, dick@example.com')
 
 
-class TestBrevetEntry(unittest.TestCase):
+@pytest.mark.usefixtures(
+    'entry', 'brevet_model', 'db_session', 'pyramid_config',
+)
+class TestBrevetEntry(object):
     """Unit tests for brevet pre-registration form handler & views.
 
     *TODO*: Add integrations tests:
@@ -517,56 +561,16 @@ class TestBrevetEntry(unittest.TestCase):
       * Valid pre-registration renders confirmation message
       * Duplicate pre-registration renders error message
     """
-    def _get_target_class(self):
-        from ..views.site.brevet import BrevetEntry
-        return BrevetEntry
-
-    def _make_one(self, *args, **kwargs):
-        return self._get_target_class()(*args, **kwargs)
-
-    def setUp(self):
-        from ..models import EmailAddress
-        self.config = testing.setUp(
-            settings={
-                'mako.directories': 'randopony:templates',
-                'google_drive.username': 'randopony',
-                'google_drive.password': 'sEcReT',
-            })
-        self.config.include('pyramid_mailer.testing')
-        self.config.add_route('brevet', '/brevets/{region}/{distance}/{date}')
-        self.config.add_route(
-            'brevet.rider_emails',
-            '/brevet/{region}/{distance}/{date}/rider_emails/{uuid}')
-        engine = create_engine('sqlite://')
-        DBSession.configure(bind=engine)
-        Base.metadata.create_all(engine)
-        from_randopony = EmailAddress(
-            key='from_randopony',
-            email='randopony@randonneurs.bc.ca',
-        )
-        admin_email = EmailAddress(
-            key='admin_email',
-            email='djl@douglatornell.ca',
-        )
-        DBSession.add_all((from_randopony, admin_email))
-
-    def tearDown(self):
-        DBSession.remove()
-        testing.tearDown()
-
-    def test_redirect_url(self):
-        """_redirect_url returns expected brevet page URL
-        """
-        request = testing.DummyRequest()
-        entry = self._make_one(request)
+    def test_redirect_url(self, entry, pyramid_config):
+        pyramid_config.add_route(
+            'brevet', '/brevets/{region}/{distance}/{date}')
         url = entry._redirect_url('VI', 200, '03Mar2013')
-        self.assertEqual(url, 'http://example.com/brevets/VI/200/03Mar2013')
+        assert url == 'http://example.com/brevets/VI/200/03Mar2013'
 
-    def test_show(self):
-        """show returns expected template variables
-        """
-        from ..models import Brevet
-        brevet = Brevet(
+    def test_show(self, entry, brevet_model, db_session, pyramid_config):
+        pyramid_config.add_route(
+            'brevet', '/brevets/{region}/{distance}/{date}')
+        brevet = brevet_model(
             region='VI',
             distance=200,
             date_time=datetime(2013, 3, 3, 7, 0),
@@ -575,22 +579,19 @@ class TestBrevetEntry(unittest.TestCase):
             organizer_email='mcroy@example.com',
             registration_end=datetime(2013, 3, 2, 12, 0),
         )
-        DBSession.add(brevet)
-        request = testing.DummyRequest()
-        request.matchdict.update({
+        db_session.add(brevet)
+        get_current_request().matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
         })
-        entry = self._make_one(request)
-        tmpl_vars = entry.show(MagicMock(name='form'))
-        self.assertEqual(tmpl_vars['active_tab'], 'brevets')
-        self.assertIn('brevets', tmpl_vars)
-        self.assertIn('populaires', tmpl_vars)
-        self.assertEqual(tmpl_vars['brevet'], brevet)
-        self.assertEqual(
-            tmpl_vars['cancel_url'],
-            'http://example.com/brevets/VI/200/03Mar2013')
+        tmpl_vars = entry.show(Mock(name='form'))
+        assert tmpl_vars['active_tab'] == 'brevets'
+        assert 'brevets' in tmpl_vars
+        assert 'populaires' in tmpl_vars
+        assert tmpl_vars['brevet'] == brevet
+        expected = 'http://example.com/brevets/VI/200/03Mar2013'
+        assert tmpl_vars['cancel_url'] == expected
 
 
 class TestMakeSpreadsheetRowDict(unittest.TestCase):
