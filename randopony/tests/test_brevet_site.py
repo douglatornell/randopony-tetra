@@ -156,8 +156,7 @@ class TestBrevetViews_New(object):
         })
         views._coming_soon_page = Mock(
             '_coming_soon', return_value='coming-soon body')
-        datetime_patch = patch.object(brevet_views_module, 'datetime')
-        with datetime_patch as m_datetime:
+        with patch.object(brevet_views_module, 'datetime') as m_datetime:
             m_datetime.today.return_value = datetime(2013, 2, 1, 18, 35)
             m_datetime.strptime = datetime.strptime
             resp = views.brevet_page()
@@ -174,8 +173,7 @@ class TestBrevetViews_New(object):
         })
         views._coming_soon_page = Mock(
             '_coming_soon', return_value='coming-soon body')
-        datetime_patch = patch.object(brevet_views_module, 'datetime')
-        with datetime_patch as m_datetime:
+        with patch.object(brevet_views_module, 'datetime') as m_datetime:
             m_datetime.today.return_value = datetime(2012, 11, 1, 18, 1)
             m_datetime.strptime = datetime.strptime
             resp = views.brevet_page()
@@ -202,6 +200,64 @@ class TestBrevetViews_New(object):
         assert tmpl_vars['active_tab'] == 'brevets'
         assert tmpl_vars['maybe_brevet'] == 'VI200 03Mar2013'
         assert kwargs['request'] == request
+
+    def test_brevet_not_in_db_and_not_coming_soon(
+        self, views, brevet_views_module,
+    ):
+        """brevet date not in db & outside coming soon range raises 404
+        """
+        from pyramid.httpexceptions import HTTPNotFound
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2014',
+        })
+        with patch.object(brevet_views_module, 'datetime') as m_datetime:
+            m_datetime.today.return_value = datetime(2013, 2, 13, 18, 43)
+            m_datetime.strptime = datetime.strptime
+            with pytest.raises(HTTPNotFound):
+                views.brevet_page()
+
+    def test_brevet_page_registration_open(
+        self, views_class, brevet_model, brevet_views_module,
+        views_core_module, db_session,
+    ):
+        """brevet_page view has expected tmpl_vars when registration is open
+        """
+        brevet = brevet_model(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+        )
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        get_membership_link_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        get_entry_form_url_patch = patch.object(
+            brevet_views_module, 'get_entry_form_url')
+        get_brevet_patch = patch.object(
+            brevet_views_module, 'get_brevet', return_value=brevet)
+        datetime_patch = patch.object(brevet_views_module, 'datetime')
+        with get_membership_link_patch:
+            with get_entry_form_url_patch:
+                with get_brevet_patch:
+                    with datetime_patch as m_dt:
+                        m_dt.utcnow.return_value = datetime(2013, 2, 22, 23, 18)
+                        m_dt.today.return_value = datetime(2013, 2, 22, 23, 18)
+                        views = views_class(get_current_request())
+                        tmpl_vars = views.brevet_page()
+        assert tmpl_vars['active_tab'] == 'brevets'
+        assert tmpl_vars['brevet'] == brevet
+        assert not tmpl_vars['registration_closed']
 
 
 class TestBrevetViews(unittest.TestCase):
@@ -231,62 +287,6 @@ class TestBrevetViews(unittest.TestCase):
     def tearDown(self):
         DBSession.remove()
         testing.tearDown()
-
-    def test_brevet_not_in_db_and_not_coming_soon(self):
-        """brevet date not in db & outside coming soon range raises 404
-        """
-        from pyramid.httpexceptions import HTTPNotFound
-        from ..views.site import brevet as brevet_module
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2014',
-        })
-        views = self._make_one(request)
-        datetime_patch = patch.object(brevet_module, 'datetime')
-        with datetime_patch as mock_datetime:
-            mock_datetime.today.return_value = datetime(2013, 2, 13, 18, 43)
-            mock_datetime.strptime = datetime.strptime
-            with self.assertRaises(HTTPNotFound):
-                views.brevet_page()
-
-    def test_brevet_page_registration_open(self):
-        """brevet_page view has expected tmpl_vars when registration is open
-        """
-        from ..models import (
-            Brevet,
-            Link,
-        )
-        from ..views.site import brevet as brevet_module
-        brevet = Brevet(
-            region='VI',
-            distance=200,
-            date_time=datetime(2013, 3, 3, 7, 0),
-            route_name='Chilly 200',
-            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
-            organizer_email='mcroy@example.com',
-            registration_end=datetime(2013, 3, 2, 12, 0),
-        )
-        entry_form_link = Link(
-            key='entry_form',
-            url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-        )
-        DBSession.add_all((brevet, entry_form_link))
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2013',
-        })
-        views = self._make_one(request)
-        with patch.object(brevet_module, 'datetime') as mock_datetime:
-            mock_datetime.utcnow.return_value = datetime(2011, 3, 22, 23, 18)
-            mock_datetime.today.return_value = datetime(2011, 3, 22, 23, 18)
-            tmpl_vars = views.brevet_page()
-        self.assertEqual(tmpl_vars['active_tab'], 'brevets')
-        self.assertEqual(tmpl_vars['brevet'], brevet)
-        self.assertFalse(tmpl_vars['registration_closed'])
 
     def test_brevet_page_registration_closed(self):
         """brevet_page view has expected tmpl_vars when registration closed

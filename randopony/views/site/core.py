@@ -70,3 +70,13 @@ def get_membership_link():
         .one()[0]
     )
     return membership_link
+
+
+def get_entry_form_url():
+    """Return club event entry form URL from database.
+    """
+    entry_form_url = (
+        DBSession.query(Link.url)
+        .filter_by(key='entry_form')
+        .one()[0])
+    return entry_form_url
