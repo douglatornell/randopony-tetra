@@ -23,8 +23,15 @@ def db_session():
 @pytest.yield_fixture(scope='function')
 def pyramid_config():
     config = testing.setUp(request=testing.DummyRequest())
+    config.registry.settings['timezone'] = 'Canada/Pacific'
     yield config
     testing.tearDown()
+
+
+@pytest.fixture(scope='session')
+def core_model():
+    from ..models import core
+    return core
 
 
 @pytest.fixture(scope='session')
@@ -37,3 +44,9 @@ def link_model():
 def email_address_model():
     from ..models import EmailAddress
     return EmailAddress
+
+
+@pytest.fixture(scope='session')
+def brevet_model():
+    from ..models import Brevet
+    return Brevet
