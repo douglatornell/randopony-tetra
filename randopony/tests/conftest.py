@@ -25,3 +25,15 @@ def pyramid_config():
     config = testing.setUp(request=testing.DummyRequest())
     yield config
     testing.tearDown()
+
+
+@pytest.fixture(scope='session')
+def link_model():
+    from ..models import Link
+    return Link
+
+
+@pytest.fixture(scope='session')
+def email_address_model():
+    from ..models import EmailAddress
+    return EmailAddress
