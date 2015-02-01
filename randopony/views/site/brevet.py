@@ -23,6 +23,7 @@ from pyramid.view import view_config
 import pytz
 import requests
 from .core import (
+    get_entry_form_url,
     get_membership_link,
     SiteViews,
 )
@@ -134,16 +135,12 @@ class BrevetViews(SiteViews):
         if self._in_past():
             body = self._moved_on_page()
             return Response(body, status='200 OK')
-        entry_form_url = (
-            DBSession.query(Link.url)
-            .filter_by(key='entry_form')
-            .one()[0])
         self.tmpl_vars.update({
             'brevet': self.brevet,
             'REGIONS': Brevet.REGIONS,
             'registration_closed': self._registration_closed,
             'event_started': self._event_started,
-            'entry_form_url': entry_form_url,
+            'entry_form_url': get_entry_form_url(),
         })
         return self.tmpl_vars
 
