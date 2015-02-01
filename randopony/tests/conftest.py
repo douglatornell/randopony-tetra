@@ -2,6 +2,7 @@
 """Fixtures for RandoPony app test suite.
 """
 import pytest
+from pyramid import testing
 from sqlalchemy import create_engine
 
 from ..models.meta import (
@@ -17,3 +18,10 @@ def db_session():
     Base.metadata.create_all(engine)
     yield DBSession
     DBSession.remove()
+
+
+@pytest.yield_fixture(scope='function')
+def pyramid_config():
+    config = testing.setUp(request=testing.DummyRequest())
+    yield config
+    testing.tearDown()
