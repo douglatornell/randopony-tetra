@@ -25,6 +25,7 @@ import requests
 from .core import (
     get_entry_form_url,
     get_membership_link,
+    get_results_link,
     SiteViews,
 )
 from ..admin.google_drive import google_drive_login
@@ -205,10 +206,6 @@ class BrevetViews(SiteViews):
         return body
 
     def _moved_on_page(self):
-        results_link = (
-            DBSession.query(Link.url)
-            .filter_by(key='results_link')
-            .one()[0])
         body = render(
             'moved-on.mako',
             {
@@ -216,7 +213,7 @@ class BrevetViews(SiteViews):
                 'brevets': self.tmpl_vars['brevets'],
                 'populaires': self.tmpl_vars['populaires'],
                 'event': self.brevet,
-                'results_link': results_link,
+                'results_link': get_results_link(),
                 'membership_link': get_membership_link(),
             },
             request=self.request)

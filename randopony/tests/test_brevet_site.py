@@ -221,7 +221,7 @@ class TestBrevetViews_New(object):
 
     def test_brevet_page_registration_open(
         self, views_class, brevet_model, brevet_views_module,
-        views_core_module, db_session,
+        views_core_module,
     ):
         """brevet_page view has expected tmpl_vars when registration is open
         """
@@ -240,24 +240,211 @@ class TestBrevetViews_New(object):
             'distance': '200',
             'date': '03Mar2013',
         })
-        get_membership_link_patch = patch.object(
+        gml_patch = patch.object(
             views_core_module, 'get_membership_link')
-        get_entry_form_url_patch = patch.object(
+        gefu_patch = patch.object(
             brevet_views_module, 'get_entry_form_url')
-        get_brevet_patch = patch.object(
+        gb_patch = patch.object(
             brevet_views_module, 'get_brevet', return_value=brevet)
-        datetime_patch = patch.object(brevet_views_module, 'datetime')
-        with get_membership_link_patch:
-            with get_entry_form_url_patch:
-                with get_brevet_patch:
-                    with datetime_patch as m_dt:
-                        m_dt.utcnow.return_value = datetime(2013, 2, 22, 23, 18)
-                        m_dt.today.return_value = datetime(2013, 2, 22, 23, 18)
-                        views = views_class(get_current_request())
-                        tmpl_vars = views.brevet_page()
+        with gml_patch, gefu_patch, gb_patch:
+            with patch.object(brevet_views_module, 'datetime') as m_dt:
+                m_dt.utcnow.return_value = datetime(2013, 2, 22, 23, 18)
+                m_dt.today.return_value = datetime(2013, 2, 22, 23, 18)
+                views = views_class(get_current_request())
+                tmpl_vars = views.brevet_page()
         assert tmpl_vars['active_tab'] == 'brevets'
         assert tmpl_vars['brevet'] == brevet
         assert not tmpl_vars['registration_closed']
+
+    def test_brevet_page_registration_closed(
+        self, views_class, brevet_model, brevet_views_module,
+        views_core_module,
+    ):
+        """brevet_page view has expected tmpl_vars when registration closed
+        """
+        brevet = brevet_model(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+        )
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        gml_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        gefu_patch = patch.object(
+            brevet_views_module, 'get_entry_form_url')
+        gb_patch = patch.object(
+            brevet_views_module, 'get_brevet', return_value=brevet)
+        with gml_patch, gefu_patch, gb_patch:
+            with patch.object(brevet_views_module, 'datetime') as m_dt:
+                m_dt.utcnow.return_value = datetime(2013, 3, 2, 23, 24)
+                m_dt.today.return_value = datetime(2013, 2, 2, 23, 24)
+                views = views_class(get_current_request())
+                tmpl_vars = views.brevet_page()
+        assert tmpl_vars['registration_closed']
+
+    def test_brevet_page_event_started(
+        self, views_class, brevet_model, brevet_views_module,
+        views_core_module,
+    ):
+        """brevet_page view has expected tmpl_vars when event has started
+        """
+        brevet = brevet_model(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+        )
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        gml_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        gefu_patch = patch.object(
+            brevet_views_module, 'get_entry_form_url')
+        gb_patch = patch.object(
+            brevet_views_module, 'get_brevet', return_value=brevet)
+        with gml_patch, gefu_patch, gb_patch:
+            with patch.object(brevet_views_module, 'datetime') as m_dt:
+                m_dt.utcnow.return_value = datetime(2013, 3, 3, 15, 1)
+                m_dt.today.return_value = datetime(2013, 3, 3, 15, 1)
+                views = views_class(get_current_request())
+                tmpl_vars = views.brevet_page()
+        assert tmpl_vars['event_started']
+
+    def test_brevet_page_event_not_started(
+        self, views_class, brevet_model, brevet_views_module,
+        views_core_module,
+    ):
+        """brevet_page view has exp tmpl_vars up to 1 hr after event start
+        """
+        brevet = brevet_model(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+        )
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        gml_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        gefu_patch = patch.object(
+            brevet_views_module, 'get_entry_form_url')
+        gb_patch = patch.object(
+            brevet_views_module, 'get_brevet', return_value=brevet)
+        with gml_patch, gefu_patch, gb_patch:
+            with patch.object(brevet_views_module, 'datetime') as m_dt:
+                m_dt.utcnow.return_value = datetime(2013, 3, 3, 14, 59)
+                m_dt.today.return_value = datetime(2013, 3, 3, 14, 59)
+                views = views_class(get_current_request())
+                tmpl_vars = views.brevet_page()
+        assert not tmpl_vars['event_started']
+
+    def test_brevet_page_past_event(
+        self, views_class, brevet_model, brevet_views_module,
+        views_core_module,
+    ):
+        """brevet_page view calls _moved_on_page for event >7 days ago
+        """
+        brevet = brevet_model(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+        )
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        gml_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        gefu_patch = patch.object(
+            brevet_views_module, 'get_entry_form_url')
+        gb_patch = patch.object(
+            brevet_views_module, 'get_brevet', return_value=brevet)
+        with gml_patch, gefu_patch, gb_patch:
+            with patch.object(brevet_views_module, 'datetime') as m_dt:
+                m_dt.today.return_value = datetime(2013, 3, 11, 18, 47)
+                views = views_class(get_current_request())
+                views._moved_on_page = Mock(
+                    '_moved_on', return_value='moved-on body')
+                resp = views.brevet_page()
+        assert resp.body == b'moved-on body'
+
+    def test_brevet_moved_on_page(
+        self, views_class, brevet_model, brevet_views_module,
+        views_core_module,
+    ):
+        """_moved_on_page calls render with expected args
+        """
+        brevet = brevet_model(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+        )
+        request = get_current_request()
+        request.matchdict.update({
+            'region': 'VI',
+            'distance': '200',
+            'date': '03Mar2013',
+        })
+        gml_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        gml_bv_patch = patch.object(
+            brevet_views_module, 'get_membership_link',
+            return_value='https://example.com/membership_link')
+        gb_patch = patch.object(
+            brevet_views_module, 'get_brevet', return_value=brevet)
+        grl_patch = patch.object(
+            brevet_views_module, 'get_results_link',
+            return_value='https://example.com/browse/randonnees')
+        with gml_patch, gml_bv_patch, gb_patch, grl_patch:
+            with patch.object(brevet_views_module, 'render') as m_render:
+                views = views_class(get_current_request())
+                views._moved_on_page()
+        tmpl_name = m_render.call_args[0][0]
+        tmpl_vars = m_render.call_args[0][1]
+        kwargs = m_render.call_args[1]
+        assert tmpl_name == 'moved-on.mako'
+        assert tmpl_vars['active_tab'] == 'brevets'
+        assert 'brevets' in tmpl_vars
+        assert 'populaires' in tmpl_vars
+        assert str(tmpl_vars['event']) == 'VI200 03Mar2013'
+        expected = 'https://example.com/browse/randonnees'
+        assert tmpl_vars['results_link'] == expected
+        expected = 'https://example.com/membership_link'
+        assert tmpl_vars['membership_link'] == expected
+        assert kwargs['request'] == request
 
 
 class TestBrevetViews(unittest.TestCase):
@@ -287,193 +474,6 @@ class TestBrevetViews(unittest.TestCase):
     def tearDown(self):
         DBSession.remove()
         testing.tearDown()
-
-    def test_brevet_page_registration_closed(self):
-        """brevet_page view has expected tmpl_vars when registration closed
-        """
-        from ..models import (
-            Brevet,
-            Link,
-        )
-        from ..views.site import brevet as brevet_module
-        brevet = Brevet(
-            region='VI',
-            distance=200,
-            date_time=datetime(2013, 3, 3, 7, 0),
-            route_name='Chilly 200',
-            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
-            organizer_email='mcroy@example.com',
-            registration_end=datetime(2013, 3, 2, 12, 0),
-        )
-        entry_form_link = Link(
-            key='entry_form',
-            url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-        )
-        DBSession.add_all((brevet, entry_form_link))
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2013',
-        })
-        views = self._make_one(request)
-        with patch.object(brevet_module, 'datetime') as mock_datetime:
-            mock_datetime.utcnow.return_value = datetime(2013, 3, 2, 23, 24)
-            mock_datetime.today.return_value = datetime(2013, 3, 2, 23, 24)
-            tmpl_vars = views.brevet_page()
-        self.assertTrue(tmpl_vars['registration_closed'])
-
-    def test_brevet_page_event_started(self):
-        """brevet_page view has expected tmpl_vars when event has started
-        """
-        from ..models import (
-            Brevet,
-            Link,
-        )
-        from ..views.site import brevet as brevet_module
-        brevet = Brevet(
-            region='VI',
-            distance=200,
-            date_time=datetime(2013, 3, 3, 7, 0),
-            route_name='Chilly 200',
-            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
-            organizer_email='mcroy@example.com',
-            registration_end=datetime(2013, 3, 2, 12, 0),
-        )
-        entry_form_link = Link(
-            key='entry_form',
-            url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-        )
-        DBSession.add_all((brevet, entry_form_link))
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2013',
-        })
-        views = self._make_one(request)
-        with patch.object(brevet_module, 'datetime') as mock_datetime:
-            mock_datetime.utcnow.return_value = datetime(2013, 3, 3, 15, 1)
-            mock_datetime.today.return_value = datetime(2013, 3, 3, 15, 1)
-            tmpl_vars = views.brevet_page()
-        self.assertTrue(tmpl_vars['event_started'])
-
-    def test_brevet_page_event_not_started(self):
-        """brevet_page view has exp tmpl_vars up to 1 hr after event start
-        """
-        from ..models import (
-            Brevet,
-            Link,
-        )
-        from ..views.site import brevet as brevet_module
-        brevet = Brevet(
-            region='VI',
-            distance=200,
-            date_time=datetime(2013, 3, 3, 7, 0),
-            route_name='Chilly 200',
-            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
-            organizer_email='mcroy@example.com',
-            registration_end=datetime(2013, 3, 2, 12, 0),
-        )
-        entry_form_link = Link(
-            key='entry_form',
-            url='http://www.randonneurs.bc.ca/organize/eventform.pdf',
-        )
-        DBSession.add_all((brevet, entry_form_link))
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2013',
-        })
-        views = self._make_one(request)
-        with patch.object(brevet_module, 'datetime') as mock_datetime:
-            mock_datetime.utcnow.return_value = datetime(2013, 3, 3, 14, 59)
-            mock_datetime.today.return_value = datetime(2013, 3, 3, 14, 59)
-            tmpl_vars = views.brevet_page()
-        self.assertFalse(tmpl_vars['event_started'])
-
-    def test_brevet_page_past_event(self):
-        """brevet_page view calls _moved_on_page for event >7 days ago
-        """
-        from ..models import (
-            Link,
-            Brevet,
-        )
-        from ..views.site import brevet as brevet_module
-        brevet = Brevet(
-            region='VI',
-            distance=200,
-            date_time=datetime(2013, 3, 3, 7, 0),
-            route_name='Chilly 200',
-            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
-            organizer_email='mcroy@example.com',
-            registration_end=datetime(2013, 3, 2, 12, 0),
-        )
-        results_link = Link(
-            key='results_link',
-            url='https://database.randonneurs.bc.ca/browse/randonnees',
-        )
-        DBSession.add_all((brevet, results_link))
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2013',
-        })
-        views = self._make_one(request)
-        views._moved_on_page = MagicMock(
-            '_moved_on', return_value='moved-on body')
-        with patch.object(brevet_module, 'datetime') as mock_datetime:
-            mock_datetime.today.return_value = datetime(2013, 3, 11, 18, 47)
-            resp = views.brevet_page()
-        self.assertEqual(resp.body, b'moved-on body')
-
-    def test_brevet_moved_on_page(self):
-        """_moved_on_page calls render with expected args
-        """
-        from ..models import (
-            Brevet,
-            Link,
-        )
-        from ..views.site import brevet as brevet_module
-        brevet = Brevet(
-            region='VI',
-            distance=200,
-            date_time=datetime(2013, 3, 3, 7, 0),
-            route_name='Chilly 200',
-            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
-            organizer_email='mcroy@example.com',
-            registration_end=datetime(2013, 3, 2, 12, 0),
-        )
-        results_link = Link(
-            key='results_link',
-            url='https://database.randonneurs.bc.ca/browse/randonnees',
-        )
-        DBSession.add_all((brevet, results_link))
-        request = testing.DummyRequest()
-        request.matchdict.update({
-            'region': 'VI',
-            'distance': '200',
-            'date': '03Mar2013',
-        })
-        views = self._make_one(request)
-        render_patch = patch.object(brevet_module, 'render')
-        with patch.object(brevet_module, 'get_membership_link'):
-            with render_patch as mock_render:
-                views._moved_on_page()
-        tmpl_name = mock_render.call_args[0][0]
-        tmpl_vars = mock_render.call_args[0][1]
-        kwargs = mock_render.call_args[1]
-        self.assertEqual(tmpl_name, 'moved-on.mako')
-        self.assertIn('brevets', tmpl_vars)
-        self.assertIn('populaires', tmpl_vars)
-        self.assertEqual(tmpl_vars['active_tab'], 'brevets')
-        self.assertEqual(str(tmpl_vars['event']), 'VI200 03Mar2013')
-        self.assertEqual(
-            tmpl_vars['results_link'],
-            'https://database.randonneurs.bc.ca/browse/randonnees')
-        self.assertEqual(kwargs['request'], request)
 
     @patch.object(brevet_module, 'get_brevet')
     def test_rider_emails_invalid_uuid(self, mock_get_brevet):
