@@ -80,3 +80,13 @@ def get_entry_form_url():
         .filter_by(key='entry_form')
         .one()[0])
     return entry_form_url
+
+
+def get_results_link():
+    """Return club event results page URL from database.
+    """
+    results_link = (
+        DBSession.query(Link.url)
+        .filter_by(key='results_link')
+        .one()[0])
+    return results_link

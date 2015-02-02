@@ -51,6 +51,22 @@ class TestGetEntryFormURL(object):
         assert entry_form_url == 'http://entry_form.pdf/'
 
 
+@pytest.mark.usefixtures('core_module', 'link_model', 'db_session')
+class TestGetResultsLink(object):
+    """Unit test for get_entry_form_url() function.
+    """
+    def test_get_entry_form_url(self, core_module, link_model, db_session):
+        """returns club event results page URL from database
+        """
+        link = link_model(
+            key='entry_form',
+            url='https://database.randonneurs.bc.ca/browse/randonnees')
+        db_session.add(link)
+        entry_form_url = core_module.get_entry_form_url()
+        expected = 'https://database.randonneurs.bc.ca/browse/randonnees'
+        assert entry_form_url == expected
+
+
 @pytest.mark.usefixtures(
     'views', 'email_address_model', 'db_session', 'pyramid_config',
 )
