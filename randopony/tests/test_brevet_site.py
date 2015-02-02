@@ -3,19 +3,15 @@
 """
 from datetime import datetime
 import unittest
+
 from mock import (
     MagicMock,
     Mock,
     patch,
 )
-from pyramid import testing
 from pyramid.threadlocal import get_current_request
 import pytest
-from sqlalchemy import create_engine
-from ..models.meta import (
-    Base,
-    DBSession,
-)
+
 from ..views.site import brevet as brevet_module
 
 
@@ -56,7 +52,7 @@ def entry(pyramid_config):
     'views_class', 'email_address_model', 'brevet_model', 'views_core_module',
     'brevet_views_module', 'db_session', 'pyramid_config',
 )
-class TestBrevetViews_New(object):
+class TestBrevetViews(object):
     """Unit tests for public site brevet views.
 
     *TODO*: Add integrations tests:
@@ -446,108 +442,103 @@ class TestBrevetViews_New(object):
         assert tmpl_vars['membership_link'] == expected
         assert kwargs['request'] == request
 
-
-class TestBrevetViews(unittest.TestCase):
-    """Unit tests for public site brevet views.
-
-    *TODO*: Add integrations tests:
-
-      * Registration closed & no register button rendered after registration_end
-      * Past event template is rendered for events more than 7 days in the past
-    """
-    def _get_target_class(self):
-        from ..views.site.brevet import BrevetViews
-        return BrevetViews
-
-    def _make_one(self, *args, **kwargs):
-        from ..views.site import core
-        with patch.object(core, 'get_membership_link'):
-            return self._get_target_class()(*args, **kwargs)
-
-    def setUp(self):
-        self.config = testing.setUp()
-        self.config.registry.settings['timezone'] = 'Canada/Pacific'
-        engine = create_engine('sqlite://')
-        DBSession.configure(bind=engine)
-        Base.metadata.create_all(engine)
-
-    def tearDown(self):
-        DBSession.remove()
-        testing.tearDown()
-
-    @patch.object(brevet_module, 'get_brevet')
-    def test_rider_emails_invalid_uuid(self, mock_get_brevet):
+    def test_rider_emails_invalid_uuid(
+        self, views_class, brevet_views_module, views_core_module,
+    ):
         """rider_emails raises 404 when request uuid doesn't match database
         """
         from pyramid.httpexceptions import HTTPNotFound
-        mock_get_brevet.return_value = MagicMock(name='brevet', uuid='bar')
-        request = testing.DummyRequest()
+        request = get_current_request()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
             'uuid': 'foo',
         })
-        views = self._make_one(request)
-        with self.assertRaises(HTTPNotFound):
-            views.rider_emails()
+        gml_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        gb_patch = patch.object(
+            brevet_views_module, 'get_brevet',
+            return_value=Mock(name='brevet', uuid='bar'))
+        with gml_patch, gb_patch:
+            views = views_class(get_current_request())
+            with pytest.raises(HTTPNotFound):
+                views.rider_emails()
 
-    @patch.object(brevet_module, 'get_brevet')
-    def test_rider_emails_past_event(self, mock_get_brevet):
+    def test_rider_emails_past_event(
+        self, views_class, brevet_views_module, views_core_module,
+    ):
         """rider_emails raises 404 when event is beyond in_past horizon
         """
         from pyramid.httpexceptions import HTTPNotFound
-        mock_get_brevet.return_value = MagicMock(name='brevet', uuid='foo')
-        request = testing.DummyRequest()
+        request = get_current_request()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
             'uuid': 'foo',
         })
-        views = self._make_one(request)
-        views._in_past = MagicMock(return_value=True)
-        with self.assertRaises(HTTPNotFound):
-            views.rider_emails()
+        gml_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        gb_patch = patch.object(
+            brevet_views_module, 'get_brevet',
+            return_value=Mock(name='brevet', uuid='foo'))
+        with gml_patch, gb_patch:
+            views = views_class(get_current_request())
+            views._in_past = Mock(return_value=True)
+            with pytest.raises(HTTPNotFound):
+                views.rider_emails()
 
-    @patch.object(brevet_module, 'get_brevet')
-    def test_rider_emails_no_riders_registered(self, mock_get_brevet):
+    def test_rider_emails_no_riders_registered(
+        self, views_class, brevet_views_module, views_core_module,
+    ):
         """rider_emails returns expected message when no riders are registered
         """
-        mock_get_brevet.return_value = MagicMock(name='brevet', uuid='foo')
-        request = testing.DummyRequest()
+        request = get_current_request()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
             'uuid': 'foo',
         })
-        views = self._make_one(request)
-        views._in_past = MagicMock(return_value=False)
-        resp = views.rider_emails()
-        self.assertEqual(resp, 'No riders have registered yet!')
+        gml_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        gb_patch = patch.object(
+            brevet_views_module, 'get_brevet',
+            return_value=Mock(name='brevet', uuid='foo', riders=[]))
+        with gml_patch, gb_patch:
+            views = views_class(get_current_request())
+            views._in_past = Mock(return_value=False)
+            resp = views.rider_emails()
+        assert resp == 'No riders have registered yet!'
 
-    @patch.object(brevet_module, 'get_brevet')
-    def test_rider_emails_list_of_addresses(self, mock_get_brevet):
+    def test_rider_emails_list_of_addresses(
+        self, views_class, brevet_views_module, views_core_module,
+    ):
         """rider_emails returns expected list of registered rider's addresses
         """
-        mock_riders = [
-            MagicMock(name='rider_tom', email='tom@example.com'),
-            MagicMock(name='rider_dick', email='dick@example.com'),
-        ]
-        mock_get_brevet.return_value = MagicMock(
-            name='brevet', uuid='foo', riders=mock_riders)
-        request = testing.DummyRequest()
+        request = get_current_request()
         request.matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
             'uuid': 'foo',
         })
-        views = self._make_one(request)
-        views._in_past = MagicMock(return_value=False)
-        resp = views.rider_emails()
-        self.assertEqual(resp, 'tom@example.com, dick@example.com')
+        gml_patch = patch.object(
+            views_core_module, 'get_membership_link')
+        gb_patch = patch.object(
+            brevet_views_module, 'get_brevet',
+            return_value=Mock(
+                name='brevet', uuid='foo',
+                riders=[
+                    Mock(name='rider_tom', email='tom@example.com'),
+                    Mock(name='rider_dick', email='dick@example.com'),
+                ]))
+        with gml_patch, gb_patch:
+            views = views_class(get_current_request())
+            views._in_past = Mock(return_value=False)
+            resp = views.rider_emails()
+        assert resp == 'tom@example.com, dick@example.com'
 
 
 @pytest.mark.usefixtures(
