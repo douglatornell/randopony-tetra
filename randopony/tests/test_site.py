@@ -59,12 +59,12 @@ class TestGetResultsLink(object):
         """returns club event results page URL from database
         """
         link = link_model(
-            key='entry_form',
+            key='results_link',
             url='https://database.randonneurs.bc.ca/browse/randonnees')
         db_session.add(link)
-        entry_form_url = core_module.get_entry_form_url()
+        results_link = core_module.get_results_link()
         expected = 'https://database.randonneurs.bc.ca/browse/randonnees'
-        assert entry_form_url == expected
+        assert results_link == expected
 
 
 @pytest.mark.usefixtures(
