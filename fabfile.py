@@ -143,6 +143,7 @@ def rsync_code():
         'requirements.txt',
         'setup.cfg',
         'temp',
+        '**/tests',
         '**/__pycache__',
         '*.sublime-*',
         '.coverage',
