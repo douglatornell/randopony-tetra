@@ -79,7 +79,7 @@
   <p>
     If you're visiting from another cycling club and are interested in
     getting a pony of your own,
-    please read the <a href="request.route_url('about')">
+    please read the <a href=${request.route_url("about")}>
     What's up with the pony?</a> page for information on how you can get and
     deploy this open-source software.
   </p>
