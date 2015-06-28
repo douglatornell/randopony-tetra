@@ -288,13 +288,13 @@ class BrevetEntry(FormView):
             )
             brevet.riders.append(rider)
             DBSession.add(rider)
-            update_google_spreadsheet.delay(
-                sorted(brevet.riders, key=attrgetter('lowercase_last_name')),
-                brevet.google_doc_id.split(':')[1],
-                self.request.registry.settings['google_drive.username'],
-                self.request.registry.settings['google_drive.password'],
-                is_club_member_url,
-            )
+            # update_google_spreadsheet.delay(
+            #     sorted(brevet.riders, key=attrgetter('lowercase_last_name')),
+            #     brevet.google_doc_id.split(':')[1],
+            #     self.request.registry.settings['google_drive.username'],
+            #     self.request.registry.settings['google_drive.password'],
+            #     is_club_member_url,
+            # )
             message = self._rider_message(brevet, rider)
             mailer.send(message)
             message = self._organizer_message(brevet, rider)
