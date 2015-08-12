@@ -366,9 +366,9 @@ class BrevetEntry(FormView):
         date = brevet.date_time.strftime('%d%b%Y')
         brevet_page_url = self._redirect_url(
             brevet.region, brevet.distance, date)
-        rider_list_url = (
-            'https://spreadsheets.google.com/ccc?key={0}'
-            .format(brevet.google_doc_id.split(':')[1]))
+        # rider_list_url = (
+        #     'https://spreadsheets.google.com/ccc?key={0}'
+        #     .format(brevet.google_doc_id.split(':')[1]))
         rider_emails = self.request.route_url(
             'brevet.rider_emails',
             region=brevet.region,
@@ -393,7 +393,7 @@ class BrevetEntry(FormView):
                     'rider': rider,
                     'brevet': brevet,
                     'brevet_page_url': brevet_page_url,
-                    'rider_list_url': rider_list_url,
+                    # 'rider_list_url': rider_list_url,
                     'rider_emails': rider_emails,
                     'admin_email': admin_email,
                 }))
