@@ -554,7 +554,10 @@ class TestBrevetEntry(object):
         url = entry._redirect_url('VI', 200, '03Mar2013')
         assert url == 'http://example.com/brevets/VI/200/03Mar2013'
 
-    def test_show(self, entry, brevet_model, db_session, pyramid_config):
+    def test_show(
+        self, entry, brevet_model, brevet_views_module, db_session,
+        pyramid_config,
+    ):
         pyramid_config.add_route(
             'brevet', '/brevets/{region}/{distance}/{date}')
         brevet = brevet_model(
@@ -567,16 +570,22 @@ class TestBrevetEntry(object):
             registration_end=datetime(2013, 3, 2, 12, 0),
         )
         db_session.add(brevet)
+        gml_bv_patch = patch.object(
+            brevet_views_module, 'get_membership_link',
+            return_value='https://example.com/membership_link')
         get_current_request().matchdict.update({
             'region': 'VI',
             'distance': '200',
             'date': '03Mar2013',
         })
-        tmpl_vars = entry.show(Mock(name='form'))
+        with gml_bv_patch:
+            tmpl_vars = entry.show(Mock(name='form'))
         assert tmpl_vars['active_tab'] == 'brevets'
         assert 'brevets' in tmpl_vars
         assert 'populaires' in tmpl_vars
         assert tmpl_vars['brevet'] == brevet
+        expected = 'https://example.com/membership_link'
+        assert tmpl_vars['membership_link'] == expected
         expected = 'http://example.com/brevets/VI/200/03Mar2013'
         assert tmpl_vars['cancel_url'] == expected
 
