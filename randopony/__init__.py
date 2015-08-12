@@ -125,7 +125,7 @@ def map_routes(config):               # pragma: no cover
     config.add_route(
         'admin.brevets.setup_123',
         'admin.brevet/{item}/setup_123')
-     # populaire admin routes
+    # populaire admin routes
     config.add_route('admin.populaires.create', '/admin/populaire/new')
     config.add_route('admin.populaires.edit', '/admin/populaire/{item}/edit')
     config.add_route('admin.populaires.view', '/admin/populaire/{item}')
