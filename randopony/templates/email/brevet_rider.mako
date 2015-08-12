@@ -1,6 +1,6 @@
 You have pre-registered for the BC Randonneurs ${brevet} brevet. Your name should appear on the list at <${brevet_page_url}>.
 
-This is an auto-generated email, but you can reply to it to contact the populaire organizer(s).
+This is an auto-generated email, but you can reply to it to contact the brevet organizer(s).
 
 You can print out the event waiver form from the club web site <${entry_form_url}>, read it carefully, fill it out, and bring it with you to the start to save time and make the organizers like you even more.
 
