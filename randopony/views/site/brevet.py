@@ -244,6 +244,7 @@ class BrevetEntry(FormView):
             'brevets': Brevet.get_current(),
             'populaires': Populaire.get_current(),
             'brevet': brevet,
+            'membership_link': get_membership_link(),
             'cancel_url': self._redirect_url(region, distance, date),
         })
         return tmpl_vars
