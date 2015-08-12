@@ -48,3 +48,11 @@ Example: Create a database row for the club webmaster's email address.
    >>> email = m.EmailAddress(key='webmaster', email='tom@example.com')
    >>> with t.manager:
    >>>     session.add(email)
+
+Example: Update the club membership sign-up link URL.
+
+.. code-block:: python
+
+    >>> with t.manager:
+    ...     link = session.query(m.Link).filter_by(key='membership_link').one()
+    ...     link.url = 'https://ccnbikes.com/#/events/2015-bc-randonneurs-cycling-club-membership'
