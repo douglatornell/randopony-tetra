@@ -1,3 +1,9 @@
+2015.2
+------
+
+- Change to PEP-440 compliant version identification scheme.
+
+
 2015r1
 ------
 
