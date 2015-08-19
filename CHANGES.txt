@@ -1,6 +1,21 @@
 2015r1
 ------
 
+- Temporarily disable interaction w/ Google spreadsheet due to auth issue;
+  see https://bitbucket.org/douglatornell/randopony-tetra/issues/1
+
+- Be consistent about getting membership sign-up site URL from database
+  re: https://bitbucket.org/douglatornell/randopony-tetra/issues/20
+
+- Change URL for event results link to club database page.
+
+- Change to py.test as unit test framework and add some py.test fixtures.
+
+- Lots of code cleanup.
+
+- Fixed brevet rider_emails link
+  re: https://bitbucket.org/douglatornell/randopony-tetra/issues/17
+
 
 2013r3
 ------
