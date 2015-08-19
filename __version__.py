@@ -4,5 +4,5 @@
 
 # pragma: no cover
 number = '2015'
-release = 'r1'
+release = '.2.dev0'
 dev_status = '5 - Production/Stable'
