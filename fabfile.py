@@ -172,9 +172,9 @@ def install_app():
     with cd(staging_dir):
         run('rm -f development.ini production.ini')
         run('rm -rf myapp')
-        run('bin/easy_install -U {}'.format(project_name))
-        run('chmod 400 lib/python2.7/site-packages/RandoPony-{}-py2.7.egg/'
-            'randopony/private_credentials.py'.format(staging_release))
+        run('bin/pip install -U {}'.format(project_name))
+        run('chmod 400 '
+            'lib/python2.7/site-packages/randopony/private_credentials.py*')
         run('ln -sf {}/staging.ini'.format(project_name))
         run('ln -sf {}/randopony'.format(project_name))
         sed('bin/start', 'development.ini', 'staging.ini')
