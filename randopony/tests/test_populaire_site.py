@@ -36,7 +36,10 @@ class TestPopulaireViews(unittest.TestCase):
 
     def _make_one(self, *args, **kwargs):
         from ..views.site import core
-        with patch.object(core, 'get_membership_link'):
+        p_c_gml = patch.object(
+            core, 'get_membership_link',
+            return_value='https://example.com/membership_link')
+        with p_c_gml:
             return self._get_target_class()(*args, **kwargs)
 
     def setUp(self):
@@ -383,6 +386,9 @@ class TestPopulaireEntry(unittest.TestCase):
         self.assertIn('brevets', tmpl_vars)
         self.assertIn('populaires', tmpl_vars)
         self.assertEqual(tmpl_vars['populaire'], populaire)
+        self.assertEqual(
+            tmpl_vars['membership_link'],
+            'https://example.com/membership_link')
         self.assertEqual(
             tmpl_vars['cancel_url'], 'http://example.com/populaires/VicPop')
 

@@ -173,6 +173,7 @@ class PopulaireEntry(FormView):
             'brevets': Brevet.get_current(),
             'populaires': Populaire.get_current(),
             'populaire': populaire,
+            'membership_link': get_membership_link(),
             'cancel_url': self._redirect_url(
                 self.request.matchdict['short_name']),
         })
