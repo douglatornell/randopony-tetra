@@ -1,5 +1,7 @@
-2015.2
+2016.1
 ------
+
+- Change to conda for development environment.
 
 - Change to PEP-440 compliant version identification scheme.
 

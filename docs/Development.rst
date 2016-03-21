@@ -17,20 +17,11 @@ and 3.3.
 Development Environment
 -----------------------
 
-Development in a virtualenv is *strongly* recommended to isolate
+Development in a `conda`_ environment is *strongly* recommended to isolate
 :obj:`randopony-tetra` and the packages it depends on from other installed
 Python packages.
-Using the virtualenv tool built into Python 3.3,
-create a virtualenv,
-activate it,
-and install the :obj:`distribute` library in it:
 
-.. code-block:: sh
-
-   tom:$ cd ~/.virtualenvs
-   tom:.virtualenvs$ pyvenv-3.3 randopony-tetra
-   tom:.virtualenvs$ source randopony-tetra/bin/activate
-   (randopony-tetra) tom:.virtualenvs$ curl http://python-distribute.org/distribute_setup.py | python
+.. _conda: http://conda.pydata.org/docs/
 
 Clone the `code repository`_ from Bitbucket:
 
@@ -41,17 +32,33 @@ Clone the `code repository`_ from Bitbucket:
 
 .. _code repository: https://bitbucket.org/douglatornell/randopony-tetra/
 
+Use :program:`conda` to create a development environment and activate it:
+
+.. code-block:: sh
+
+   $ cd randopony-tetra
+   $ conda env create -f environment.yaml
+   ...
+   $ source activate randopony
+
+To deactivate the development environment,
+use:
+
+.. code-block:: sh
+
+   (randopony)$ source deactivate
+
 Install RandoPony as a development package:
 
 .. code-block:: sh
 
-   (randopony-tetra) tom:randopony-tetra$ python setup.py develop
+   (randopony-tetra)$ pip intall --editable .
 
 Run the development server:
 
 .. code-block:: sh
 
-   (randopony-tetra) tom:randopony-tetra$ pserve --reload development.ini
+   (randopony-tetra)$ pserve --reload development.ini
 
 
 .. _TestingAndCoverage-section:
