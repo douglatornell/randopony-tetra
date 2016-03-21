@@ -1,0 +1,38 @@
+# conda environment description for RandoPony package development environment
+#
+# Create a conda environment for development, testing & documentation
+# of the RandoPony package with:
+#
+#  $ cd RandoPony-tetra
+#  $ conda env create -f environment.yaml
+#  $ source activate randopony
+#  (raondopony)$ pip install --editable .
+#
+# See the requirements.txt file for an exhaustive list of all of the
+# packages installed in the environment and their versions used in
+# recent development.
+
+name: randopony
+dependencies:
+- coverage
+- gdata
+- ipython
+- mock
+- pyramid
+- pyramid_debugtoolbar
+- pyramid_mako
+- pytz
+- pytest
+- python=2.7
+- sqlalchemy
+- supervisor
+- sphinx
+- transaction
+- waitress
+- zope.sqlalchemy
+- pip:
+  - celery
+  - pyramid-deform
+  - pyramid-mailer
+  - pyramid-persona
+  - pyramid-tm
