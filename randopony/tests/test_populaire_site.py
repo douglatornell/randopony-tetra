@@ -753,7 +753,7 @@ class TestPopulaireEntry(unittest.TestCase):
                 'last_name': 'Dickson',
                 'comment': 'Sunshine Man',
             })
-        mock_task.delay.assert_called_once()
+        assert mock_task.delay.called
 
     def test_failure(self):
         """populaire entry form validation failure returns expected tmpl_vars
