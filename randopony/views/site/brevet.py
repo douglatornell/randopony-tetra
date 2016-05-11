@@ -6,7 +6,6 @@ from datetime import (
     timedelta,
 )
 import logging
-from operator import attrgetter
 from celery.task import task
 from deform import Button
 from gdata.spreadsheet.service import SpreadsheetsService
@@ -155,8 +154,9 @@ class BrevetViews(SiteViews):
         uuid = self.request.matchdict['uuid']
         if uuid != str(brevet.uuid) or self._in_past():
             raise HTTPNotFound
-        return (', '.join(rider.email for rider in brevet.riders)
-                or 'No riders have registered yet!')
+        return (
+            ', '.join(rider.email for rider in brevet.riders) or
+            'No riders have registered yet!')
 
     @property
     def _maybe_coming_soon(self):
@@ -192,7 +192,8 @@ class BrevetViews(SiteViews):
 
     def _coming_soon_page(self):
         maybe_brevet = (
-            '{0[region]}{0[distance]} {0[date]}'.format(self.request.matchdict))
+            '{0[region]}{0[distance]} {0[date]}'
+            .format(self.request.matchdict))
         body = render(
             'coming-soon.mako',
             {
@@ -330,7 +331,8 @@ class BrevetEntry(FormView):
             .first().email
         )
         brevet_page_url = self._redirect_url(
-            brevet.region, brevet.distance, brevet.date_time.strftime('%d%b%Y'))
+            brevet.region, brevet.distance,
+            brevet.date_time.strftime('%d%b%Y'))
         entry_form_url = (
             DBSession.query(Link.url)
             .filter_by(key='entry_form')
@@ -345,7 +347,7 @@ class BrevetEntry(FormView):
             extra_headers={
                 'Sender': from_randopony,
                 'Reply-To': brevet.organizer_email,
-            },
+                },
             body=render(
                 'email/brevet_rider.mako',
                 {
@@ -382,7 +384,7 @@ class BrevetEntry(FormView):
             .first().email
         )
         message = Message(
-            subject='{0} has Pre-registered for the {1}'
+            subject=u'{0} has Pre-registered for the {1}'
                     .format(rider, brevet),
             sender=from_randopony,
             recipients=[
@@ -396,7 +398,8 @@ class BrevetEntry(FormView):
                     # 'rider_list_url': rider_list_url,
                     'rider_emails': rider_emails,
                     'admin_email': admin_email,
-                }))
+                })
+        )
         return message
 
 
