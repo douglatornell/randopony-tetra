@@ -8,6 +8,7 @@ try:
 except ImportError:                  # pragma: no cover
     from mock import patch
 from pyramid import testing
+import pytest
 from sqlalchemy import create_engine
 from ..models.meta import (
     Base,
@@ -221,69 +222,97 @@ class TestBrevet(unittest.TestCase):
         self.assertEqual(brevets.all(), [])
 
 
-class TestBrevetRider(unittest.TestCase):
+class TestBrevetRider(object):
     """Unit tests for BrevetRider data model.
     """
-    def _get_target_class(self):
-        from ..models import BrevetRider
-        return BrevetRider
-
-    def _make_one(self, *args, **kwargs):
-        return self._get_target_class()(*args, **kwargs)
-
-    def setUp(self):
-        self.config = testing.setUp()
-        engine = create_engine('sqlite://')
-        DBSession.configure(bind=engine)
-        Base.metadata.create_all(engine)
-
-    def tearDown(self):
-        DBSession.remove()
-        testing.tearDown()
-
-    def test_str(self):
+    @pytest.mark.parametrize("first_name, last_name", [
+        ('Tom', 'Dickson'),  # ASCII
+        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_str(self, first_name, last_name, brevet_rider_model):
         """BrevetRider model string rep is first_name last_name
         """
-        rider = self._make_one(
+        rider = brevet_rider_model(
             email='tom@example.com',
-            first_name='Tom',
-            last_name='Dickson',
+            first_name=first_name,
+            last_name=last_name,
             comment='',
         )
-        self.assertEqual(str(rider), 'Tom Dickson')
+        expected = u'{} {}'.format(first_name, last_name).encode('utf-8')
+        assert str(rider) == expected
 
-    def test_repr(self):
+    @pytest.mark.parametrize("first_name, last_name", [
+        ('Tom', 'Dickson'),  # ASCII
+        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_repr(self, last_name, first_name, brevet_rider_model):
         """BrevetRider model repr is <Rider(first_name last_name)>
         """
-        rider = self._make_one(
+        rider = brevet_rider_model(
             email='tom@example.com',
-            first_name='Tom',
-            last_name='Dickson',
+            first_name=first_name,
+            last_name=last_name,
             comment='',
         )
-        self.assertEqual(repr(rider), '<Rider(Tom Dickson)>')
+        expected = (
+            u'<Rider({} {})>'.format(first_name, last_name).encode('utf-8'))
+        assert repr(rider) == expected
 
-    def test_full_name_wo_comment(self):
+    @pytest.mark.parametrize("first_name, last_name", [
+        ('Tom', 'Dickson'),  # ASCII
+        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_full_name_wo_comment(
+        self, first_name, last_name, brevet_rider_model,
+    ):
         """BrevetRider full_name w/o comment is first_name last_name
         """
-        rider = self._make_one(
+        rider = brevet_rider_model(
             email='tom@example.com',
-            first_name='Tom',
-            last_name='Dickson',
+            first_name=first_name,
+            last_name=last_name,
             comment='',
         )
-        self.assertEqual(rider.full_name, 'Tom Dickson')
+        expected = u'{} {}'.format(first_name, last_name)
+        assert rider.full_name == expected
 
-    def test_full_name_w_comment(self):
+    @pytest.mark.parametrize("first_name, last_name", [
+        ('Tom', 'Dickson'),  # ASCII
+        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_full_name_w_comment(
+        self, first_name, last_name, brevet_rider_model,
+    ):
         """BrevetRider full_name w comment is first_name "comment" last_name
         """
-        rider = self._make_one(
+        rider = brevet_rider_model(
             email='tom@example.com',
-            first_name='Tom',
-            last_name='Dickson',
+            first_name=first_name,
+            last_name=last_name,
             comment='hoping for sun',
         )
-        self.assertEqual(rider.full_name, 'Tom "hoping for sun" Dickson')
+        expected = u'{} "hoping for sun" {}'.format(first_name, last_name)
+        assert rider.full_name == expected
+
+    @pytest.mark.parametrize("first_name, last_name", [
+        ('Tom', 'Dickson'),  # ASCII
+        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_unicode(self, first_name, last_name, brevet_rider_model):
+        """BrevetRider model unicode rep is first_name last_name
+        """
+        rider = brevet_rider_model(
+            email='tom@example.com',
+            first_name=first_name,
+            last_name=last_name,
+            comment='',
+        )
+        assert unicode(rider) == u'{} {}'.format(first_name, last_name)
 
 
 class TestPopulaire(unittest.TestCase):
@@ -383,70 +412,100 @@ class TestPopulaire(unittest.TestCase):
             'http://www.randonneurs.bc.ca/organize/eventform.pdf')
 
 
-class TestPopulaireRider(unittest.TestCase):
+class TestPopulaireRider(object):
     """Unit tests for PopulaireRider data model.
     """
-    def _get_target_class(self):
-        from ..models import PopulaireRider
-        return PopulaireRider
-
-    def _make_one(self, *args, **kwargs):
-        return self._get_target_class()(*args, **kwargs)
-
-    def setUp(self):
-        self.config = testing.setUp()
-        engine = create_engine('sqlite://')
-        DBSession.configure(bind=engine)
-        Base.metadata.create_all(engine)
-
-    def tearDown(self):
-        DBSession.remove()
-        testing.tearDown()
-
-    def test_str(self):
+    @pytest.mark.parametrize("first_name, last_name", [
+        ('Tom', 'Dickson'),  # ASCII
+        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_str(self, first_name, last_name, pop_rider_model):
         """PopulaireRider model string rep is first_name last_name
         """
-        rider = self._make_one(
+        rider = pop_rider_model(
             email='tom@example.com',
-            first_name='Tom',
-            last_name='Dickson',
+            first_name=first_name,
+            last_name=last_name,
             distance='60',
             comment='',
         )
-        self.assertEqual(str(rider), 'Tom Dickson')
+        expected = u'{} {}'.format(first_name, last_name).encode('utf-8')
+        assert str(rider) == expected
 
-    def test_repr(self):
+    @pytest.mark.parametrize("first_name, last_name", [
+        ('Tom', 'Dickson'),  # ASCII
+        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_repr(self, first_name, last_name, pop_rider_model):
         """PopulaireRider model repr is <Rider(first_name last_name)>
         """
-        rider = self._make_one(
+        rider = pop_rider_model(
             email='tom@example.com',
-            first_name='Tom',
-            last_name='Dickson',
+            first_name=first_name,
+            last_name=last_name,
             distance='60',
             comment='',
         )
-        self.assertEqual(repr(rider), '<Rider(Tom Dickson)>')
+        expected = (
+            u'<Rider({} {})>'.format(first_name, last_name).encode('utf-8'))
+        assert repr(rider) == expected
 
-    def test_full_name_wo_comment(self):
+    @pytest.mark.parametrize("first_name, last_name", [
+    ('Tom', 'Dickson'),  # ASCII
+    (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+    (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_full_name_wo_comment(
+        self, first_name, last_name, pop_rider_model,
+    ):
         """PopulaireRider full_name w/o comment is first_name last_name
         """
-        rider = self._make_one(
+        rider = pop_rider_model(
             email='tom@example.com',
-            first_name='Tom',
-            last_name='Dickson',
+            first_name=first_name,
+            last_name=last_name,
             distance='60',
             comment='',
         )
-        self.assertEqual(rider.full_name, 'Tom Dickson')
+        expected = u'{} {}'.format(first_name, last_name)
+        assert rider.full_name == expected
 
-    def test_full_name_w_comment(self):
+
+    @pytest.mark.parametrize("first_name, last_name", [
+    ('Tom', 'Dickson'),  # ASCII
+    (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+    (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_full_name_w_comment(
+        self, first_name, last_name, pop_rider_model,
+    ):
         """PopulaireRider full_name w comment is first_name "comment" last_name
         """
-        rider = self._make_one(
+        rider = pop_rider_model(
             email='tom@example.com',
-            first_name='Tom',
-            last_name='Dickson',
+            first_name=first_name,
+            last_name=last_name,
             distance='60',
             comment='hoping for sun',
         )
-        self.assertEqual(rider.full_name, 'Tom "hoping for sun" Dickson')
+        expected = u'{} "hoping for sun" {}'.format(first_name, last_name)
+        assert rider.full_name == expected
+
+    @pytest.mark.parametrize("first_name, last_name", [
+        ('Tom', 'Dickson'),  # ASCII
+        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_unicode(self, first_name, last_name, pop_rider_model):
+        """BrevetRider model unicode rep is first_name last_name
+        """
+        rider = pop_rider_model(
+            email='tom@example.com',
+            first_name=first_name,
+            last_name=last_name,
+            distance='60',
+            comment='',
+        )
+        assert unicode(rider) == u'{} {}'.format(first_name, last_name)
