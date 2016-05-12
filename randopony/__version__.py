@@ -3,6 +3,6 @@
 """
 
 # pragma: no cover
-number = '2015'
-release = '.2.dev0'
+number = '2016'
+release = '.1'
 dev_status = '5 - Production/Stable'
