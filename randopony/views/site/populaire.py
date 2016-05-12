@@ -23,6 +23,7 @@ from pyramid.view import view_config
 import pytz
 from .core import (
     get_membership_link,
+    get_results_link,
     SiteViews,
 )
 from ..admin.google_drive import google_drive_login
@@ -115,11 +116,6 @@ class PopulaireViews(SiteViews):
         return self.populaire.date_time < days_ago
 
     def _moved_on_page(self):
-        results_link = (
-            DBSession.query(Link.url)
-            .filter_by(key='results_link')
-            .one()[0]
-        )
         body = render(
             'moved-on.mako',
             {
@@ -127,7 +123,7 @@ class PopulaireViews(SiteViews):
                 'brevets': self.tmpl_vars['brevets'],
                 'populaires': self.tmpl_vars['populaires'],
                 'event': '{0} {0.date_time:%d-%b-%Y}'.format(self.populaire),
-                'results_link': results_link,
+                'results_link': get_results_link(),
                 'membership_link': get_membership_link(),
             },
             request=self.request)
@@ -215,13 +211,13 @@ class PopulaireEntry(FormView):
             )
             populaire.riders.append(rider)
             DBSession.add(rider)
-            update_google_spreadsheet.delay(
-                sorted(
-                    populaire.riders, key=attrgetter('lowercase_last_name')),
-                populaire.google_doc_id.split(':')[1],
-                self.request.registry.settings['google_drive.username'],
-                self.request.registry.settings['google_drive.password'],
-            )
+            # update_google_spreadsheet.delay(
+            #     sorted(
+            #         populaire.riders, key=attrgetter('lowercase_last_name')),
+            #     populaire.google_doc_id.split(':')[1],
+            #     self.request.registry.settings['google_drive.username'],
+            #     self.request.registry.settings['google_drive.password'],
+            # )
             message = self._rider_message(populaire, rider)
             mailer.send(message)
             message = self._organizer_message(populaire, rider)
@@ -274,9 +270,9 @@ class PopulaireEntry(FormView):
             .first().email
         )
         pop_page_url = self._redirect_url(populaire.short_name)
-        rider_list_url = (
-            'https://spreadsheets.google.com/ccc?key={0}'
-            .format(populaire.google_doc_id.split(':')[1]))
+        # rider_list_url = (
+        #     'https://spreadsheets.google.com/ccc?key={0}'
+        #     .format(populaire.google_doc_id.split(':')[1]))
         rider_emails = self.request.route_url(
             'populaire.rider_emails',
             short_name=populaire.short_name,
@@ -287,7 +283,7 @@ class PopulaireEntry(FormView):
             .first().email
         )
         message = Message(
-            subject='{0} has Pre-registered for the {1}'
+            subject=u'{0} has Pre-registered for the {1}'
                     .format(rider, populaire),
             sender=from_randopony,
             recipients=[
@@ -298,7 +294,7 @@ class PopulaireEntry(FormView):
                     'rider': rider,
                     'populaire': populaire,
                     'pop_page_url': pop_page_url,
-                    'rider_list_url': rider_list_url,
+                    # 'rider_list_url': rider_list_url,
                     'rider_emails': rider_emails,
                     'admin_email': admin_email,
                 }))
