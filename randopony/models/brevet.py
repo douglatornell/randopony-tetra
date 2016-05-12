@@ -211,17 +211,20 @@ class BrevetRider(Base):
         self.info_answer = info_answer
 
     def __str__(self):
-        return ' '.join((self.first_name, self.last_name))
+        return ' '.join((self.first_name, self.last_name)).encode('utf-8')
 
     def __repr__(self):
-        return '<Rider({})>'.format(self)
+        return ('<Rider({})>'.format(self).decode('utf-8')).encode('utf-8')
+
+    def __unicode__(self):
+        return u' '.join((self.first_name, self.last_name))
 
     @property
     def full_name(self):
         return (
-            '{0.first_name} "{0.comment}" {0.last_name}'.format(self)
+            u'{0.first_name} "{0.comment}" {0.last_name}'.format(self)
             if self.comment
-            else str(self))
+            else u'{}'.format(self))
 
 
 class BrevetEntrySchema(CSRFSchema):

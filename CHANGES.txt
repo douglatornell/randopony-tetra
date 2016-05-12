@@ -1,6 +1,17 @@
 2016.1
 ------
 
+- Handle Unicode characters in rider names and riders list comments for
+  brevet and populaire entries.
+
+- Temporarily disable interaction w/ Google spreadsheet for populaires
+  due to auth issue;
+  see https://bitbucket.org/douglatornell/randopony-tetra/issues/1
+
+- Update club membership link to 2016 URL.
+
+- Fix club membership link in populaire entry form view.
+
 - Change to conda for development environment.
 
 - Change to PEP-440 compliant version identification scheme.
