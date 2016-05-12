@@ -21,7 +21,7 @@ env.user = 'bcrandonneur'
 env.hosts = ['bcrandonneur.webfactional.com']
 project_name = 'randopony-tetra'
 app_name = 'randopony'
-staging_release = '2015.2'
+staging_release = '2015r1'  # re-using production app space
 staging_dir = (
     '/home/{0}/webapps/{1}{2}'
     .format(env.user, app_name, staging_release.replace('.', '_')))
@@ -147,8 +147,10 @@ def rsync_code():
         '**/tests',
         '**/__pycache__',
         '*.sublime-*',
+        '.cache',
         '.coverage',
         '.coveragerc',
+        '.idea',
         '*.log',
         '*.pid',
         '*.sqlite',
