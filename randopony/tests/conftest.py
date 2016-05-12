@@ -24,6 +24,8 @@ def db_session():
 def pyramid_config():
     config = testing.setUp(request=testing.DummyRequest())
     config.registry.settings['timezone'] = 'Canada/Pacific'
+    config.registry.settings['mako.directories'] = 'randopony:templates'
+    config.include('pyramid_mako')
     yield config
     testing.tearDown()
 
@@ -50,3 +52,28 @@ def email_address_model():
 def brevet_model():
     from ..models import Brevet
     return Brevet
+
+
+@pytest.fixture(scope='session')
+def brevet_rider_model():
+    from ..models import BrevetRider
+    return BrevetRider
+
+
+@pytest.fixture(scope='session')
+def pop_model():
+    from ..models import Populaire
+    return Populaire
+
+
+@pytest.fixture(scope='session')
+def pop_rider_model():
+    from ..models import PopulaireRider
+    return PopulaireRider
+
+
+@pytest.fixture(scope='module')
+def views_core_module():
+    from ..views.site import core
+    return core
+
