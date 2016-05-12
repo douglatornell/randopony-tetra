@@ -100,7 +100,7 @@ and then run :program:`coverage report`:
    Name                                   Stmts   Miss Branch BrMiss  Cover  Missing
    ----------------------------------------------------------------------------------
    randopony/__init__                        19      0      0      0   100%
-   randopony/__version__                      1      1      0      0     0%   2
+   randopony/__pkg_metadata__                 1      1      0      0     0%   2
    randopony/models/__init__                  5      0      0      0   100%
    randopony/models/admin                    19      0      0      0   100%
    randopony/models/brevet                   48      0      6      0   100%

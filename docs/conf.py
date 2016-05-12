@@ -48,11 +48,11 @@ copyright = (
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-import __version__
+import __pkg_metadata__
 # The short X.Y version.
-version = __version__.number
+version = __pkg_metadata__.number
 # The full version, including alpha/beta/rc tags.
-release = version + __version__.release
+release = version + __pkg_metadata__.release
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

@@ -1,6 +1,6 @@
 import os
 from setuptools import setup, find_packages
-import __version__
+import __pkg_metadata__
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
@@ -25,11 +25,11 @@ requires = [
 ]
 
 setup(name='RandoPony',
-      version=__version__.number + __version__.release,
+      version=__pkg_metadata__.number + __pkg_metadata__.release,
       description='RandoPony',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
-          "Development Status :: " + __version__.dev_status,
+          "Development Status :: " + __pkg_metadata__.dev_status,
           "License :: OSI Approved :: BSD License",
           "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3.3",

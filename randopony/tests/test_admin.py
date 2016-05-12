@@ -39,7 +39,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_home(self):
         """admin home view has expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         request = testing.DummyRequest()
         admin = self._make_one(request)
         tmpl_vars = admin.home()
@@ -53,7 +53,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_wranglers_list(self):
         """admin wranglers view has expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         request = testing.DummyRequest()
         request.matchdict['list'] = 'wranglers'
         admin = self._make_one(request)
@@ -98,7 +98,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_delete_wrangler_confirmation(self):
         """admin delete confirmation view for wrangler has exp template vars
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         request.matchdict['list'] = 'wranglers'

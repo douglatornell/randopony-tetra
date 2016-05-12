@@ -54,7 +54,7 @@ class TestWranglerCreate(unittest.TestCase):
     def test_show(self):
         """show returns expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
@@ -84,7 +84,7 @@ class TestWranglerCreate(unittest.TestCase):
     def test_failure(self):
         """create wrangler failure returns expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
@@ -146,7 +146,7 @@ class TestWranglerEdit(unittest.TestCase):
     def test_show(self):
         """admin edit wrangler show returns expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         from ..models import Administrator
         admin = Administrator(persona_email='tom@example.com')
         DBSession.add(admin)
@@ -186,7 +186,7 @@ class TestWranglerEdit(unittest.TestCase):
     def test_failure(self):
         """admin edit wrangler failure returns expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         edit = self._make_one(request)
