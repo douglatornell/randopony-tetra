@@ -48,7 +48,7 @@
 
     <div class="footer">
       <p>
-        &copy; 2013-2015
+        &copy; 2013-2016
         <a href="http://douglatornell.ca" class="footer">douglatornell.ca</a>
       </p>
       <p>
