@@ -10,7 +10,7 @@ from ...models import (
     AdministratorSchema,
 )
 from ...models.meta import DBSession
-from ... import __version__ as version
+from ... import __pkg_metadata__ as version
 
 
 @view_config(

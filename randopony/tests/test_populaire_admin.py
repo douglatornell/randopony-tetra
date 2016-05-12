@@ -37,7 +37,7 @@ class TestPopulaireDetails(unittest.TestCase):
     def test_populaire_details(self):
         """populaire_details view has expected template vsriables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         from ..models import Populaire
         from ..views.admin.populaire import populaire_details
         populaire = Populaire(
@@ -103,7 +103,7 @@ class TestPopulaireCreate(unittest.TestCase):
     def test_show(self):
         """show returns expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
@@ -146,7 +146,7 @@ class TestPopulaireCreate(unittest.TestCase):
     def test_failure(self):
         """create populaire failure returns expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
@@ -232,7 +232,7 @@ class TestPopulaireEdit(unittest.TestCase):
     def test_show(self):
         """admin populaire edit show returns expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         from ..models import Populaire
         populaire = Populaire(
             event_name='Victoria Populaire',
@@ -309,7 +309,7 @@ class TestPopulaireEdit(unittest.TestCase):
     def test_failure(self):
         """edit populaire failure returns expected template variables
         """
-        from .. import __version__ as version
+        from .. import __pkg_metadata__ as version
         self.config.add_route(
             'admin.populaires.view', '/admin/populaires/{item}')
         request = testing.DummyRequest()
