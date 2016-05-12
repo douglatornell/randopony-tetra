@@ -2,19 +2,18 @@
 """Tests for RandoPony public site brevet views and functionality.
 """
 from datetime import datetime
-
-from mock import (
-    Mock,
-    patch,
-)
+try:
+    from unittest.mock import (
+        Mock,
+        patch,
+    )
+except ImportError:  # pragma: no cover
+    from mock import (
+        Mock,
+        patch,
+    )
 from pyramid.threadlocal import get_current_request
 import pytest
-
-
-@pytest.fixture(scope='module')
-def views_core_module():
-    from ..views.site import core
-    return core
 
 
 @pytest.fixture(scope='module')
@@ -62,8 +61,7 @@ class TestBrevetViews(object):
     ):
         """region_list view has expected tmpl_vars
         """
-        email = email_address_model(
-            key='admin_email', email='tom@example.com')
+        email = email_address_model(key='admin_email', email='tom@example.com')
         db_session.add(email)
         with patch.object(views_core_module, 'get_membership_link'):
             views = views_class(get_current_request())
@@ -232,10 +230,8 @@ class TestBrevetViews(object):
             'distance': '200',
             'date': '03Mar2013',
         })
-        gml_patch = patch.object(
-            views_core_module, 'get_membership_link')
-        gefu_patch = patch.object(
-            brevet_views_module, 'get_entry_form_url')
+        gml_patch = patch.object(views_core_module, 'get_membership_link')
+        gefu_patch = patch.object(brevet_views_module, 'get_entry_form_url')
         gb_patch = patch.object(
             brevet_views_module, 'get_brevet', return_value=brevet)
         with gml_patch, gefu_patch, gb_patch:
@@ -588,6 +584,91 @@ class TestBrevetEntry(object):
         assert tmpl_vars['membership_link'] == expected
         expected = 'http://example.com/brevets/VI/200/03Mar2013'
         assert tmpl_vars['cancel_url'] == expected
+
+    def test_rider_message(
+        self, entry, brevet_model, brevet_rider_model, email_address_model,
+        brevet_views_module, link_model, db_session, pyramid_config,
+    ):
+        pyramid_config.add_route(
+            'brevet', '/brevets/{region}/{distance}/{date}')
+        from_randopony = email_address_model(
+            key='from_randopony', email='randopony@example.com')
+        entry_form_url = link_model(
+            key='entry_form', url='http://example.com/entry_form.pdf')
+        db_session.add_all((from_randopony, entry_form_url))
+        p_gml = patch.object(
+            brevet_views_module, 'get_membership_link',
+            return_value='https://example.com/membership_link')
+        brevet = brevet_model(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+        )
+        rider = brevet_rider_model(
+            email='tom@example.com',
+            first_name='Tom',
+            last_name='Dickson',
+            comment='',
+            member_status=True,
+            bike_type='single',
+        )
+        with p_gml, patch.object(brevet_views_module, 'render') as m_render:
+            message = entry._rider_message(brevet, rider)
+        expected = 'Pre-registration Confirmation for VI200 03Mar2013'
+        assert message.subject == expected
+        assert message.sender == from_randopony.email
+        assert message.recipients == [rider.email]
+        assert message.body == m_render()
+
+    @pytest.mark.parametrize("first_name, last_name", [
+        ('Jerry', 'Harrison'),  # ASCII
+        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
+        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
+    ])
+    def test_organizer_message(
+        self, first_name, last_name, entry, brevet_model, brevet_rider_model,
+        email_address_model, brevet_views_module, db_session, pyramid_config,
+    ):
+        pyramid_config.add_route(
+            'brevet', '/brevets/{region}/{distance}/{date}')
+        pyramid_config.add_route(
+            'brevet.rider_emails',
+            '/brevets/{region}/{distance}/{date}/rider_emails/{uuid}')
+        from_randopony = email_address_model(
+            key='from_randopony', email='randopony@example.com')
+        admin_email = email_address_model(
+            key='admin_email', email='tom@example.com')
+        db_session.add_all((from_randopony, admin_email))
+        brevet = brevet_model(
+            region='VI',
+            distance=200,
+            date_time=datetime(2013, 3, 3, 7, 0),
+            route_name='Chilly 200',
+            start_locn='Chez Croy, 3131 Millgrove St, Victoria',
+            organizer_email='mcroy@example.com',
+            registration_end=datetime(2013, 3, 2, 12, 0),
+        )
+        rider = brevet_rider_model(
+            email='jerry@example.com',
+            first_name=first_name,
+            last_name=last_name,
+            comment='',
+            member_status=True,
+            bike_type='single',
+        )
+        with patch.object(brevet_views_module, 'render') as m_render:
+            message = entry._organizer_message(brevet, rider)
+        expected = (
+            u'{} {} has Pre-registered for the VI200 03Mar2013'
+            .format(first_name, last_name))
+        assert message.subject == expected
+        assert message.sender == from_randopony.email
+        assert message.recipients == ['mcroy@example.com']
+        assert message.body == m_render()
 
 
 @pytest.mark.usefixtures('brevet_views_module')
