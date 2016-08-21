@@ -1,6 +1,8 @@
 2016.2
 ------
 
+- Add 2000 km distance for brevets.
+
 - Improve packaging.
 
 

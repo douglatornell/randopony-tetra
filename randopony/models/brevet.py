@@ -43,6 +43,7 @@ class Brevet(EventMixin, Base):
         400: '400 km',
         600: '600 km',
         1000: '1000 km',
+        2000: '2000 km',
     }
 
     __tablename__ = 'brevets'
