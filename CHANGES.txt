@@ -1,6 +1,8 @@
 2016.2
 ------
 
+- Add Sentry exception monitoring via pyramid_crow package.
+
 - Add 2000 km distance for brevets.
 
 - Improve packaging.

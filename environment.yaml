@@ -32,6 +32,7 @@ dependencies:
 - zope.sqlalchemy
 - pip:
   - celery
+  - pyramid-crow
   - pyramid-deform
   - pyramid-mailer
   - pyramid-persona
