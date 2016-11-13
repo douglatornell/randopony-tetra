@@ -62,6 +62,11 @@ def main(global_config, **settings):  # pragma: no cover
     config = Configurator(
         settings=settings,
         root_factory=Root)
+    config.include('pyramid_deform')
+    config.include('pyramid_mailer')
+    config.include('pyramid_mako')
+    config.include('pyramid_persona')
+    config.include('pyramid_tm')
     config.add_static_view('static', 'static', cache_max_age=3600)
     authn_policy = AuthTktAuthenticationPolicy(
         settings['persona.secret'],
