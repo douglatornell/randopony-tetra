@@ -5,9 +5,14 @@ from datetime import (
     datetime,
     timedelta,
 )
-from pyramid.httpexceptions import HTTPFound
+import logging
+
+from pyramid import security
+from pyramid.httpexceptions import (
+    HTTPForbidden,
+    HTTPFound,
+)
 from pyramid.renderers import render
-from pyramid.response import Response
 from pyramid.view import (
     forbidden_view_config,
     view_config,
@@ -16,6 +21,8 @@ from pyramid.view import (
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from sqlalchemy import desc
+from stormpath.error import Error as StormpathError
+
 from ...models import (
     Administrator,
     Brevet,
@@ -26,19 +33,83 @@ from ...models.meta import DBSession
 from ... import __pkg_metadata__ as version
 
 
+logger = logging.getLogger(__name__)
+
+
+class ACLFactory(object):
+    """Produce objects that provide an access control list that maps
+    security principals to permissions.
+
+    Used as an app configuration root factory to provide per-request
+    contexts that supply the app ACL to the Pyramid auth framework.
+    """
+    __acl__ = [(security.Allow, security.Authenticated, 'authenticated')]
+
+    def __init__(self, request):
+        self.request = request
+
+
+def group_finder(email, request):
+    """Return the list of Pyramid auth principals associated with the
+    user identified by :kbd:`email`.
+    """
+    # Trivial because if the auth flow gets to here the user has been
+    # authenticated, and that's all we require.
+    return [security.Authenticated]
+
+
 @forbidden_view_config()
+def forbidden_view(request):
+    """Handle HTTPForbidden exceptions.
+    """
+    # Trivial because authentication is all that matters; access is all or none
+    return HTTPFound(location=request.route_url('admin.login'))
+
+
+@view_config(
+    route_name='admin.login',
+    renderer='admin/login.mako',
+    permission=security.NO_PERMISSION_REQUIRED,
+)
 def login(request):
-    body = render(
-        'admin/login.mako',
-        {
-            'version': version.number + version.release,
-            'logout_btn': False
-        },
-        request=request)
-    return Response(body, status='403 Forbidden')
+    return {'version': version.number + version.release}
 
 
-@view_defaults(permission='admin')
+@view_config(
+    route_name='admin.login.handler',
+    request_method='POST',
+    renderer='admin/login.mako',
+    permission=security.NO_PERMISSION_REQUIRED
+)
+def login_handler(request):
+    stormpath_app = request.registry.settings['stormpath_app']
+    email = request.POST.get('email')
+    password = request.POST.get('password')
+    try:
+        auth_result = stormpath_app.authenticate_account(email, password)
+    except StormpathError as e:
+        logger.info('auth failure for {0}: {1}'.format(email, e))
+        return login(request)
+    logger.info('successful login by {}'.format(email))
+    return HTTPFound(
+        location=request.route_url('admin.home'),
+        headers=security.remember(request, auth_result.account.email))
+
+
+@view_config(
+    route_name='admin.logout',
+    permission=security.NO_PERMISSION_REQUIRED,
+)
+def logout(request):
+    """Process user log-out request.
+    """
+    return HTTPFound(
+        location=request.route_url('admin.home'),
+        headers=security.forget(request)
+    )
+
+
+@view_defaults(permission='authenticated')
 class AdminViews(object):
     """Views for the RandoPony admin interface.
     """
@@ -68,10 +139,7 @@ class AdminViews(object):
 
     def __init__(self, request):
         self.request = request
-        self.tmpl_vars = {
-            'version': version.number + version.release,
-            'logout_btn': True,
-        }
+        self.tmpl_vars = {'version': version.number + version.release}
 
     @view_config(route_name='admin.home', renderer='admin/home.mako')
     def home(self):
@@ -83,7 +151,6 @@ class AdminViews(object):
         params = self.lists[list_name]
         self.tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'items': (DBSession.query(params['model'])
                       .order_by(params['order_by'])),
             'action': params['action'],
@@ -105,7 +172,6 @@ class AdminViews(object):
         params = self.lists[list_name]
         self.tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'list': list_name,
             'item': item,
             'item_type': params['item_type'],

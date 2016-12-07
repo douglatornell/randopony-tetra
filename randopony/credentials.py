@@ -8,7 +8,8 @@ import logging
 log = logging.getLogger(__name__)
 
 
-persona_secret = None
+auth_tkt_secret = None
+session_cookie_secret = None
 
 google_drive_username = None
 google_drive_password = None
@@ -18,7 +19,8 @@ email_host_password = None
 
 try:
     from .private_credentials import (
-        persona_secret,
+        auth_tkt_secret,
+        session_cookie_secret,
         google_drive_username,
         google_drive_password,
         email_host_username,

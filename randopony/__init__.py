@@ -1,78 +1,59 @@
+import os
+
 from celery import current_app as celery
+from pyramid.session import SignedCookieSessionFactory
+
+import celery_config
 from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
-from pyramid.security import (
-    ALL_PERMISSIONS,
-    Allow,
-)
 from pyramid.settings import asbool
 from sqlalchemy import engine_from_config
-from sqlalchemy.orm.exc import NoResultFound
-import celery_config
-from .credentials import (
-    persona_secret,
-    google_drive_username,
-    google_drive_password,
-    email_host_username,
-    email_host_password,
-)
+from stormpath.client import Client
+
+from . import credentials
 from .models import Administrator
 from .models.meta import (
     DBSession,
     Base,
 )
-
-
-class Root(object):
-    """Simplest possible resource tree to map groups to permissions.
-    """
-    __acl__ = [
-        (Allow, 'g:admin', ALL_PERMISSIONS),
-    ]
-
-    def __init__(self, request):
-        self.request = request
-
-
-def groupfinder(userid, request):
-    """Check userid against Administrator data model.
-
-    If userid is a known Persona email address, the user is an admin.
-    """
-    query = (DBSession.query(Administrator)
-             .filter(Administrator.persona_email == userid))
-    try:
-        query.one()
-        return ['g:admin']
-    except NoResultFound:
-        return None
+from .views.admin import core as admin_core
 
 
 def main(global_config, **settings):  # pragma: no cover
     """ Configure RandoPony and return its Pyramid WSGI application.
     """
+    authn_policy = AuthTktAuthenticationPolicy(
+        credentials.auth_tkt_secret,
+        hashalg='sha512',
+        callback=admin_core.group_finder,
+    )
+    authz_policy = ACLAuthorizationPolicy()
+    session_factory = SignedCookieSessionFactory(
+        credentials.session_cookie_secret)
+    stormpath_client = Client(
+        api_key_file=os.path.abspath('stormpath-apikey.properties'))
     settings.update({
-        'persona.secret': persona_secret,
-        'google_drive.username': google_drive_username,
-        'google_drive.password': google_drive_password,
+        'google_drive.username': credentials.google_drive_username,
+        'google_drive.password': credentials.google_drive_password,
+        'stormpath_app':
+            stormpath_client.applications.search({'name': 'RandoPony'})[0],
     })
     if asbool(settings.get('production_deployment', 'false')):
-        settings.update({'mail.username': email_host_username})
-        settings.update({'mail.password': email_host_password})
+        settings.update({'mail.username': credentials.email_host_username})
+        settings.update({'mail.password': credentials.email_host_password})
     config = Configurator(
         settings=settings,
-        root_factory=Root)
+        authentication_policy=authn_policy,
+        authorization_policy=authz_policy,
+        session_factory=session_factory,
+        root_factory=admin_core.ACLFactory,
+    )
     config.include('pyramid_deform')
     config.include('pyramid_mailer')
     config.include('pyramid_mako')
-    config.include('pyramid_persona')
     config.include('pyramid_tm')
     config.add_static_view('static', 'static', cache_max_age=3600)
-    authn_policy = AuthTktAuthenticationPolicy(
-        settings['persona.secret'],
-        hashalg='sha512',
-        callback=groupfinder)
-    config.set_authentication_policy(authn_policy)
     map_routes(config)
     config.scan()
     engine = engine_from_config(settings, 'sqlalchemy.')
@@ -111,6 +92,9 @@ def map_routes(config):               # pragma: no cover
         'populaire.rider_emails',
         '/populaires/{short_name}/rider_emails/{uuid}')
     # admin core routes
+    config.add_route('admin.login', 'admin/login')
+    config.add_route('admin.login.handler', 'admin/login.handler')
+    config.add_route('admin.logout', 'admin/logout')
     config.add_route('admin.home', '/admin/')
     config.add_route('admin.list', '/admin/{list}/')
     config.add_route('admin.delete', '/admin/{list}/{item}/delete')
