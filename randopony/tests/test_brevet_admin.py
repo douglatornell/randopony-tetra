@@ -57,7 +57,6 @@ class TestBrevetDetails(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'brevet': brevet,
             })
 
@@ -110,7 +109,6 @@ class TestBrevetCreate(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_form.render(),
                 'cancel_url': 'http://example.com/admin/brevets/'
             })
@@ -150,7 +148,6 @@ class TestBrevetCreate(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_val_err.render(),
                 'cancel_url': 'http://example.com/admin/brevets/'
             })
@@ -240,7 +237,6 @@ class TestBrevetEdit(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_form.render(),
                 'cancel_url':
                     'http://example.com/admin/brevets/LM200%2011Nov2012'
@@ -297,7 +293,6 @@ class TestBrevetEdit(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_val_err.render(),
                 'cancel_url':
                     'http://example.com/admin/brevets/LM200%2011Nov2012'

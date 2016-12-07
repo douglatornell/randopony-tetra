@@ -23,14 +23,13 @@ from ... import __pkg_metadata__ as version
 @view_config(
     route_name='admin.populaires.view',
     renderer='admin/populaire.mako',
-    permission='admin',
+    permission='authenticated',
 )
 def populaire_details(request):
     short_name = request.matchdict['item']
     populaire = admin_core.get_populaire(short_name)
     return {
         'version': version.number + version.release,
-        'logout_btn': True,
         'populaire': populaire,
     }
 
@@ -38,7 +37,7 @@ def populaire_details(request):
 @view_config(
     route_name='admin.populaires.create',
     renderer='admin/populaire_edit.mako',
-    permission='admin',
+    permission='authenticated',
 )
 class PopulaireCreate(FormView):
     schema = PopulaireSchema()
@@ -56,7 +55,6 @@ class PopulaireCreate(FormView):
         tmpl_vars = super(PopulaireCreate, self).show(form)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'cancel_url': self.list_url()
         })
         return tmpl_vars
@@ -80,7 +78,6 @@ class PopulaireCreate(FormView):
         tmpl_vars = super(PopulaireCreate, self).failure(e)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'cancel_url': self.list_url()
         })
         return tmpl_vars
@@ -89,7 +86,7 @@ class PopulaireCreate(FormView):
 @view_config(
     route_name='admin.populaires.edit',
     renderer='admin/populaire_edit.mako',
-    permission='admin',
+    permission='authenticated',
 )
 class PopulaireEdit(FormView):
     schema = PopulaireSchema()
@@ -121,7 +118,6 @@ class PopulaireEdit(FormView):
         tmpl_vars = super(PopulaireEdit, self).show(form)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'cancel_url': self._redirect_url(self.request.matchdict['item']),
         })
         return tmpl_vars
@@ -147,7 +143,6 @@ class PopulaireEdit(FormView):
         tmpl_vars = super(PopulaireEdit, self).failure(e)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'cancel_url': self._redirect_url(self.request.matchdict['item']),
         })
         return tmpl_vars
@@ -155,7 +150,7 @@ class PopulaireEdit(FormView):
 
 @view_config(
     route_name='admin.populaires.create_rider_list',
-    permission='admin',
+    permission='authenticated',
 )
 def create_rider_list(request):
     short_name = request.matchdict['item']
@@ -180,7 +175,7 @@ def _create_rider_list(request, populaire):
 
 @view_config(
     route_name='admin.populaires.email_to_organizer',
-    permission='admin',
+    permission='authenticated',
 )
 def email_to_organizer(request):
     short_name = request.matchdict['item']
@@ -209,7 +204,7 @@ def _email_to_organizer(request, populaire):
 
 @view_config(
     route_name='admin.populaires.email_to_webmaster',
-    permission='admin',
+    permission='authenticated',
 )
 def email_to_webmaster(request):
     short_name = request.matchdict['item']
@@ -233,7 +228,7 @@ def _email_to_webmaster(request, populaire):
 
 @view_config(
     route_name='admin.populaires.setup_123',
-    permission='admin',
+    permission='authenticated',
 )
 def setup_123(request):
     short_name = request.matchdict['item']

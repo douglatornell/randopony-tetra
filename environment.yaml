@@ -35,5 +35,5 @@ dependencies:
   - pyramid-crow
   - pyramid-deform
   - pyramid-mailer
-  - pyramid-persona
   - pyramid-tm
+  - stormpath

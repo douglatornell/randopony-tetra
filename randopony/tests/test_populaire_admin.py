@@ -60,7 +60,6 @@ class TestPopulaireDetails(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'populaire': populaire,
             })
 
@@ -113,7 +112,6 @@ class TestPopulaireCreate(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_form.render(),
                 'cancel_url': 'http://example.com/admin/populaires/',
             })
@@ -156,7 +154,6 @@ class TestPopulaireCreate(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_val_error.render(),
                 'cancel_url': 'http://example.com/admin/populaires/',
             })
@@ -258,7 +255,6 @@ class TestPopulaireEdit(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_form.render(),
                 'cancel_url': 'http://example.com/admin/populaires/VicPop',
             })
@@ -321,7 +317,6 @@ class TestPopulaireEdit(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_val_error.render(),
                 'cancel_url': 'http://example.com/admin/populaires/VicPop',
             })

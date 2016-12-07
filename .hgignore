@@ -3,3 +3,4 @@ syntax: glob
 *.pid
 *.sqlite
 private_credentials.py
+stormpath-apikey.properties

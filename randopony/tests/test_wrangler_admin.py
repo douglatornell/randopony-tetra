@@ -64,7 +64,6 @@ class TestWranglerCreate(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_form.render(),
                 'list_url': 'http://example.com/admin/wranglers/',
             })
@@ -94,7 +93,6 @@ class TestWranglerCreate(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_val_err.render(),
                 'list_url': 'http://example.com/admin/wranglers/',
             })
@@ -160,7 +158,6 @@ class TestWranglerEdit(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_form.render(),
                 'list_url': 'http://example.com/admin/wranglers/',
             })
@@ -196,7 +193,6 @@ class TestWranglerEdit(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'form': mock_val_err.render(),
                 'list_url': 'http://example.com/admin/wranglers/',
             })

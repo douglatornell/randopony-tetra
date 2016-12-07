@@ -44,11 +44,7 @@ class TestCoreAdminViews(unittest.TestCase):
         admin = self._make_one(request)
         tmpl_vars = admin.home()
         self.assertEqual(
-            tmpl_vars,
-            {
-                'version': version.number + version.release,
-                'logout_btn': True,
-            })
+            tmpl_vars, {'version': version.number + version.release})
 
     def test_wranglers_list(self):
         """admin wranglers view has expected template variables
@@ -60,7 +56,6 @@ class TestCoreAdminViews(unittest.TestCase):
         tmpl_vars = admin.items_list()
         self.assertEqual(
             tmpl_vars['version'], version.number + version.release)
-        self.assertTrue(tmpl_vars['logout_btn'])
         self.assertEqual(tmpl_vars['list'], 'wranglers')
         self.assertEqual(tmpl_vars['list_title'], 'Pony Wranglers')
         self.assertEqual(tmpl_vars['action'], 'edit')
@@ -109,7 +104,6 @@ class TestCoreAdminViews(unittest.TestCase):
             tmpl_vars,
             {
                 'version': version.number + version.release,
-                'logout_btn': True,
                 'list': 'wranglers',
                 'item': 'tom@example.com',
                 'item_type': 'administrator',

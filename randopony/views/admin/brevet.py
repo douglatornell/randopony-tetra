@@ -18,14 +18,13 @@ from ... import __pkg_metadata__ as version
 @view_config(
     route_name='admin.brevets.view',
     renderer='admin/brevet.mako',
-    permission='admin',
+    permission='authenticated',
 )
 def brevet_details(request):
     code, date = request.matchdict['item'].split()
     brevet = admin_core.get_brevet(code, date)
     return {
         'version': version.number + version.release,
-        'logout_btn': True,
         'brevet': brevet,
     }
 
@@ -33,7 +32,7 @@ def brevet_details(request):
 @view_config(
     route_name='admin.brevets.create',
     renderer='admin/brevet_edit.mako',
-    permission='admin',
+    permission='authenticated',
 )
 class BrevetCreate(FormView):
     schema = BrevetSchema()
@@ -51,7 +50,6 @@ class BrevetCreate(FormView):
         tmpl_vars = super(BrevetCreate, self).show(form)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'cancel_url': self.list_url()
         })
         return tmpl_vars
@@ -73,7 +71,6 @@ class BrevetCreate(FormView):
         tmpl_vars = super(BrevetCreate, self).failure(e)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'cancel_url': self.list_url()
         })
         return tmpl_vars
@@ -82,7 +79,7 @@ class BrevetCreate(FormView):
 @view_config(
     route_name='admin.brevets.edit',
     renderer='admin/brevet_edit.mako',
-    permission='admin',
+    permission='authenticated',
 )
 class BrevetEdit(FormView):
     schema = BrevetSchema()
@@ -114,7 +111,6 @@ class BrevetEdit(FormView):
         tmpl_vars = super(BrevetEdit, self).show(form)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'cancel_url': self.view_url()
         })
         return tmpl_vars
@@ -140,7 +136,6 @@ class BrevetEdit(FormView):
         tmpl_vars = super(BrevetEdit, self).failure(e)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'cancel_url': self.view_url()
         })
         return tmpl_vars
@@ -148,7 +143,7 @@ class BrevetEdit(FormView):
 
 @view_config(
     route_name='admin.brevets.create_rider_list',
-    permission='admin',
+    permission='authenticated',
 )
 def create_rider_list(request):
     code, date = request.matchdict['item'].split()
@@ -177,7 +172,7 @@ def _create_rider_list(request, brevet):
 
 @view_config(
     route_name='admin.brevets.email_to_organizer',
-    permission='admin',
+    permission='authenticated',
 )
 def email_to_organizer(request):
     code, date = request.matchdict['item'].split()
@@ -207,7 +202,7 @@ def _email_to_organizer(request, brevet, date):
 
 @view_config(
     route_name='admin.brevets.email_to_webmaster',
-    permission='admin',
+    permission='authenticated',
 )
 def email_to_webmaster(request):
     code, date = request.matchdict['item'].split()
@@ -233,7 +228,7 @@ def _email_to_webmaster(request, brevet, date):
 
 @view_config(
     route_name='admin.brevets.setup_123',
-    permission='admin',
+    permission='authenticated',
 )
 def setup_123(request):
     code, date = request.matchdict['item'].split()

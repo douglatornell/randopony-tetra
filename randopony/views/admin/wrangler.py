@@ -16,7 +16,7 @@ from ... import __pkg_metadata__ as version
 @view_config(
     route_name='admin.wranglers.create',
     renderer='admin/wrangler.mako',
-    permission='admin',
+    permission='authenticated',
 )
 class WranglerCreate(FormView):
     schema = AdministratorSchema()
@@ -33,7 +33,6 @@ class WranglerCreate(FormView):
         tmpl_vars = super(WranglerCreate, self).show(form)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'list_url': self.list_url()
         })
         return tmpl_vars
@@ -47,7 +46,6 @@ class WranglerCreate(FormView):
         tmpl_vars = super(WranglerCreate, self).failure(e)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'list_url': self.list_url()
         })
         return tmpl_vars
@@ -56,7 +54,7 @@ class WranglerCreate(FormView):
 @view_config(
     route_name='admin.wranglers.edit',
     renderer='admin/wrangler.mako',
-    permission='admin',
+    permission='authenticated',
 )
 class WranglerEdit(FormView):
     schema = AdministratorSchema()
@@ -83,7 +81,6 @@ class WranglerEdit(FormView):
         tmpl_vars = super(WranglerEdit, self).show(form)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'list_url': self.list_url()
         })
         return tmpl_vars
@@ -101,7 +98,6 @@ class WranglerEdit(FormView):
         tmpl_vars = super(WranglerEdit, self).failure(e)
         tmpl_vars.update({
             'version': version.number + version.release,
-            'logout_btn': True,
             'list_url': self.list_url()
         })
         return tmpl_vars

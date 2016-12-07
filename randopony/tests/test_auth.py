@@ -2,8 +2,11 @@
 """Unit tests for RandoPony auth configuration.
 """
 import unittest
+
+from pyramid import security
 from pyramid import testing
 from sqlalchemy import create_engine
+
 from ..models.meta import (
     Base,
     DBSession,
@@ -28,23 +31,19 @@ class TestAuthConfig(unittest.TestCase):
         """
         from pyramid.security import ALL_PERMISSIONS
         from pyramid.security import Allow
-        from .. import Root
+        from ..views.admin.core import ACLFactory
         request = testing.DummyRequest()
-        root = Root(request)
-        self.assertEqual(root.__acl__, [(Allow, 'g:admin', ALL_PERMISSIONS)])
+        root = ACLFactory(request)
+        self.assertEqual(
+            root.__acl__,
+            [(security.Allow, security.Authenticated, 'authenticated')])
 
     def test_groupfinder_known_user_admin_group(self):
         """groupfinder returns admin group for known user"""
-        from .. import groupfinder
+        from ..views.admin.core import group_finder
         from ..models import Administrator
         admin = Administrator(persona_email='tom@example.com')
         DBSession.add(admin)
         request = testing.DummyRequest()
-        groups = groupfinder('tom@example.com', request)
-        self.assertEqual(groups, ['g:admin'])
-
-    def test_groupfinder_unkown_user(self):
-        """groupfinder returns None for unknown user"""
-        from .. import groupfinder
-        request = testing.DummyRequest()
-        self.assertIsNone(groupfinder('harry@example.com', request))
+        groups = group_finder('tom@example.com', request)
+        self.assertEqual(groups, [security.Authenticated])

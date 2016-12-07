@@ -10,8 +10,6 @@
 </%block>
 
 <%block name="page_js">
-  <script src="https://login.persona.org/include.js"></script>
-  <script>${request.persona_js}</script>
   <%block name="view_js"></%block>
 </%block>
 
@@ -21,9 +19,9 @@
       <a href="${request.route_url('admin.home')}" class="brand">
         RandoPony ${version} Admin
       </a>
-      %if logout_btn:
+      %if request.authenticated_userid:
       <ul class="nav pull-right">
-        <li><button id="signout" class="btn">Logout</button></li>
+        <li><button class="btn btn-default" onclick="location.href='${request.route_url("admin.logout")}'">Logout</button></li>
       </ul>
       %endif
     </div>
