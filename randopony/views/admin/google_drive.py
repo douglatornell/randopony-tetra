@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Google Drive interface functions for RandoPony.
 """
-import gdata.acl.data
-from gdata.docs.client import DocsClient
-from gdata.spreadsheet.service import SpreadsheetsService
+# import gdata.acl.data
+# from gdata.docs.client import DocsClient
+# from gdata.spreadsheet.service import SpreadsheetsService
 
 
 def google_drive_login(service, username, password):

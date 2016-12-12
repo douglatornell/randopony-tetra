@@ -8,7 +8,7 @@ from datetime import (
 import logging
 from celery.task import task
 from deform import Button
-from gdata.spreadsheet.service import SpreadsheetsService
+# from gdata.spreadsheet.service import SpreadsheetsService
 from pyramid_deform import FormView
 from pyramid.httpexceptions import (
     HTTPFound,
@@ -27,7 +27,7 @@ from .core import (
     get_results_link,
     SiteViews,
 )
-from ..admin.google_drive import google_drive_login
+# from ..admin.google_drive import google_drive_login
 from ...models import (
     Brevet,
     BrevetEntrySchema,
@@ -423,24 +423,24 @@ def _get_member_status_by_name(first_name, last_name, is_club_member_url):
     return is_club_member
 
 
-@task(ignore_result=True)
-def update_google_spreadsheet(riders, doc_key, username, password,
-                              is_club_member_url):
-    client = google_drive_login(SpreadsheetsService, username, password)
-    spreadsheet_list = client.GetListFeed(doc_key)
-    spreadsheet_rows = len(spreadsheet_list.entry)
-    # Update the rows already in the spreadsheet
-    for row, rider in enumerate(riders[:spreadsheet_rows]):
-        rider_number = row + 1
-        new_row_data = _make_spreadsheet_row_dict(
-            rider_number, rider, is_club_member_url)
-        client.UpdateRow(spreadsheet_list.entry[row], new_row_data)
-    # Add remaining rows
-    for row, rider in enumerate(riders[spreadsheet_rows:]):
-        rider_number = spreadsheet_rows + row + 1
-        row_data = _make_spreadsheet_row_dict(
-            rider_number, rider, is_club_member_url)
-        client.InsertRow(row_data, doc_key)
+# @task(ignore_result=True)
+# def update_google_spreadsheet(riders, doc_key, username, password,
+#                               is_club_member_url):
+#     # client = google_drive_login(SpreadsheetsService, username, password)
+#     spreadsheet_list = client.GetListFeed(doc_key)
+#     spreadsheet_rows = len(spreadsheet_list.entry)
+#     # Update the rows already in the spreadsheet
+#     for row, rider in enumerate(riders[:spreadsheet_rows]):
+#         rider_number = row + 1
+#         new_row_data = _make_spreadsheet_row_dict(
+#             rider_number, rider, is_club_member_url)
+#         client.UpdateRow(spreadsheet_list.entry[row], new_row_data)
+#     # Add remaining rows
+#     for row, rider in enumerate(riders[spreadsheet_rows:]):
+#         rider_number = spreadsheet_rows + row + 1
+#         row_data = _make_spreadsheet_row_dict(
+#             rider_number, rider, is_club_member_url)
+#         client.InsertRow(row_data, doc_key)
 
 
 def _make_spreadsheet_row_dict(rider_number, rider, is_club_member_url):

@@ -2,14 +2,14 @@
 """RandoPony populaire admin views.
 """
 from deform import Button
-from gdata.docs.client import DocsClient
+# from gdata.docs.client import DocsClient
 from pyramid_deform import FormView
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.view import view_config
-from . import google_drive
+# from . import google_drive
 from . import core as admin_core
 from ...models import (
     EmailAddress,

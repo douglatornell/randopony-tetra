@@ -1,6 +1,12 @@
 2016.3
 ------
 
+- Hack code enough to get it running under Python 3.5;
+  mostly removal of gdata (Google Docs) calls.
+  Necessary because webfaction's urllib3 installations raise SNIMissingWarning
+  which is fatal under Python 2.7,
+  but survivable under Python 3.5.
+
 - Change auth to stormpath re: demise of persona.org
 
 

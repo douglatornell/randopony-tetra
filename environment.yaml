@@ -15,7 +15,7 @@
 name: randopony
 dependencies:
 - coverage
-- gdata
+#- gdata
 - ipython
 - mock
 - pyramid
@@ -25,7 +25,7 @@ dependencies:
 - pytest
 - python=2.7
 - sqlalchemy
-- supervisor
+#- supervisor
 - sphinx
 - transaction
 - waitress

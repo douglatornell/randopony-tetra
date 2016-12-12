@@ -8,7 +8,9 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'celery',
-    'gdata',
+    'colander=1.2',
+    'deform=0.9.9',
+    # 'gdata',
     'pyramid',
     'pyramid-crow',
     'pyramid-debugtoolbar',
@@ -19,7 +21,7 @@ requires = [
     'pytz',
     'SQLAlchemy',
     'stormpath',
-    'supervisor',
+    # 'supervisor',
     'transaction',
     'waitress',
     'zope.sqlalchemy',
