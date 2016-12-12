@@ -3,7 +3,6 @@ import os
 from celery import current_app as celery
 from pyramid.session import SignedCookieSessionFactory
 
-import celery_config
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
@@ -11,7 +10,10 @@ from pyramid.settings import asbool
 from sqlalchemy import engine_from_config
 from stormpath.client import Client
 
-from . import credentials
+from . import (
+    celery_config,
+    credentials,
+)
 from .models import Administrator
 from .models.meta import (
     DBSession,

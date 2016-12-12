@@ -5,7 +5,7 @@ from deform import Button
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
-from . import google_drive
+# from . import google_drive
 from . import core as admin_core
 from ...models import (
     Brevet,
@@ -148,26 +148,26 @@ class BrevetEdit(FormView):
 def create_rider_list(request):
     code, date = request.matchdict['item'].split()
     brevet = admin_core.get_brevet(code, date)
-    flash = _create_rider_list(request, brevet)
-    admin_core.finalize_flash_msg(request, flash)
+    # flash = _create_rider_list(request, brevet)
+    # admin_core.finalize_flash_msg(request, flash)
     redirect_url = request.route_url(
         'admin.brevets.view', item=request.matchdict['item'])
     return HTTPFound(redirect_url)
 
 
-def _create_rider_list(request, brevet):
-    """Actual creation of rider list spreadsheet on Google Drive.
-
-    For use by :func:`create_rider_list` and :func:`setup_123` views.
-    """
-    username = request.registry.settings['google_drive.username']
-    password = request.registry.settings['google_drive.password']
-    flash = google_drive.create_rider_list(
-        brevet, 'Brevet Rider List Template', username, password)
-    if flash[0] == 'success':
-        flash += google_drive.update_rider_list_info_question(
-            brevet, username, password)
-    return flash
+# def _create_rider_list(request, brevet):
+#     """Actual creation of rider list spreadsheet on Google Drive.
+#
+#     For use by :func:`create_rider_list` and :func:`setup_123` views.
+#     """
+#     username = request.registry.settings['google_drive.username']
+#     password = request.registry.settings['google_drive.password']
+#     flash = google_drive.create_rider_list(
+#         brevet, 'Brevet Rider List Template', username, password)
+#     if flash[0] == 'success':
+#         flash += google_drive.update_rider_list_info_question(
+#             brevet, username, password)
+#     return flash
 
 
 @view_config(
@@ -233,11 +233,11 @@ def _email_to_webmaster(request, brevet, date):
 def setup_123(request):
     code, date = request.matchdict['item'].split()
     brevet = admin_core.get_brevet(code, date)
-    flash = _create_rider_list(request, brevet)
-    if 'error' not in flash:
-        flash += _email_to_organizer(request, brevet, date)
-        flash += _email_to_webmaster(request, brevet, date)
-    admin_core.finalize_flash_msg(request, flash)
+    # flash = _create_rider_list(request, brevet)
+    # if 'error' not in flash:
+    #     flash += _email_to_organizer(request, brevet, date)
+    #     flash += _email_to_webmaster(request, brevet, date)
+    # admin_core.finalize_flash_msg(request, flash)
     redirect_url = request.route_url(
         'admin.brevets.view', item=request.matchdict['item'])
     return HTTPFound(redirect_url)
