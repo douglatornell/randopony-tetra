@@ -13,7 +13,6 @@ requires = [
     # 'gdata',
     'pyramid',
     'pyramid-crow',
-    'pyramid-debugtoolbar',
     'pyramid-deform',
     'pyramid-mailer',
     'pyramid-mako',
