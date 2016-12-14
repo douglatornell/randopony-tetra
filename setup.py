@@ -22,7 +22,6 @@ requires = [
     'stormpath',
     # 'supervisor',
     'transaction',
-    'waitress',
     'zope.sqlalchemy',
 ]
 
