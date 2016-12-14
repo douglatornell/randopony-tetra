@@ -8,8 +8,8 @@ CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
     'celery',
-    'colander=1.2',
-    'deform=0.9.9',
+    'colander==1.2',
+    'deform==0.9.9',
     # 'gdata',
     'pyramid',
     'pyramid-crow',
