@@ -51,6 +51,7 @@ def main(global_config, **settings):  # pragma: no cover
         session_factory=session_factory,
         root_factory=admin_core.ACLFactory,
     )
+    config.include('pyramid_crow')
     config.include('pyramid_deform')
     config.include('pyramid_mailer')
     config.include('pyramid_mako')
