@@ -4,3 +4,4 @@ syntax: glob
 *.sqlite
 private_credentials.py
 stormpath-apikey.properties
+sentry_dsn.py
