@@ -10,16 +10,16 @@ from pyramid.settings import asbool
 from sqlalchemy import engine_from_config
 from stormpath.client import Client
 
-from . import (
+from randopony import (
     celery_config,
     credentials,
 )
-from .models import Administrator
-from .models.meta import (
+from randopony.models import Administrator
+from randopony.models.meta import (
     DBSession,
     Base,
 )
-from .views.admin import core as admin_core
+from randopony.views.admin import core as admin_core
 
 
 def main(global_config, **settings):  # pragma: no cover
@@ -33,8 +33,7 @@ def main(global_config, **settings):  # pragma: no cover
     authz_policy = ACLAuthorizationPolicy()
     session_factory = SignedCookieSessionFactory(
         credentials.session_cookie_secret)
-    stormpath_client = Client(
-        api_key_file=os.path.abspath('stormpath-apikey.properties'))
+    stormpath_client = Client(api_key_file=settings['stormpath.api_key_file'])
     settings.update({
         'google_drive.username': credentials.google_drive_username,
         'google_drive.password': credentials.google_drive_password,
