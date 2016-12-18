@@ -2,12 +2,11 @@
 functionality.
 """
 import unittest
-try:
-    from unittest.mock import MagicMock
-except ImportError:                      # pragma: no cover
-    from mock import MagicMock
+from unittest.mock import MagicMock
+
 from pyramid import testing
 from sqlalchemy import create_engine
+
 from ..models.meta import (
     Base,
     DBSession,

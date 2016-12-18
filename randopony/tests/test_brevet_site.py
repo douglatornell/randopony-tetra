@@ -1,16 +1,11 @@
 """Tests for RandoPony public site brevet views and functionality.
 """
 from datetime import datetime
-try:
-    from unittest.mock import (
-        Mock,
-        patch,
-    )
-except ImportError:  # pragma: no cover
-    from mock import (
-        Mock,
-        patch,
-    )
+from unittest.mock import (
+    Mock,
+    patch,
+)
+
 from pyramid.threadlocal import get_current_request
 import pytest
 

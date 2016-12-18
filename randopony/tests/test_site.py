@@ -1,9 +1,6 @@
 """Tests for RandoPony public site core views and functionality.
 """
-try:
-    from unittest.mock import patch
-except ImportError:                  # pragma: no cover
-    from mock import patch
+from unittest.mock import patch
 
 from pyramid.threadlocal import get_current_request
 import pytest

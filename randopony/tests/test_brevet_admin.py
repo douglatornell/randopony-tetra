@@ -2,16 +2,10 @@
 """
 from datetime import datetime
 import unittest
-try:
-    from unittest.mock import (
-        MagicMock,
-        patch,
-    )
-except ImportError:                      # pragma: no cover
-    from mock import (
-        MagicMock,
-        patch,
-    )
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
 
 from pyramid import testing
 import pytest
