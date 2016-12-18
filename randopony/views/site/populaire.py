@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony public site populaire views.
 """
 from datetime import (

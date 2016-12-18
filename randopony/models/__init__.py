@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony data model.
 """
 from .core import (

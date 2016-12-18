@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for RandoPony brevet admin views and functionality.
 """
 from datetime import datetime

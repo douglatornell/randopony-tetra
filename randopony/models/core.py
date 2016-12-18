@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony data model core components.
 """
 from datetime import (

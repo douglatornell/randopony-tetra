@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # RandoPony documentation build configuration file, created by
 # sphinx-quickstart on Fri Nov 23 08:31:13 2012.

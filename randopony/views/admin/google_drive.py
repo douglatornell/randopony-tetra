@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Google Drive interface functions for RandoPony.
 """
 # import gdata.acl.data
