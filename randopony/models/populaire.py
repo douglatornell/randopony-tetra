@@ -177,13 +177,10 @@ class PopulaireRider(Base):
         self.comment = comment
 
     def __str__(self):
-        return ' '.join((self.first_name, self.last_name)).encode('utf-8')
+        return ' '.join((self.first_name, self.last_name))
 
     def __repr__(self):
-        return ('<Rider({})>'.format(self).decode('utf-8')).encode('utf-8')
-
-    def __unicode__(self):
-        return u' '.join((self.first_name, self.last_name))
+        return '<Rider({})>'.format(self)
 
     @property
     def full_name(self):

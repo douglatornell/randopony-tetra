@@ -239,7 +239,7 @@ class TestBrevetRider(object):
             last_name=last_name,
             comment='',
         )
-        expected = u'{} {}'.format(first_name, last_name).encode('utf-8')
+        expected = '{} {}'.format(first_name, last_name)
         assert str(rider) == expected
 
     @pytest.mark.parametrize("first_name, last_name", [
@@ -256,8 +256,7 @@ class TestBrevetRider(object):
             last_name=last_name,
             comment='',
         )
-        expected = (
-            u'<Rider({} {})>'.format(first_name, last_name).encode('utf-8'))
+        expected = '<Rider({} {})>'.format(first_name, last_name)
         assert repr(rider) == expected
 
     @pytest.mark.parametrize("first_name, last_name", [
@@ -297,22 +296,6 @@ class TestBrevetRider(object):
         )
         expected = u'{} "hoping for sun" {}'.format(first_name, last_name)
         assert rider.full_name == expected
-
-    @pytest.mark.parametrize("first_name, last_name", [
-        ('Tom', 'Dickson'),  # ASCII
-        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
-        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
-    ])
-    def test_unicode(self, first_name, last_name, brevet_rider_model):
-        """BrevetRider model unicode rep is first_name last_name
-        """
-        rider = brevet_rider_model(
-            email='tom@example.com',
-            first_name=first_name,
-            last_name=last_name,
-            comment='',
-        )
-        assert unicode(rider) == u'{} {}'.format(first_name, last_name)
 
 
 class TestPopulaire(unittest.TestCase):
@@ -430,7 +413,7 @@ class TestPopulaireRider(object):
             distance='60',
             comment='',
         )
-        expected = u'{} {}'.format(first_name, last_name).encode('utf-8')
+        expected = '{} {}'.format(first_name, last_name)
         assert str(rider) == expected
 
     @pytest.mark.parametrize("first_name, last_name", [
@@ -448,8 +431,7 @@ class TestPopulaireRider(object):
             distance='60',
             comment='',
         )
-        expected = (
-            u'<Rider({} {})>'.format(first_name, last_name).encode('utf-8'))
+        expected = '<Rider({} {})>'.format(first_name, last_name)
         assert repr(rider) == expected
 
     @pytest.mark.parametrize("first_name, last_name", [
@@ -492,20 +474,3 @@ class TestPopulaireRider(object):
         )
         expected = u'{} "hoping for sun" {}'.format(first_name, last_name)
         assert rider.full_name == expected
-
-    @pytest.mark.parametrize("first_name, last_name", [
-        ('Tom', 'Dickson'),  # ASCII
-        (u'Étienne', u'«küßî»'),  # 1-byte Unicode
-        (u'Étienne', u'“ЌύБЇ”'),  # 2-byte Unicode
-    ])
-    def test_unicode(self, first_name, last_name, pop_rider_model):
-        """BrevetRider model unicode rep is first_name last_name
-        """
-        rider = pop_rider_model(
-            email='tom@example.com',
-            first_name=first_name,
-            last_name=last_name,
-            distance='60',
-            comment='',
-        )
-        assert unicode(rider) == u'{} {}'.format(first_name, last_name)
