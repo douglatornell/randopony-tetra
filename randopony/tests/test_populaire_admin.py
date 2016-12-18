@@ -13,8 +13,11 @@ except ImportError:                      # pragma: no cover
         MagicMock,
         patch,
     )
+
 from pyramid import testing
+import pytest
 from sqlalchemy import create_engine
+
 from ..models.meta import (
     Base,
     DBSession,
@@ -385,6 +388,7 @@ class TestSetup123(unittest.TestCase):
         self.assertEqual(
             resp.location, 'http://example.com/admin/populaire/VicPop')
 
+    @pytest.mark.xfail(reason='google spreadsheet disabled')
     def test_setup_123_error_create_rider_list_already_done(self):
         """setup_123 stops w/ exp flash msg if rider list doc id is setup
         """

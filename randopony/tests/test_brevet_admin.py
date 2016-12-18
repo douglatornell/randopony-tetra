@@ -13,8 +13,11 @@ except ImportError:                      # pragma: no cover
         MagicMock,
         patch,
     )
+
 from pyramid import testing
+import pytest
 from sqlalchemy import create_engine
+
 from ..models.meta import (
     Base,
     DBSession,
@@ -320,6 +323,7 @@ class TestCreateRiderList(unittest.TestCase):
         DBSession.remove()
         testing.tearDown()
 
+    @pytest.mark.xfail(reason='google spreadsheet disabled')
     def test_create_rider_list_already_exists(self):
         """_create_rider_list returns expected flash when rider list exists
         """
@@ -349,6 +353,7 @@ class TestCreateRiderList(unittest.TestCase):
                 'error', 'Rider list spreadsheet already created',
             ])
 
+    @pytest.mark.xfail(reason='google spreadsheet disabled')
     def test_create_rider_list_success(self):
         """rider list spreadsheet updated w/ info question upon create success
         """
@@ -417,6 +422,7 @@ class TestSetup123(unittest.TestCase):
         DBSession.remove()
         testing.tearDown()
 
+    @pytest.mark.xfail(reason='_create_rider_list disabled')
     def test_setup_123(self):
         """setup_123 calls expected 3 setup steps
         """
@@ -448,6 +454,7 @@ class TestSetup123(unittest.TestCase):
         self.assertEqual(
             resp.location, 'http://example.com/admin/brevets/VI200%2003Mar2013')
 
+    @pytest.mark.xfail(reason='_create_rider_list disabled')
     def test_setup_123_error_create_rider_list_already_done(self):
         """setup_123 stops w/ exp flash msg if rider list doc id is setup
         """
@@ -477,6 +484,7 @@ class TestSetup123(unittest.TestCase):
             flash,
             ['error', 'Rider list spreadsheet already created'])
 
+    @pytest.mark.xfail(reason='_create_rider_list disabled')
     def test_setup_123_success_flash(self):
         """setup_123 sets expected flash message on success
         """

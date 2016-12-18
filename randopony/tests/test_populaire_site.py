@@ -2,7 +2,6 @@
 """Tests for RandoPony public site populaire views and functionality.
 """
 from datetime import datetime
-import unittest
 try:
     from unittest.mock import (
         MagicMock,
@@ -13,15 +12,13 @@ except ImportError:                  # pragma: no cover
         MagicMock,
         patch,
     )
+
 from pyramid import testing
 from pyramid.threadlocal import get_current_request
 from pyramid_mailer import get_mailer
-from sqlalchemy import create_engine
-from ..models.meta import (
-    Base,
-    DBSession,
-)
 import pytest
+
+from ..models.meta import DBSession
 
 
 @pytest.fixture(scope='module')
@@ -415,6 +412,7 @@ class TestPopulaireEntry(object):
             'duplicate', ' '.join((first_name, last_name)), 'tom@example.com']
         assert request.session.pop_flash() == expected
 
+    @pytest.mark.xfail(reason='google spreadsheet disabled')
     @pytest.mark.parametrize("first_name, last_name", [
         ('Tom', 'Disckson'),  # ASCII
         (u'Étienne', u'«küßî»'),  # 1-byte Unicode
@@ -468,6 +466,7 @@ class TestPopulaireEntry(object):
         assert url.location == 'http://example.com/populaires/VicPop'
         assert request.session.pop_flash() == ['success', 'fred@example.com']
 
+    @pytest.mark.xfail(reason='google spreadsheet disabled')
     def test_register_success_single_distance(
         self, entry, pop_model, pop_rider_model, email_address_model,
         views_module, db_session, pyramid_config,
@@ -507,6 +506,7 @@ class TestPopulaireEntry(object):
         rider = db_session.query(pop_rider_model).first()
         assert rider.distance == '60'
 
+    @pytest.mark.xfail(reason='google spreadsheet disabled')
     def test_register_success_sends_2_emails(
         self, entry, pop_model, pop_rider_model, email_address_model,
         views_module, db_session, pyramid_config,
