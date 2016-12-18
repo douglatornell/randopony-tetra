@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony admin views core components.
 """
 from datetime import (

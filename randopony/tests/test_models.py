@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Unit tests for RandoPony data model.
 """
 from datetime import datetime

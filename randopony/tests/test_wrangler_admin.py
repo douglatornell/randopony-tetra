@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for RandoPony administrator (aka wrangler) admin views and
 functionality.
 """

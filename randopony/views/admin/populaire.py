@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony populaire admin views.
 """
 from deform import Button

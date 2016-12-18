@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony data model meta objects.
 """
 from sqlalchemy.ext.declarative import declarative_base

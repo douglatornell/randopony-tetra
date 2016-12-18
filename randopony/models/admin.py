@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony administrator (aka wrangler) data model.
 """
 import colander

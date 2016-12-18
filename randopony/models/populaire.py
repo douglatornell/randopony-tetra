@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony populaire data model.
 """
 import uuid

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Fixtures for RandoPony app test suite.
 """
 import pytest

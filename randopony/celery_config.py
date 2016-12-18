@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony-tetra celery configuration.
 """
 

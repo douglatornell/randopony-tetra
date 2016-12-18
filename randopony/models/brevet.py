@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony brevet data model.
 """
 from datetime import timedelta

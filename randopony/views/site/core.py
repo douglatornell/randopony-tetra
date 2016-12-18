@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """RandoPony public site core views.
 """
 from pyramid.view import (
