@@ -1,16 +1,10 @@
 """Tests for RandoPony public site populaire views and functionality.
 """
 from datetime import datetime
-try:
-    from unittest.mock import (
-        MagicMock,
-        patch,
-    )
-except ImportError:                  # pragma: no cover
-    from mock import (
-        MagicMock,
-        patch,
-    )
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
 
 from pyramid import testing
 from pyramid.threadlocal import get_current_request

@@ -2,13 +2,12 @@
 """
 from datetime import datetime
 import unittest
-try:
-    from unittest.mock import patch
-except ImportError:                  # pragma: no cover
-    from mock import patch
+from unittest.mock import patch
+
 from pyramid import testing
 import pytest
 from sqlalchemy import create_engine
+
 from ..models.meta import (
     Base,
     DBSession,
