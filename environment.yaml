@@ -28,7 +28,6 @@ dependencies:
 #- supervisor
 - sphinx
 - transaction
-- waitress
 - zope.sqlalchemy
 - pip:
   - celery
