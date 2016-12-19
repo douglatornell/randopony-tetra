@@ -8,13 +8,13 @@ import pytest
 
 @pytest.fixture(scope='module')
 def core_module():
-    from ..views.site import core
+    from randopony.views.site import core
     return core
 
 
 @pytest.fixture(scope='function')
 def views(core_module, pyramid_config):
-    from ..views.site.core import SiteViews
+    from randopony.views.site.core import SiteViews
     with patch.object(core_module, 'get_membership_link'):
         return SiteViews(get_current_request())
 

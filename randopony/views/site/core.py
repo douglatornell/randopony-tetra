@@ -4,13 +4,13 @@ from pyramid.view import (
     notfound_view_config,
     view_config,
 )
-from ...models import (
+from randopony.models import (
     Brevet,
     EmailAddress,
     Link,
     Populaire,
 )
-from ...models.meta import DBSession
+from randopony.models.meta import DBSession
 
 
 class SiteViews(object):

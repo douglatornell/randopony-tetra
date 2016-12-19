@@ -1,20 +1,20 @@
 """RandoPony data model.
 """
-from .core import (
+from randopony.models.core import (
     EmailAddress,
     Link,
 )
-from .admin import (
+from randopony.models.admin import (
     Administrator,
     AdministratorSchema,
 )
-from .brevet import (
+from randopony.models.brevet import (
     Brevet,
     BrevetSchema,
     BrevetEntrySchema,
     BrevetRider,
 )
-from .populaire import (
+from randopony.models.populaire import (
     Populaire,
     PopulaireSchema,
     PopulaireEntrySchema,

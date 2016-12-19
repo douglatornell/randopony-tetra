@@ -11,7 +11,7 @@ from pyramid import testing
 import pytest
 from sqlalchemy import create_engine
 
-from ..models.meta import (
+from randopony.models.meta import (
     Base,
     DBSession,
 )
@@ -33,9 +33,9 @@ class TestPopulaireDetails(unittest.TestCase):
     def test_populaire_details(self):
         """populaire_details view has expected template vsriables
         """
-        from .. import __pkg_metadata__ as version
-        from ..models import Populaire
-        from ..views.admin.populaire import populaire_details
+        from randopony  import __pkg_metadata__ as version
+        from randopony.models import Populaire
+        from randopony.views.admin.populaire import populaire_details
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -70,7 +70,7 @@ class TestPopulaireCreate(unittest.TestCase):
          * POST with populaire that is already in db fails gracefully
     """
     def _get_target_class(self):
-        from ..views.admin.populaire import PopulaireCreate
+        from randopony.views.admin.populaire import PopulaireCreate
         return PopulaireCreate
 
     def _make_one(self, *args, **kwargs):
@@ -98,7 +98,7 @@ class TestPopulaireCreate(unittest.TestCase):
     def test_show(self):
         """show returns expected template variables
         """
-        from .. import __pkg_metadata__ as version
+        from randopony import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
@@ -115,7 +115,7 @@ class TestPopulaireCreate(unittest.TestCase):
     def test_add_success(self):
         """admin create populaire success adds populaire to database
         """
-        from ..models import Populaire
+        from randopony.models import Populaire
         self.config.add_route('admin.list', '/admin/{list}/')
         self.config.add_route('admin.populaires.view', '/admin/populaires/{item}')
         request = testing.DummyRequest()
@@ -140,7 +140,7 @@ class TestPopulaireCreate(unittest.TestCase):
     def test_failure(self):
         """create populaire failure returns expected template variables
         """
-        from .. import __pkg_metadata__ as version
+        from randopony import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
@@ -164,7 +164,7 @@ class TestPopulaireEdit(unittest.TestCase):
          * POST with valid data updates record in database
     """
     def _get_target_class(self):
-        from ..views.admin.populaire import PopulaireEdit
+        from randopony.views.admin.populaire import PopulaireEdit
         return PopulaireEdit
 
     def _make_one(self, *args, **kwargs):
@@ -183,7 +183,7 @@ class TestPopulaireEdit(unittest.TestCase):
     def test_appstruct(self):
         """admin populaire edit appstruct returns dict to populate form
         """
-        from ..models import Populaire
+        from randopony.models import Populaire
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -225,8 +225,8 @@ class TestPopulaireEdit(unittest.TestCase):
     def test_show(self):
         """admin populaire edit show returns expected template variables
         """
-        from .. import __pkg_metadata__ as version
-        from ..models import Populaire
+        from randopony import __pkg_metadata__ as version
+        from randopony.models import Populaire
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -258,7 +258,7 @@ class TestPopulaireEdit(unittest.TestCase):
     def test_save_success(self):
         """admin edit populaire save success updates populaire in database
         """
-        from ..models import Populaire
+        from randopony.models import Populaire
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -301,7 +301,7 @@ class TestPopulaireEdit(unittest.TestCase):
     def test_failure(self):
         """edit populaire failure returns expected template variables
         """
-        from .. import __pkg_metadata__ as version
+        from randopony import __pkg_metadata__ as version
         self.config.add_route(
             'admin.populaires.view', '/admin/populaires/{item}')
         request = testing.DummyRequest()
@@ -322,7 +322,7 @@ class TestSetup123(unittest.TestCase):
     """Unit tests for combined 3-step setup admin function view.
     """
     def _call_setup_123(self, *args, **kwargs):
-        from ..views.admin.populaire import setup_123
+        from randopony.views.admin.populaire import setup_123
         return setup_123(*args, **kwargs)
 
     def setUp(self):
@@ -352,8 +352,8 @@ class TestSetup123(unittest.TestCase):
     def test_setup_123(self):
         """setup_123 calls expected 3 setup steps
         """
-        from ..models import Populaire
-        from ..views.admin import populaire as pop_module
+        from randopony.models import Populaire
+        from randopony.views.admin import populaire as pop_module
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -385,8 +385,8 @@ class TestSetup123(unittest.TestCase):
     def test_setup_123_error_create_rider_list_already_done(self):
         """setup_123 stops w/ exp flash msg if rider list doc id is setup
         """
-        from ..models import Populaire
-        from ..views.admin import populaire as pop_module
+        from randopony.models import Populaire
+        from randopony.views.admin import populaire as pop_module
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -417,11 +417,11 @@ class TestSetup123(unittest.TestCase):
     def test_setup_123_success_flash(self):
         """setup_123 sets expected flash message on success
         """
-        from ..models import (
+        from randopony.models import (
             EmailAddress,
             Populaire,
         )
-        from ..views.admin import populaire as pop_module
+        from randopony.views.admin import populaire as pop_module
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',

@@ -8,7 +8,7 @@ from pyramid import testing
 import pytest
 from sqlalchemy import create_engine
 
-from ..models.meta import (
+from randopony.models.meta import (
     Base,
     DBSession,
 )
@@ -18,7 +18,7 @@ class TestAdministrator(unittest.TestCase):
     """Unit tests for Administrator data model.
     """
     def _get_target_class(self):
-        from ..models import Administrator
+        from randopony.models import Administrator
         return Administrator
 
     def _make_one(self, *args, **kwargs):
@@ -39,7 +39,7 @@ class TestEmailAddress(unittest.TestCase):
     """Unit tests for EmailAddress data model.
     """
     def _get_target_class(self):
-        from ..models import EmailAddress
+        from randopony.models import EmailAddress
         return EmailAddress
 
     def _make_one(self, *args, **kwargs):
@@ -55,7 +55,7 @@ class TestLink(unittest.TestCase):
     """Unit tests for Link data model.
     """
     def _get_target_class(self):
-        from ..models import Link
+        from randopony.models import Link
         return Link
 
     def _make_one(self, *args, **kwargs):
@@ -72,7 +72,7 @@ class TestBrevet(unittest.TestCase):
     """Unit tests for Brevet data model.
     """
     def _get_target_class(self):
-        from ..models import Brevet
+        from randopony.models import Brevet
         return Brevet
 
     def _make_one(self, *args, **kwargs):
@@ -163,7 +163,7 @@ class TestBrevet(unittest.TestCase):
     def test_get_current_future_brevet(self):
         """get_current class method returns brevet in future
         """
-        from ..models import core
+        from randopony.models import core
         brevet = self._make_one(
             region='LM',
             distance=200,
@@ -183,7 +183,7 @@ class TestBrevet(unittest.TestCase):
     def test_get_current_recent_brevet(self):
         """get_current class method returns brevet in within last 7 days
         """
-        from ..models import core
+        from randopony.models import core
         brevet = self._make_one(
             region='LM',
             distance=200,
@@ -203,7 +203,7 @@ class TestBrevet(unittest.TestCase):
     def test_get_current_exclude_old_brevet(self):
         """get_current class method excludes brevet longer ago than 7 days
         """
-        from ..models import core
+        from randopony.models import core
         brevet = self._make_one(
             region='LM',
             distance=200,
@@ -300,7 +300,7 @@ class TestPopulaire(unittest.TestCase):
     """Unit tests for Populaire data model.
     """
     def _get_target_class(self):
-        from ..models import Populaire
+        from randopony.models import Populaire
         return Populaire
 
     def _make_one(self, *args, **kwargs):
@@ -372,7 +372,7 @@ class TestPopulaire(unittest.TestCase):
     def test_default_entry_form_url(self):
         """Populaire entry form URL defaults to standard club form
         """
-        from ..models import Link
+        from randopony.models import Link
         entry_form_link = Link(
             key='entry_form',
             url='http://www.randonneurs.bc.ca/organize/eventform.pdf',

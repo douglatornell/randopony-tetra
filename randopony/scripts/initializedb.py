@@ -8,12 +8,12 @@ from pyramid.paster import (
     setup_logging,
 )
 from sqlalchemy import engine_from_config
-from ..models import (
+from randopony.models import (
     Administrator,
     EmailAddress,
     Link,
 )
-from ..models.meta import (
+from randopony.models.meta import (
     Base,
     DBSession,
 )

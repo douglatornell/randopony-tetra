@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 from pyramid import testing
 from sqlalchemy import create_engine
 
-from ..models.meta import (
+from randopony.models.meta import (
     Base,
     DBSession,
 )
@@ -24,7 +24,7 @@ class TestWranglerCreate(unittest.TestCase):
          * POST with email address already in db fails gracefully
     """
     def _get_target_class(self):
-        from ..views.admin.wrangler import WranglerCreate
+        from randopony.views.admin.wrangler import WranglerCreate
         return WranglerCreate
 
     def _make_one(self, *args, **kwargs):
@@ -52,7 +52,7 @@ class TestWranglerCreate(unittest.TestCase):
     def test_show(self):
         """show returns expected template variables
         """
-        from .. import __pkg_metadata__ as version
+        from randopony import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
@@ -69,7 +69,7 @@ class TestWranglerCreate(unittest.TestCase):
     def test_add_success(self):
         """create wrangler success adds persona email to database
         """
-        from ..models import Administrator
+        from randopony.models import Administrator
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
@@ -81,7 +81,7 @@ class TestWranglerCreate(unittest.TestCase):
     def test_failure(self):
         """create wrangler failure returns expected template variables
         """
-        from .. import __pkg_metadata__ as version
+        from randopony import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
@@ -106,7 +106,7 @@ class TestWranglerEdit(unittest.TestCase):
          * POST with valid email address updates record in database
     """
     def _get_target_class(self):
-        from ..views.admin.wrangler import WranglerEdit
+        from randopony.views.admin.wrangler import WranglerEdit
         return WranglerEdit
 
     def _make_one(self, *args, **kwargs):
@@ -125,7 +125,7 @@ class TestWranglerEdit(unittest.TestCase):
     def test_appstruct(self):
         """admin edit wrangler appstruct method returns dict to populate form
         """
-        from ..models import Administrator
+        from randopony.models import Administrator
         admin = Administrator(persona_email='tom@example.com')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
@@ -142,8 +142,8 @@ class TestWranglerEdit(unittest.TestCase):
     def test_show(self):
         """admin edit wrangler show returns expected template variables
         """
-        from .. import __pkg_metadata__ as version
-        from ..models import Administrator
+        from randopony import __pkg_metadata__ as version
+        from randopony.models import Administrator
         admin = Administrator(persona_email='tom@example.com')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
@@ -163,7 +163,7 @@ class TestWranglerEdit(unittest.TestCase):
     def test_save_success(self):
         """admin edit wrangler success updates persona email in database
         """
-        from ..models import Administrator
+        from randopony.models import Administrator
         admin = Administrator(persona_email='tom@example.com')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
@@ -181,7 +181,7 @@ class TestWranglerEdit(unittest.TestCase):
     def test_failure(self):
         """admin edit wrangler failure returns expected template variables
         """
-        from .. import __pkg_metadata__ as version
+        from randopony import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         edit = self._make_one(request)

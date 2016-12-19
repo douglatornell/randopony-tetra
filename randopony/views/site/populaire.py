@@ -20,13 +20,13 @@ from pyramid.renderers import render
 from pyramid.response import Response
 from pyramid.view import view_config
 import pytz
-from .core import (
+from randopony.views.site.core import (
     get_membership_link,
     get_results_link,
     SiteViews,
 )
-# from ..admin.google_drive import google_drive_login
-from ...models import (
+# from randopony.views.admin.google_drive import google_drive_login
+from randopony.models import (
     Brevet,
     EmailAddress,
     Link,
@@ -34,7 +34,7 @@ from ...models import (
     PopulaireEntrySchema,
     PopulaireRider,
 )
-from ...models.meta import DBSession
+from randopony.models.meta import DBSession
 
 
 log = logging.getLogger(__name__)

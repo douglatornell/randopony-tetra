@@ -8,7 +8,7 @@ from pyramid import testing
 from pyramid_mailer import get_mailer
 from sqlalchemy import create_engine
 
-from ..models.meta import (
+from randopony.models.meta import (
     Base,
     DBSession,
 )
@@ -18,7 +18,7 @@ class TestCoreAdminViews(unittest.TestCase):
     """Unit tests for core admin interface views.
     """
     def _get_target_class(self):
-        from ..views.admin.core import AdminViews
+        from randopony.views.admin.core import AdminViews
         return AdminViews
 
     def _make_one(self, *args, **kwargs):
@@ -37,7 +37,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_home(self):
         """admin home view has expected template variables
         """
-        from .. import __pkg_metadata__ as version
+        from randopony import __pkg_metadata__ as version
         request = testing.DummyRequest()
         admin = self._make_one(request)
         tmpl_vars = admin.home()
@@ -47,7 +47,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_wranglers_list(self):
         """admin wranglers view has expected template variables
         """
-        from .. import __pkg_metadata__ as version
+        from randopony import __pkg_metadata__ as version
         request = testing.DummyRequest()
         request.matchdict['list'] = 'wranglers'
         admin = self._make_one(request)
@@ -61,7 +61,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_wranglers_list_order(self):
         """admin wranglers list is alpha ordered by persona email
         """
-        from ..models import Administrator
+        from randopony.models import Administrator
         admin1 = Administrator(persona_email='tom@example.com')
         admin2 = Administrator(persona_email='harry@example.com')
         DBSession.add_all((admin1, admin2))
@@ -76,7 +76,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_delete_cancel(self):
         """admin delete cancel leaves item in database
         """
-        from ..models import Administrator
+        from randopony.models import Administrator
         admin = Administrator(persona_email='tom@example.com')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
@@ -91,7 +91,7 @@ class TestCoreAdminViews(unittest.TestCase):
     def test_delete_wrangler_confirmation(self):
         """admin delete confirmation view for wrangler has exp template vars
         """
-        from .. import __pkg_metadata__ as version
+        from randopony import __pkg_metadata__ as version
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         request.matchdict['list'] = 'wranglers'
@@ -111,7 +111,7 @@ class TestCoreAdminViews(unittest.TestCase):
         """admin delete for wrangler deletes item from database
         """
         from sqlalchemy.orm.exc import NoResultFound
-        from ..models import Administrator
+        from randopony.models import Administrator
         admin = Administrator(persona_email='tom@example.com')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
@@ -128,8 +128,8 @@ class TestCoreAdminViews(unittest.TestCase):
         """admin delete for brevet deletes item from database
         """
         from sqlalchemy.orm.exc import NoResultFound
-        from ..models import core
-        from ..models import Brevet
+        from randopony.models import core
+        from randopony.models import Brevet
         brevet = Brevet(
             region='LM',
             distance=200,
@@ -156,11 +156,11 @@ class TestEmailToOrganizer(unittest.TestCase):
     """Unit tests for email_to_organizer admin function re: event URLs.
     """
     def _call_email_to_organizer(self, *args, **kwargs):
-        from ..views.admin.core import email_to_organizer
+        from randopony.views.admin.core import email_to_organizer
         return email_to_organizer(*args, **kwargs)
 
     def setUp(self):
-        from ..models import EmailAddress
+        from randopony.models import EmailAddress
         self.config = testing.setUp(
             settings={
                 'mako.directories': 'randopony:templates',
@@ -194,7 +194,7 @@ class TestEmailToOrganizer(unittest.TestCase):
     def test_email_to_organizer_catches_missing_google_doc_id(self):
         """email_to_organizer return error flash if google_doc_id not set
         """
-        from ..models import Brevet
+        from randopony.models import Brevet
         brevet = Brevet(
             region='VI',
             distance=200,
@@ -230,7 +230,7 @@ class TestEmailToOrganizer(unittest.TestCase):
     def test_email_to_organizer_sends_email(self):
         """email_to_organizer sends message & sets expected flash message
         """
-        from ..models import Brevet
+        from randopony.models import Brevet
         brevet = Brevet(
             region='VI',
             distance=200,
@@ -266,7 +266,7 @@ class TestEmailToOrganizer(unittest.TestCase):
     def test_email_to_organizer_message(self):
         """email_to_organizer message has expected content
         """
-        from ..models import (
+        from randopony.models import (
             EmailAddress,
             Brevet,
         )
@@ -323,7 +323,7 @@ class TestEmailToOrganizer(unittest.TestCase):
     def test_email_to_organizer_multi_organizer(self):
         """email to organizer has expected to list for multi-organizer event
         """
-        from ..models import Brevet
+        from randopony.models import Brevet
         brevet = Brevet(
             region='VI',
             distance=200,
@@ -360,11 +360,11 @@ class TestEmailToWebmaster(unittest.TestCase):
     """Unit tests for email_to_webmaster admin function re: event page URL.
     """
     def _call_email_to_webmaster(self, *args, **kwargs):
-        from ..views.admin.core import email_to_webmaster
+        from randopony.views.admin.core import email_to_webmaster
         return email_to_webmaster(*args, **kwargs)
 
     def setUp(self):
-        from ..models import EmailAddress
+        from randopony.models import EmailAddress
         self.config = testing.setUp(
             settings={
                 'mako.directories': 'randopony:templates',
@@ -399,7 +399,7 @@ class TestEmailToWebmaster(unittest.TestCase):
     def test_email_to_webmaster_sends_email(self):
         """email_to_webmaster sends message & sets expected flash message
         """
-        from ..models import Populaire
+        from randopony.models import Populaire
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -429,7 +429,7 @@ class TestEmailToWebmaster(unittest.TestCase):
     def test_email_to_webmaster_message(self):
         """email_to_webmaster message has expected content
         """
-        from ..models import Populaire
+        from randopony.models import Populaire
         populaire = Populaire(
             event_name='Victoria Populaire',
             short_name='VicPop',
@@ -465,7 +465,7 @@ class TestFinalizeFlashMsg(unittest.TestCase):
     """Unit tests for finalize_flash_msg function.
     """
     def _call_finalize_flash_msg(self, *args, **kwargs):
-        from ..views.admin.core import finalize_flash_msg
+        from randopony.views.admin.core import finalize_flash_msg
         return finalize_flash_msg(*args, **kwargs)
 
     def test_finalize_flash_msg_error(self):

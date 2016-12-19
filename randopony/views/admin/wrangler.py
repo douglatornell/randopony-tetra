@@ -4,12 +4,12 @@ from deform import Button
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
-from ...models import (
+from randopony.models import (
     Administrator,
     AdministratorSchema,
 )
-from ...models.meta import DBSession
-from ... import __pkg_metadata__ as version
+from randopony.models.meta import DBSession
+from randopony import __pkg_metadata__ as version
 
 
 @view_config(
