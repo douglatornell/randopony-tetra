@@ -18,7 +18,7 @@ email_host_username = None
 email_host_password = None
 
 try:
-    from .private_credentials import (
+    from randopony.private_credentials import (
         auth_tkt_secret,
         session_cookie_secret,
         google_drive_username,

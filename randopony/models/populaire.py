@@ -16,11 +16,11 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import relationship
-from .core import (
+from randopony.models.core import (
     EventMixin,
     Link,
 )
-from .meta import (
+from randopony.models.meta import (
     Base,
     DBSession,
 )

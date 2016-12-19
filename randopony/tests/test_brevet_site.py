@@ -12,13 +12,13 @@ import pytest
 
 @pytest.fixture(scope='module')
 def brevet_views_module():
-    from ..views.site import brevet
+    from randopony.views.site import brevet
     return brevet
 
 
 @pytest.fixture(scope='module')
 def views_class():
-    from ..views.site.brevet import BrevetViews
+    from randopony.views.site.brevet import BrevetViews
     return BrevetViews
 
 
@@ -26,14 +26,14 @@ def views_class():
 def views(views_core_module, pyramid_config):
     """BrevetViews instance with mocked get_membership_link() function
     """
-    from ..views.site.brevet import BrevetViews
+    from randopony.views.site.brevet import BrevetViews
     with patch.object(views_core_module, 'get_membership_link'):
         return BrevetViews(get_current_request())
 
 
 @pytest.fixture(scope='function')
 def entry(pyramid_config):
-    from ..views.site.brevet import BrevetEntry
+    from randopony.views.site.brevet import BrevetEntry
     return BrevetEntry(get_current_request())
 
 

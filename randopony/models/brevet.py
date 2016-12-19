@@ -21,8 +21,8 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import relationship
-from .core import EventMixin
-from .meta import Base
+from randopony.models.core import EventMixin
+from randopony.models.meta import Base
 
 
 class Brevet(EventMixin, Base):

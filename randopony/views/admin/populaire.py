@@ -8,15 +8,15 @@ from pyramid_mailer.message import Message
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.view import view_config
-# from . import google_drive
-from . import core as admin_core
-from ...models import (
+# from randopony.views.admin import google_drive
+from randopony.views.admin import core as admin_core
+from randopony.models import (
     EmailAddress,
     Populaire,
     PopulaireSchema,
 )
-from ...models.meta import DBSession
-from ... import __pkg_metadata__ as version
+from randopony.models.meta import DBSession
+from randopony import __pkg_metadata__ as version
 
 
 @view_config(

@@ -22,14 +22,14 @@ from pyramid_mailer.message import Message
 from sqlalchemy import desc
 from stormpath.error import Error as StormpathError
 
-from ...models import (
+from randopony.models import (
     Administrator,
     Brevet,
     EmailAddress,
     Populaire,
 )
-from ...models.meta import DBSession
-from ... import __pkg_metadata__ as version
+from randopony.models.meta import DBSession
+from randopony import __pkg_metadata__ as version
 
 
 logger = logging.getLogger(__name__)

@@ -11,7 +11,7 @@ from sqlalchemy import (
     Integer,
     Text,
 )
-from .meta import Base
+from randopony.models.meta import Base
 
 
 class Administrator(Base):

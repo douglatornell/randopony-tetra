@@ -11,24 +11,24 @@ from pyramid.threadlocal import get_current_request
 from pyramid_mailer import get_mailer
 import pytest
 
-from ..models.meta import DBSession
+from randopony.models.meta import DBSession
 
 
 @pytest.fixture(scope='module')
 def views_module():
-    from ..views.site import populaire
+    from randopony.views.site import populaire
     return populaire
 
 
 @pytest.fixture(scope='module')
 def views_class():
-    from ..views.site.populaire import PopulaireViews
+    from randopony.views.site.populaire import PopulaireViews
     return PopulaireViews
 
 
 @pytest.fixture(scope='function')
 def entry(pyramid_config):
-    from ..views.site.populaire import PopulaireEntry
+    from randopony.views.site.populaire import PopulaireEntry
     return PopulaireEntry(get_current_request())
 
 
@@ -678,8 +678,8 @@ class TestPopulaireEntry(object):
     def test_register_success_queues_update_google_spreadsheet_task(self):
         """successful registration queues task to update rider list spreadsheet
         """
-        from ..models import Populaire
-        from ..views.site import populaire as pop_module
+        from randopony.models import Populaire
+        from randopony.views.site import populaire as pop_module
         populaire = Populaire(
             event_name="New Year's Populaire",
             short_name='NewYearsPop',

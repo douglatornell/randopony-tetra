@@ -4,7 +4,7 @@ import pytest
 from pyramid import testing
 from sqlalchemy import create_engine
 
-from ..models.meta import (
+from randopony.models.meta import (
     Base,
     DBSession,
 )
@@ -31,48 +31,48 @@ def pyramid_config():
 
 @pytest.fixture(scope='session')
 def core_model():
-    from ..models import core
+    from randopony.models import core
     return core
 
 
 @pytest.fixture(scope='session')
 def link_model():
-    from ..models import Link
+    from randopony.models import Link
     return Link
 
 
 @pytest.fixture(scope='session')
 def email_address_model():
-    from ..models import EmailAddress
+    from randopony.models import EmailAddress
     return EmailAddress
 
 
 @pytest.fixture(scope='session')
 def brevet_model():
-    from ..models import Brevet
+    from randopony.models import Brevet
     return Brevet
 
 
 @pytest.fixture(scope='session')
 def brevet_rider_model():
-    from ..models import BrevetRider
+    from randopony.models import BrevetRider
     return BrevetRider
 
 
 @pytest.fixture(scope='session')
 def pop_model():
-    from ..models import Populaire
+    from randopony.models import Populaire
     return Populaire
 
 
 @pytest.fixture(scope='session')
 def pop_rider_model():
-    from ..models import PopulaireRider
+    from randopony.models import PopulaireRider
     return PopulaireRider
 
 
 @pytest.fixture(scope='module')
 def views_core_module():
-    from ..views.site import core
+    from randopony.views.site import core
     return core
 

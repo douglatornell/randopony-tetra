@@ -6,7 +6,7 @@ from pyramid import security
 from pyramid import testing
 from sqlalchemy import create_engine
 
-from ..models.meta import (
+from randopony.models.meta import (
     Base,
     DBSession,
 )
@@ -30,7 +30,7 @@ class TestAuthConfig(unittest.TestCase):
         """
         from pyramid.security import ALL_PERMISSIONS
         from pyramid.security import Allow
-        from ..views.admin.core import ACLFactory
+        from randopony.views.admin.core import ACLFactory
         request = testing.DummyRequest()
         root = ACLFactory(request)
         self.assertEqual(
@@ -39,8 +39,8 @@ class TestAuthConfig(unittest.TestCase):
 
     def test_groupfinder_known_user_admin_group(self):
         """groupfinder returns admin group for known user"""
-        from ..views.admin.core import group_finder
-        from ..models import Administrator
+        from randopony.views.admin.core import group_finder
+        from randopony.models import Administrator
         admin = Administrator(persona_email='tom@example.com')
         DBSession.add(admin)
         request = testing.DummyRequest()

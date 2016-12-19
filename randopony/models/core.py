@@ -10,7 +10,7 @@ from sqlalchemy import (
     Integer,
     Text,
 )
-from .meta import (
+from randopony.models.meta import (
     Base,
     DBSession,
 )
