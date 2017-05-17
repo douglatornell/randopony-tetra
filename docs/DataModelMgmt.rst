@@ -26,6 +26,13 @@ The code examples below assume that the configuration file that
    session = randopony.models.DBSession
    t = transaction
 
+Launch :command:`pshell` with:
+
+.. code-block:: bash
+
+    $ cd webapps/randopony_py3/randopony-tetra
+    $ ../env/bin/pshell production.ini
+
 
 Database Table Creation
 -----------------------
@@ -56,3 +63,11 @@ Example: Update the club membership sign-up link URL.
     >>> with t.manager:
     ...     link = session.query(m.Link).filter_by(key='membership_link').one()
     ...     link.url = 'https://ccnbikes.com/#/events/2015-bc-randonneurs-cycling-club-membership'
+
+Example: Add a 2nd organizer email address to a brevet (pending resolution of https://bitbucket.org/douglatornell/randopony-tetra/issues/24).
+
+.. code-block:: python
+
+    >>> with t.manager:
+    ...     brevet = session.query(m.Brevet).filter_by(region='LM', distance=400).one()
+    ...     brevet.organizer_email += ', tom@example.com'
