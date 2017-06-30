@@ -13,26 +13,28 @@
 # recent development.
 
 name: randopony
+
 dependencies:
 - coverage
 #- gdata
 - ipython
-- mock
-- pyramid
-- pyramid_debugtoolbar
-- pyramid_mako
 - pytz
 - pytest
-- python=2.7
-- sqlalchemy
+- python=3.5
 #- supervisor
 - sphinx
-- transaction
-- zope.sqlalchemy
 - pip:
   - celery
+  - colander==1.2
+  - deform==0.9.9
+  - pyramid==1.7.3
   - pyramid-crow
+  - pyramid_debugtoolbar
   - pyramid-deform
   - pyramid-mailer
+  - pyramid_mako
   - pyramid-tm
+  - sqlalchemy
   - stormpath
+  - transaction
+  - zope.sqlalchemy
