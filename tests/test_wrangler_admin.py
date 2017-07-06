@@ -2,7 +2,7 @@
 functionality.
 """
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from pyramid import testing
 from sqlalchemy import create_engine
@@ -66,16 +66,22 @@ class TestWranglerCreate(unittest.TestCase):
                 'list_url': 'http://example.com/admin/wranglers/',
             })
 
-    def test_add_success(self):
-        """create wrangler success adds persona email to database
+    @patch(
+        'randopony.views.admin.wrangler.custom_app_context.encrypt',
+        return_value='hash'
+    )
+    def test_add_success(self, m_encrypt):
+        """create wrangler success adds email to database
         """
         from randopony.models import Administrator
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         create = self._make_one(request)
-        url = create.add_success({'persona_email': 'tom@example.com'})
+        url = create.add_success(
+            {'email': 'tom@example.com', 'password': 'password'})
         wrangler = DBSession.query(Administrator).first()
-        self.assertEqual(wrangler.persona_email, 'tom@example.com')
+        self.assertEqual(wrangler.email, 'tom@example.com')
+        self.assertEqual(wrangler.password_hash, 'hash')
         self.assertEqual(url.location, 'http://example.com/admin/wranglers/')
 
     def test_failure(self):
@@ -126,7 +132,7 @@ class TestWranglerEdit(unittest.TestCase):
         """admin edit wrangler appstruct method returns dict to populate form
         """
         from randopony.models import Administrator
-        admin = Administrator(persona_email='tom@example.com')
+        admin = Administrator(email='tom@example.com', password_hash='hash')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
@@ -136,7 +142,7 @@ class TestWranglerEdit(unittest.TestCase):
         self.assertEqual(
             appstruct, {
                 'id': 1,
-                'persona_email': 'tom@example.com',
+                'email': 'tom@example.com',
             })
 
     def test_show(self):
@@ -144,7 +150,7 @@ class TestWranglerEdit(unittest.TestCase):
         """
         from randopony import __pkg_metadata__ as version
         from randopony.models import Administrator
-        admin = Administrator(persona_email='tom@example.com')
+        admin = Administrator(email='tom@example.com', password_hash='hash')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
@@ -160,21 +166,27 @@ class TestWranglerEdit(unittest.TestCase):
                 'list_url': 'http://example.com/admin/wranglers/',
             })
 
-    def test_save_success(self):
-        """admin edit wrangler success updates persona email in database
+    @patch(
+        'randopony.views.admin.wrangler.custom_app_context.encrypt',
+        return_value='hash'
+    )
+    def test_save_success(self, m_encrypt):
+        """admin edit wrangler success updates email in database
         """
         from randopony.models import Administrator
-        admin = Administrator(persona_email='tom@example.com')
+        admin = Administrator(email='tom@example.com', password_hash='hash')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest()
         edit = self._make_one(request)
         url = edit.save_success({
             'id': 1,
-            'persona_email': 'harry@example.com',
+            'email': 'harry@example.com',
+            'password': 'password',
         })
         wrangler = DBSession.query(Administrator).first()
-        self.assertEqual(wrangler.persona_email, 'harry@example.com')
+        self.assertEqual(wrangler.email, 'harry@example.com')
+        self.assertEqual(wrangler.password_hash, 'hash')
         self.assertEqual(
             url.location, 'http://example.com/admin/wranglers/')
 

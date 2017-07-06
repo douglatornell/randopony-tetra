@@ -8,7 +8,6 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
 from pyramid.settings import asbool
 from sqlalchemy import engine_from_config
-from stormpath.client import Client
 
 from randopony import (
     celery_config,
@@ -33,12 +32,9 @@ def main(global_config, **settings):  # pragma: no cover
     authz_policy = ACLAuthorizationPolicy()
     session_factory = SignedCookieSessionFactory(
         credentials.session_cookie_secret)
-    stormpath_client = Client(api_key_file=settings['stormpath.api_key_file'])
     settings.update({
         'google_drive.username': credentials.google_drive_username,
         'google_drive.password': credentials.google_drive_password,
-        'stormpath_app':
-            stormpath_client.applications.search({'name': 'RandoPony'})[0],
     })
     if asbool(settings.get('production_deployment', 'false')):
         settings.update({'mail.username': credentials.email_host_username})

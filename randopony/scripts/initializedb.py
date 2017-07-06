@@ -2,12 +2,15 @@
 """
 import os
 import sys
-import transaction
+
+from passlib.apps import custom_app_context
 from pyramid.paster import (
     get_appsettings,
     setup_logging,
 )
 from sqlalchemy import engine_from_config
+import transaction
+
 from randopony.models import (
     Administrator,
     EmailAddress,
@@ -36,7 +39,15 @@ def main(argv=sys.argv):
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
     # Deployment specific initialization
-    admin = Administrator(persona_email='djl@douglatornell.ca')
+    password1, password2 = True, False
+    while password1 != password2:
+        password1 = input('password for administrator djl@douglatornell.ca: ')
+        password2 = input('again: ')
+    password_hash = custom_app_context.encrypt(password1)
+    admin = Administrator(
+        email='djl@douglatornell.ca',
+        password_hash=password_hash,
+    )
     admin_email = EmailAddress(
         key='admin_email',
         email='djl@douglatornell.ca',
@@ -65,7 +76,7 @@ def main(argv=sys.argv):
     membership_link = Link(
         key='membership_link',
         url='https://ccnbikes.com/#/events/'
-            '2016-bc-randonneurs-cycling-club-membership',
+            '2017-bc-randonneurs-cycling-club-membership',
     )
     with transaction.manager:
         DBSession.add_all((
@@ -78,3 +89,7 @@ def main(argv=sys.argv):
             is_club_member_api,
             membership_link,
         ))
+
+
+if __name__ == '__main__':
+    main()

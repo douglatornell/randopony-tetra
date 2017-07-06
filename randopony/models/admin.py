@@ -3,6 +3,7 @@
 import colander
 from deform.widget import (
     HiddenWidget,
+    PasswordWidget,
     TextInputWidget,
 )
 from pyramid_deform import CSRFSchema
@@ -11,27 +12,42 @@ from sqlalchemy import (
     Integer,
     Text,
 )
-from randopony.models.meta import Base
+from sqlalchemy.orm.exc import NoResultFound
+
+from randopony.models.meta import (
+    Base,
+    DBSession,
+)
 
 
 class Administrator(Base):
     """App administrator (aka Pony Wrangler).
-
-    Authentication is via Mozilla Persona, so all we store is the admin's
-    Persona email address.
     """
     __tablename__ = 'admins'
     id = Column(Integer, primary_key=True)
-    persona_email = Column(Text, index=True, unique=True)
+    email = Column(Text, index=True, unique=True)
+    password_hash = Column(Text, nullable=False)
 
-    def __init__(self, persona_email):
-        self.persona_email = persona_email
+    def __init__(self, email, password_hash):
+        self.email = email
+        self.password_hash = password_hash
 
     def __str__(self):
-        return self.persona_email
+        return self.email
 
     def __repr__(self):
         return '<Administrator({})>'.format(self)
+
+    @classmethod
+    def get(cls, email):
+        try:
+            return (
+                DBSession.query(cls)
+                .filter(cls.email == email)
+                .one()
+            )
+        except NoResultFound:
+            raise NoResultFound('no User with email: {}'.format(email))
 
 
 class AdministratorSchema(CSRFSchema):
@@ -41,7 +57,7 @@ class AdministratorSchema(CSRFSchema):
         colander.Integer(),
         widget=HiddenWidget(),
     )
-    persona_email = colander.SchemaNode(
+    email = colander.SchemaNode(
         colander.String(),
         widget=TextInputWidget(
             template='emailinput',
@@ -49,4 +65,8 @@ class AdministratorSchema(CSRFSchema):
             placeholder='tom@example.com',
         ),
         validator=colander.Email(),
+    )
+    password = colander.SchemaNode(
+        colander.String(),
+        widget=PasswordWidget(),
     )

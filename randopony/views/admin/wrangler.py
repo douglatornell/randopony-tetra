@@ -1,9 +1,11 @@
 """RandoPony brevet admin views.
 """
 from deform import Button
+from passlib.apps import custom_app_context
 from pyramid_deform import FormView
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
+
 from randopony.models import (
     Administrator,
     AdministratorSchema,
@@ -37,7 +39,8 @@ class WranglerCreate(FormView):
         return tmpl_vars
 
     def add_success(self, appstruct):
-        admin = Administrator(appstruct['persona_email'])
+        password_hash = custom_app_context.encrypt(appstruct['password'])
+        admin = Administrator(appstruct['email'], password_hash)
         DBSession.add(admin)
         return HTTPFound(self.list_url())
 
@@ -68,12 +71,12 @@ class WranglerEdit(FormView):
     def appstruct(self):
         admin = (
             DBSession.query(Administrator)
-            .filter_by(persona_email=self.request.matchdict['item'])
+            .filter_by(email=self.request.matchdict['item'])
             .one()
         )
         return {
             'id': admin.id,
-            'persona_email': admin.persona_email,
+            'email': admin.email,
         }
 
     def show(self, form):
@@ -90,7 +93,8 @@ class WranglerEdit(FormView):
             .filter_by(id=appstruct['id'])
             .one()
         )
-        admin.persona_email = appstruct['persona_email']
+        admin.email = appstruct['email']
+        admin.password_hash = custom_app_context.encrypt(appstruct['password'])
         return HTTPFound(self.list_url())
 
     def failure(self, e):

@@ -6,11 +6,9 @@ from datetime import (
 )
 import logging
 
+from passlib.apps import custom_app_context
 from pyramid import security
-from pyramid.httpexceptions import (
-    HTTPForbidden,
-    HTTPFound,
-)
+from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render
 from pyramid.view import (
     forbidden_view_config,
@@ -20,7 +18,7 @@ from pyramid.view import (
 from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 from sqlalchemy import desc
-from stormpath.error import Error as StormpathError
+from sqlalchemy.orm.exc import NoResultFound
 
 from randopony.models import (
     Administrator,
@@ -70,8 +68,13 @@ def forbidden_view(request):
     renderer='admin/login.mako',
     permission=security.NO_PERMISSION_REQUIRED,
 )
-def login(request):
-    return {'version': version.number + version.release}
+def login(request, unknown_email=False, incorrect_password=False, email=''):
+    return {
+        'version': version.number + version.release,
+        'email': email,
+        'unknown_email': unknown_email,
+        'incorrect_password': incorrect_password,
+    }
 
 
 @view_config(
@@ -81,18 +84,21 @@ def login(request):
     permission=security.NO_PERMISSION_REQUIRED
 )
 def login_handler(request):
-    stormpath_app = request.registry.settings['stormpath_app']
-    email = request.POST.get('email')
-    password = request.POST.get('password')
     try:
-        auth_result = stormpath_app.authenticate_account(email, password)
-    except StormpathError as e:
-        logger.info('auth failure for {0}: {1}'.format(email, e))
-        return login(request)
+        email = request.POST.get('email')
+        user = Administrator.get(email)
+    except NoResultFound:
+        logger.info('rejected sign-in with unknown email: {}'.format(email))
+        return login(request, unknown_email=True, email=email)
+    password = request.POST.get('password')
+    if not custom_app_context.verify(password, user.password_hash):
+        logger.info(
+            'rejected sign-in for {} with incorrect password'.format(email))
+        return login(request, incorrect_password=True, email=email)
     logger.info('successful login by {}'.format(email))
     return HTTPFound(
         location=request.route_url('admin.home'),
-        headers=security.remember(request, auth_result.account.email))
+        headers=security.remember(request, email))
 
 
 @view_config(
@@ -103,7 +109,7 @@ def logout(request):
     """Process user log-out request.
     """
     return HTTPFound(
-        location=request.route_url('admin.home'),
+        location=request.route_url('admin.login'),
         headers=security.forget(request)
     )
 
@@ -131,7 +137,7 @@ class AdminViews(object):
             'model': Administrator,
             'item_type': 'administrator',
             'list_title': 'Pony Wranglers',
-            'order_by': Administrator.persona_email,
+            'order_by': Administrator.email,
             'action': 'edit',
         },
     }
@@ -185,7 +191,7 @@ class AdminViews(object):
             elif list_name == 'populaires':
                 criterion = Populaire.id == get_populaire(item).id
             elif list_name == 'wranglers':
-                criterion = Administrator.persona_email == item
+                criterion = Administrator.email == item
             (DBSession.query(params['model'])
                 .filter(criterion)
                 .delete())
