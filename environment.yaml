@@ -27,6 +27,7 @@ dependencies:
   - celery
   - colander==1.2
   - deform==0.9.9
+  - passlib
   - pyramid==1.7.3
   - pyramid-crow
   - pyramid_debugtoolbar
@@ -35,6 +36,5 @@ dependencies:
   - pyramid_mako
   - pyramid-tm
   - sqlalchemy
-  - stormpath
   - transaction
   - zope.sqlalchemy

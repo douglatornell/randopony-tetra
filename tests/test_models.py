@@ -25,13 +25,13 @@ class TestAdministrator(unittest.TestCase):
         return self._get_target_class()(*args, **kwargs)
 
     def test_str(self):
-        """Administrator model string rep is persona email address
+        """Administrator model string rep is email address
         """
-        admin = self._make_one('tom@example.com')
+        admin = self._make_one('tom@example.com', password_hash='hash')
         self.assertEqual(str(admin), 'tom@example.com')
 
     def test_repr(self):
-        admin = self._make_one('tom@example.com')
+        admin = self._make_one('tom@example.com', password_hash='hash')
         self.assertEqual(repr(admin), '<Administrator(tom@example.com)>')
 
 

@@ -59,17 +59,17 @@ class TestCoreAdminViews(unittest.TestCase):
         self.assertEqual(tmpl_vars['action'], 'edit')
 
     def test_wranglers_list_order(self):
-        """admin wranglers list is alpha ordered by persona email
+        """admin wranglers list is alpha ordered by email
         """
         from randopony.models import Administrator
-        admin1 = Administrator(persona_email='tom@example.com')
-        admin2 = Administrator(persona_email='harry@example.com')
+        admin1 = Administrator(email='tom@example.com', password_hash='hash')
+        admin2 = Administrator(email='harry@example.com', password_hash='hash')
         DBSession.add_all((admin1, admin2))
         request = testing.DummyRequest()
         request.matchdict['list'] = 'wranglers'
         admin = self._make_one(request)
         tmpl_vars = admin.items_list()
-        admins = [a.persona_email for a in tmpl_vars['items'].all()]
+        admins = [a.email for a in tmpl_vars['items'].all()]
         self.assertEqual(
             admins, 'harry@example.com tom@example.com'.split())
 
@@ -77,7 +77,7 @@ class TestCoreAdminViews(unittest.TestCase):
         """admin delete cancel leaves item in database
         """
         from randopony.models import Administrator
-        admin = Administrator(persona_email='tom@example.com')
+        admin = Administrator(email='tom@example.com', password_hash='hash')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest(post={'cancel': 'cancel'})
@@ -86,7 +86,7 @@ class TestCoreAdminViews(unittest.TestCase):
         admin = self._make_one(request)
         admin.delete()
         wrangler = DBSession.query(Administrator).first()
-        self.assertEqual(wrangler.persona_email, 'tom@example.com')
+        self.assertEqual(wrangler.email, 'tom@example.com')
 
     def test_delete_wrangler_confirmation(self):
         """admin delete confirmation view for wrangler has exp template vars
@@ -112,7 +112,7 @@ class TestCoreAdminViews(unittest.TestCase):
         """
         from sqlalchemy.orm.exc import NoResultFound
         from randopony.models import Administrator
-        admin = Administrator(persona_email='tom@example.com')
+        admin = Administrator(email='tom@example.com', password_hash='hash')
         DBSession.add(admin)
         self.config.add_route('admin.list', '/admin/{list}/')
         request = testing.DummyRequest(post={'delete': 'delete'})
@@ -122,7 +122,7 @@ class TestCoreAdminViews(unittest.TestCase):
         admin.delete()
         query = DBSession.query(Administrator)
         with self.assertRaises(NoResultFound):
-            query.filter_by(persona_email='tom@example.com').one()
+            query.filter_by(email='tom@example.com').one()
 
     def test_delete_brevet(self):
         """admin delete for brevet deletes item from database

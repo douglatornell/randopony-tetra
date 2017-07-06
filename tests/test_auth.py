@@ -41,7 +41,7 @@ class TestAuthConfig(unittest.TestCase):
         """groupfinder returns admin group for known user"""
         from randopony.views.admin.core import group_finder
         from randopony.models import Administrator
-        admin = Administrator(persona_email='tom@example.com')
+        admin = Administrator(email='tom@example.com', password_hash='hash')
         DBSession.add(admin)
         request = testing.DummyRequest()
         groups = group_finder('tom@example.com', request)
