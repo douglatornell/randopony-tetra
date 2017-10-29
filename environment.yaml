@@ -20,13 +20,14 @@ dependencies:
 - ipython
 - pytz
 - pytest
-- python=3.5
+- python=3.6
 #- supervisor
 - sphinx
 - pip:
   - celery
   - colander==1.2
   - deform==0.9.9
+  - iso8601==0.1.11
   - passlib
   - pyramid==1.7.3
   - pyramid-crow
