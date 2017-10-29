@@ -8,8 +8,7 @@ Development
 Python Versions
 ---------------
 
-RandoPony-tetra is developed with Python 3.3 and tested with Python 2.7
-and 3.3.
+RandoPony-tetra is developed and tested with Python 3.6.
 
 
 .. _DevelopmentEnvironment-section:
@@ -27,8 +26,7 @@ Clone the `code repository`_ from Bitbucket:
 
 .. code-block:: sh
 
-   (randopony-tetra) tom:$ cd python
-   (randopony-tetra) tom:python$ hg clone https://bitbucket.org/douglatornell/randopony-tetra
+   $ hg clone https://bitbucket.org/douglatornell/randopony-tetra
 
 .. _code repository: https://bitbucket.org/douglatornell/randopony-tetra/
 
@@ -52,7 +50,7 @@ Install RandoPony as a development package:
 
 .. code-block:: sh
 
-   (randopony-tetra)$ pip intall --editable .
+   (randopony-tetra)$ pip install --editable .
 
 Run the development server:
 
@@ -66,66 +64,44 @@ Run the development server:
 Testing and Coverage
 --------------------
 
-The test suite uses only the tools provided by the Python 3.3 :mod:`unittest`
-module.
-The simplest way to run the complete test suite is with
-:program:`unittest discover`:
+The test suite for the :kbd:`randopony-tetra` package is in :file:`randopony-tetra/tests/`.
+The `pytest`_ tool is used for test fixtures and as the test runner for the suite.
 
-.. code-block:: sh
+.. _pytest: https://docs.pytest.org/en/latest/
 
-   (randopony-tetra) tom:randopony-tetra$ python -m unittest discover
-   ..........................................................
-   ----------------------------------------------------------------------
-   Ran 58 tests in 1.513s
+With your :kbd:`randopony` development environment activated,
+use:
 
-   OK
+.. code-block:: bash
 
-A more sophisticated test runner like :program:`nose` or :program:`py.test`
-can be used to run parts of the test suite, etc.
+    (randopony-tetra)$ cd randopony-tetra/
+    (randopony-tetra)$ py.test
 
-To generate a test coverage report,
-run the test suite via :program:`coverage`,
-and then run :program:`coverage report`:
+to run the test suite.
 
-.. code-block:: sh
+You can monitor what lines of code the test suite exercises using the `coverage.py`_ tool with the command:
 
-   (randopony-tetra) tom:randopony-tetra$ coverage run -m unittest discover
-   ..........................................................
-   ----------------------------------------------------------------------
-   Ran 58 tests in 1.577s
+.. _coverage.py: https://coverage.readthedocs.org/en/latest/
 
-   OK
+.. code-block:: bash
 
-   (randopony-tetra) tom:randopony-tetra$ coverage report
-   Name                                   Stmts   Miss Branch BrMiss  Cover  Missing
-   ----------------------------------------------------------------------------------
-   randopony/__init__                        19      0      0      0   100%
-   randopony/__pkg_metadata__                 1      1      0      0     0%   2
-   randopony/models/__init__                  5      0      0      0   100%
-   randopony/models/admin                    19      0      0      0   100%
-   randopony/models/brevet                   48      0      6      0   100%
-   randopony/models/core                     37      0      0      0   100%
-   randopony/models/meta                      6      0      0      0   100%
-   randopony/models/populaire                41      0      0      0   100%
-   randopony/scripts/__init__                 0      0      0      0   100%
-   randopony/scripts/initializedb            24     24      2      2     0%   2-39
-   randopony/tests/__init__                   0      0      0      0   100%
-   randopony/tests/test_admin               103      0      2      0   100%
-   randopony/tests/test_auth                 35      0      0      0   100%
-   randopony/tests/test_brevet_admin        130      0      0      0   100%
-   randopony/tests/test_models              117      0      0      0   100%
-   randopony/tests/test_populaire_admin     132      0      0      0   100%
-   randopony/tests/test_site                105      0      0      0   100%
-   randopony/tests/test_wrangler_admin      106      0      0      0   100%
-   randopony/views/__init__                   0      0      0      0   100%
-   randopony/views/admin/__init__             0      0      0      0   100%
-   randopony/views/admin/brevet              71      0      6      0   100%
-   randopony/views/admin/core                42      2     10      1    94%   25-26
-   randopony/views/admin/populaire           68      0      6      0   100%
-   randopony/views/admin/wrangler            50      0      4      0   100%
-   randopony/views/site                      35      0      2      0   100%
-   ----------------------------------------------------------------------------------
-   TOTAL                                   1194     27     38      3    98%
+    (randopony-tetra)$ cd SalishSeaCmd/
+    (randopony-tetra)$ coverage run -m py.test
+
+and generate a test coverage report with:
+
+.. code-block:: bash
+
+    (randopony-tetra)$ coverage report
+
+to produce a plain text report,
+or
+
+.. code-block:: bash
+
+    (randopony-tetra)$ coverage html
+
+to produce an HTML report that you can view in your browser by opening :file:`randopony-tetra/htmlcov/index.html`.
 
 :file:`randopony-tetra/.coveragerc` contains settings which enable branch
 coverage,
@@ -145,7 +121,7 @@ Build the docs with:
 
 .. code-block:: sh
 
-   (randopony-tetra) tom:randopony-tetra$ (cd docs && make html)
+   (randopony-tetra)$ (cd docs && make html)
 
 The results are browsable in :file:`randopony-tetra/docs/_build/html/`.
 
